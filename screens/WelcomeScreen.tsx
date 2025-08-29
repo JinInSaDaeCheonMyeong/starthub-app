@@ -23,8 +23,7 @@ export default function WelcomeScreen({navigation}: WelcomeScreenProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { disabled } = useDisabled()
   return (
-      <SafeAreaView style={styles.container}>
-          <StatusBar barStyle="dark-content" backgroundColor={Colors.white1}/>
+      <View style={styles.container}>
           <Text style={styles.headText}>
               Start
               <Text style={[styles.headText, {color : Colors.primary}]}>
@@ -81,7 +80,7 @@ export default function WelcomeScreen({navigation}: WelcomeScreenProps) {
               <CommonButton disabled={disabled} title={'StartHub 시작하기'} onPress={() => navigation.navigate('Start')}/>
           </View>
           <StatusBar barStyle="dark-content" backgroundColor={Colors.white1}/>
-      </SafeAreaView>
+      </View>
   );
 }
 const styles = StyleSheet.create({

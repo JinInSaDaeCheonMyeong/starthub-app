@@ -40,8 +40,7 @@ export default function SigninScreen(props: SigninScreenProps) {
     } = useSigninScreen(props)
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor={Colors.white1}/>
+        <View style={styles.container}>
             <KeyboardAwareScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
                 keyboardShouldPersistTaps="handled"
@@ -94,7 +93,7 @@ export default function SigninScreen(props: SigninScreenProps) {
                     </View>
                 </View>
             </KeyboardAwareScrollView>
-        </SafeAreaView>
+        </View>
     )
 }
 
