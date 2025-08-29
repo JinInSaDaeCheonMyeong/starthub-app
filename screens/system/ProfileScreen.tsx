@@ -20,7 +20,7 @@ export default function ProfileScreen({navigation, route : {params}} : ProfileSc
         {label : '이메일', data : params.email ?? "내용을 불러올 수 없습니다"},
     ]
     return (
-        <SafeAreaView style={styles.mainContainer}>
+        <View style={styles.mainContainer}>
             <View style={styles.header}>
                 <BackButton
                     width={24}
@@ -64,7 +64,7 @@ export default function ProfileScreen({navigation, route : {params}} : ProfileSc
                     </View>
                 ))}
             </ScrollView>
-        </SafeAreaView>
+        </View>
     )
 }
 

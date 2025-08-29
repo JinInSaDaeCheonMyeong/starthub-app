@@ -23,7 +23,7 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
     const {width} = useWindowDimensions()
 
     return(
-        <SafeAreaView style={styles.mainContainer}>
+        <View style={styles.mainContainer}>
             <View style={styles.header}>
                 <BackButton
                     width={24}
@@ -185,7 +185,7 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                     </View>
                 </View>
             </View>
-        </SafeAreaView>
+        </View>
     )
 }
 

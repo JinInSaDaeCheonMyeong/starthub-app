@@ -89,7 +89,7 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
     )
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <View style={styles.safeArea}>
             <View style={styles.header}>
                 <BackButton
                     width={24}
@@ -184,7 +184,7 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                     <Text style={styles.logoutText}>로그아웃</Text>
                 </TouchableOpacity>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     )
 }
 
