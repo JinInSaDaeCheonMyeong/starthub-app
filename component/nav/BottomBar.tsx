@@ -38,7 +38,7 @@ export const BottomBar: React.FC<BottomTabBarProps> = ({state, descriptors, navi
     };
     return (
         <Shadow distance={8} offset={[0, 4]} startColor="rgba(155, 155, 155, 0.2)">
-            <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+            <View style={[styles.container, { paddingBottom: insets.bottom + 12}]}>
                 {state.routes.map((route, index) => {
                     const label = labelMap.get(route.name) ?? route.name;
                     const isFocused = state.index === index;

@@ -1,4 +1,4 @@
-import {Dimensions, FlatList, Linking, SafeAreaView, ScrollView, StyleSheet, Text, View} from "react-native";
+import {Dimensions, FlatList, Linking, ScrollView, StyleSheet, Text, View} from "react-native";
 import SearchBar from "../../component/home/SearchBar";
 import DropDown from "../../component/DropDown";
 import { Colors } from "../../constants/Color";
@@ -109,7 +109,7 @@ export default function NoticeScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <View>
                 <View style={styles.searchBar}>
                     <SearchBar
@@ -261,7 +261,7 @@ export default function NoticeScreen() {
                     </View>: <View/>
                 }
             />
-        </SafeAreaView>
+        </View>
     )
 }
 const styles = StyleSheet.create({
