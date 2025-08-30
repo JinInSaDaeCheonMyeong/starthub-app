@@ -30,8 +30,11 @@ export const useError = () => {
             if(!response){
                 show('네트워크 오류가 발생하였습니다')
             } else {
-                const errorData = response.data as ErrorResponse
-                showError(errorData.message + "입니다")
+                const message = (response.data as ErrorResponse).message
+                if(message[message.length] === '.') {
+                    showError(message.slice(0, -1));
+                }
+                showError(message + "입니다")
             }
         } else {
             show("예상치 못한 오류가 발생하였습니다")
