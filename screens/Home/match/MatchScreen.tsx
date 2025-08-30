@@ -111,7 +111,7 @@ export default function MatchScreen({ navigation }: MatchScreenProps) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <View style={styles.searchBar}>
                 <SearchBar onPress={onSearch} />
             </View>
@@ -153,7 +153,7 @@ export default function MatchScreen({ navigation }: MatchScreenProps) {
                     );
                 }}
             />
-        </SafeAreaView>
+        </View>
     );
 }
 

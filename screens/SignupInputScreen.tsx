@@ -43,8 +43,7 @@ export default function SignupInputScreen(props : SignupInputScreenProps) {
     const CurrentScreen = SCREENS[currentProgress-1]
 
     return(
-    <SafeAreaView style={styles.mainContainer}>
-        <StatusBar barStyle="dark-content" backgroundColor={Colors.white1}/>
+    <View style={styles.mainContainer}>
         <View style={styles.backButton}>
             <BackButton 
                 width={20} 
@@ -78,7 +77,7 @@ export default function SignupInputScreen(props : SignupInputScreenProps) {
                 disabled={disabled}
             />
         </View>
-    </SafeAreaView>
+    </View>
     )
 }
 

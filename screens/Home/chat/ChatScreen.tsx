@@ -72,8 +72,8 @@ export default function ChatScreen({navigation} : ChatScreenProps) {
     )
 
     return (
-        <Provider>
-        <SafeAreaView style={styles.mainContainer}>
+        <View style={styles.mainContainer}>
+            <Provider>
             <View style={styles.searchContainer}>
                 <SearchBar onPress={(text : string) => {
                     setFilterText(text)
@@ -176,8 +176,8 @@ export default function ChatScreen({navigation} : ChatScreenProps) {
                     </View>
                 </Shadow>
             </View>
-        </SafeAreaView>
-        </Provider>
+            </Provider>
+        </View>
     )
 
 }

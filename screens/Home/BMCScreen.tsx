@@ -30,8 +30,8 @@ export default function BMCScreen(navigation: BMCScreenProps) {
         .sort((a, b) => b.date.getTime() - a.date.getTime())
         .slice(0, 8);
     return (
-        <PaperProvider>
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
+            <PaperProvider>
             <FlatList
                 data={BMCDummyData}
                 numColumns={2}
@@ -108,8 +108,8 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                     <View style={{marginTop: 20}}/>
                 }
             />
-        </SafeAreaView>
-        </PaperProvider>
+            </PaperProvider>
+        </View>
     )
 
 }

@@ -94,9 +94,8 @@ export default function StartScreen({navigation}: StartScreenProps) {
         }
     ];
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false}>
-                <StatusBar barStyle="dark-content" backgroundColor={Colors.white1}/>
                 <View style={styles.backButton}>
                     <BackButton onClick={() => navigation.goBack()} width={20} height={20} color={Colors.black2}/>
                 </View>
@@ -120,7 +119,7 @@ export default function StartScreen({navigation}: StartScreenProps) {
                 </View>
                 <StatusBar barStyle="dark-content" backgroundColor={Colors.white1}/>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 }
 

@@ -4,6 +4,8 @@ import ProfileScreen from "../screens/system/ProfileScreen";
 import { Colors } from "../constants/Color";
 import { GetMeResponse } from "../type/user/user.type";
 import EditProfileScreen from "../screens/system/EditProfileScreen";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
+import {View} from "react-native";
 
 const Stack = createStackNavigator<SystemStackParamList>();
 
@@ -14,19 +16,22 @@ export type SystemStackParamList = {
 };
 
 export default function SystemStack(){
+    const insets = useSafeAreaInsets();
     return (
-        <Stack.Navigator
-            initialRouteName={"System"} 
-            screenOptions={{
-                cardStyle : {
-                    backgroundColor : Colors.white1
-                },
-                headerShown: false,
-            }}
-        >
-            <Stack.Screen name="System" component={SystemScreen}/>
-            <Stack.Screen name="Profile" component={ProfileScreen}/>
-            <Stack.Screen name="EditProfile" component={EditProfileScreen}/>
-        </Stack.Navigator>
+        <View style={{flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom}}>
+            <Stack.Navigator
+                initialRouteName={"System"}
+                screenOptions={{
+                    cardStyle : {
+                        backgroundColor : Colors.white1
+                    },
+                    headerShown: false,
+                }}
+            >
+                <Stack.Screen name="System" component={SystemScreen}/>
+                <Stack.Screen name="Profile" component={ProfileScreen}/>
+                <Stack.Screen name="EditProfile" component={EditProfileScreen}/>
+            </Stack.Navigator>
+        </View>
     )
 }

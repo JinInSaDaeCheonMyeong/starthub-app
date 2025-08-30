@@ -116,8 +116,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor={Colors.white1} />
         <ScrollView showsVerticalScrollIndicator={false}>
             <ImminentView
                 title={closestNotice ? closestNotice.title : "마감 임박 공고가 없습니다."}
@@ -210,7 +208,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             />
             </View>
         </ScrollView>
-        </SafeAreaView>
     );
 }
 

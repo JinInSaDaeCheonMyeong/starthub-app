@@ -48,19 +48,18 @@ export default function SignupScreen(props : SignupScreenProps){
     ]
 
     return(
-    <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor={Colors.white1}/>
+        <View style={styles.container}>
             <KeyboardAwareScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.backButton}>
-                    <BackButton 
-                    width={20} 
-                    height={20} 
-                    color={Colors.black2} 
-                    onClick={() => {goBack()}}
+                    <BackButton
+                        width={20}
+                        height={20}
+                        color={Colors.black2}
+                        onClick={() => {goBack()}}
                     />
                 </View>
                 <Text style={styles.titleText}>Start<Text style={styles.accentText}>Hub</Text> 계정 만들기</Text>
@@ -95,18 +94,18 @@ export default function SignupScreen(props : SignupScreenProps){
                     </View>
                     <View style={styles.passwordContainer}>
                         <Text style={styles.containerText}>비밀번호</Text>
-                        <AuthTextInput 
+                        <AuthTextInput
                             value={password}
-                            placeHolder="비밀번호" 
+                            placeHolder="비밀번호"
                             placeHolderTextColor={Colors.gray2}
                             isPassword={true}
                             onChange={(text) => {
                                 setPassword(text)
                             }}
                         />
-                        <AuthTextInput 
+                        <AuthTextInput
                             value={checkPassword}
-                            placeHolder="비밀번호 확인" 
+                            placeHolder="비밀번호 확인"
                             placeHolderTextColor={Colors.gray2}
                             isPassword={true}
                             onChange={(text) => {
@@ -140,15 +139,15 @@ export default function SignupScreen(props : SignupScreenProps){
                     </View>
                 </View>
             </KeyboardAwareScrollView>
-        <View style={styles.buttonContainer}>
-            {errorVisible && <Text style={styles.errorText}>{errorText}</Text>}
-            <CommonButton 
-                title="회원가입" 
-                onPress={() => {requestSignup()}}
-                disabled={disabled}
-            />
+            <View style={styles.buttonContainer}>
+                {errorVisible && <Text style={styles.errorText}>{errorText}</Text>}
+                <CommonButton
+                    title="회원가입"
+                    onPress={() => {requestSignup()}}
+                    disabled={disabled}
+                />
+            </View>
         </View>
-    </SafeAreaView>
     )
 }
 
