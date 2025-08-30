@@ -12,7 +12,6 @@ type HeaderBarProps = {
 export default function HeaderBar(props : HeaderBarProps){
     const logo = require("../assets/logos/starthub_title_logo.png")
     return (
-        <SafeAreaView>
             <View style={styles.headerContainer}>
                 <Image style={{width : 88, height : 36}} source={logo}/>
                 <View style={styles.iconContainer}>
@@ -24,7 +23,6 @@ export default function HeaderBar(props : HeaderBarProps){
                     </TouchableOpacity>
                 </View>
             </View>
-        </SafeAreaView>
     )
 }
 
