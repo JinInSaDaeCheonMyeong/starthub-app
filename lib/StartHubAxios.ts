@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { getAccToken, getRefToken, removeTokens, saveAccToken, saveRefToken } from "../util/token";
-import { refresh } from "../api/user";
 import { BackHandler, Platform } from "react-native";
+import { RefreshResponse } from "../type/user/refresh.type";
 
 const StartHubAxios = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_URL,
@@ -27,15 +27,19 @@ StartHubAxios.interceptors.response.use(
         if (
             error.response?.status === 401 &&
             !originalRequest._retry &&
-            !originalRequest.url.includes("/user/refresh")
+            !originalRequest.url.includes("/user/reissue")
         ) {
             originalRequest._retry = true;
             try {
                 const refreshData = await getRefToken();
                 if (!refreshData) throw new Error("No refresh token");
                 const {
-                    data: { access: accessToken, refresh: refreshToken }
-                } = await refresh({ refresh: refreshData });
+                    data: { access: accessToken, refresh: refreshToken },
+                }: RefreshResponse = (await axios.post(
+                    `${process.env.EXPO_PUBLIC_API_URL}/user/reissue`,
+                    { refresh : refreshData },
+                    {headers: {'X-Platform': 'app'}}
+                )).data
                 await saveAccToken(accessToken);
                 await saveRefToken(refreshToken);
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;

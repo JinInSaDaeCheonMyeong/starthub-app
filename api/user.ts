@@ -19,13 +19,6 @@ export const signin = async (signinData : SigninRequest) : Promise<SigninRespons
         { headers : GET_TOKEN_API_HEADERS }
     )).data
 
-export const refresh = async (refreshData : RefreshRequest) : Promise<RefreshResponse> => 
-    (await StartHubAxios.post(
-        '/user/reissue',
-        refreshData, 
-        { headers : GET_TOKEN_API_HEADERS }
-    )).data
-
 export const setProfile = async (setProfileData: SetProfileRequest): Promise<Response> =>
     (await StartHubAxios.patch('/user/profile', setProfileData)).data;
 
