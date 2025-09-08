@@ -1,4 +1,4 @@
-import { Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, StyleSheet, Linking } from "react-native";
 import BackButton from "../../component/BackButton";
 import RightArrow from "../../assets/icons/right-arrow-back.svg"
 import BookmarkIcon from '../../assets/icons/bookMark/bookmark.svg'
@@ -6,69 +6,79 @@ import TimeIcon from '../../assets/icons/section/time.svg'
 import WriteIcon from '../../assets/icons/section/writing.svg'
 import InfoIcon from '../../assets/icons/section/information.svg'
 import ServiceIcon from '../../assets/icons/section/service.svg'
+import PersonIcon from "../../assets/icons/section/person.svg";
 import { Colors } from "../../constants/Color";
 import { StackScreenProps } from "@react-navigation/stack";
 import { Fonts } from "../../constants/Fonts";
-import { useCallback,useState } from "react";
 import { ShowToast, ToastType } from "../../util/ShowToast";
-import {  isAxiosError } from "axios";
-import { getMe } from "../../api/user";
 import { SystemStackParamList } from "../../navigation/SystemStack";
-import { GetMeResponse } from "../../type/user/user.type";
-import {useFocusEffect} from "@react-navigation/native"
 import { removeTokens } from "../../util/token";
+import { JSX } from "react";
 
 type SystemScreenProps = StackScreenProps<SystemStackParamList, 'System'>
 
+type navSectionType = {
+    title: string
+    sections: {
+        label: string
+        icon: JSX.Element
+        stackName: keyof SystemStackParamList
+    }[]
+};
+
 export default function SystemScreen({navigation} : SystemScreenProps) {
-    const DEFAULT_DATA = ''
-    const [companyName, setCompanyName] = useState('소속된 기업이 없습니다...')
-    const [user, setUser] = useState<GetMeResponse['data']>({
-        id : -1, 
-        email : DEFAULT_DATA,
-        username : DEFAULT_DATA,
-        birth : DEFAULT_DATA,
-        gender : DEFAULT_DATA,
-        profileImage : DEFAULT_DATA,
-        introduction : DEFAULT_DATA
-    })
 
     const onPress = () => {
         ShowToast("개발", "아직 개발 중인 기능입니다", ToastType.INFO)
     }
-    const sections = [
+
+    const navSections : navSectionType[] = [
         {
-            title : '나의 활동',
+            title : '프로필',
             sections : [
-                {label : '최근 본 게시물', icon : <TimeIcon width={20} height={20} color={Colors.black2}/>},
-                {label : '내 북마크', icon : <BookmarkIcon width={20} height={20} color={Colors.black2}/>},
-                {label : '내 작성글', icon : <WriteIcon width={20} height={20} color={Colors.black2}/>}
+                {
+                    label : '내 프로필 보기', 
+                    icon : <PersonIcon width={20} height={20} color={Colors.black2}/>,
+                    stackName : 'Profile'
+                }
             ]
         },
         {
-            title : '고객 센터',
+            title : '나의 활동',
             sections : [
-                {label : '이용 약관', icon : <InfoIcon width={20} height={20} color={Colors.black2}/>},
-                {label : '고객 센터', icon : <ServiceIcon width={20} height={20} color={Colors.black2}/>},
-            ]
-        }
-    ]
-
-    useFocusEffect(
-        useCallback(() => {
-            const fetchUserProfile = async () => {
-                try {
-                    const userInfo = (await getMe()).data
-                    setUser(userInfo)
-                } catch (error) {
-                    if(isAxiosError(error)){
-                        ShowToast("오류 발생", error.message, ToastType.ERROR)
-                    }
+                {
+                    label : '최근 본 게시물', 
+                    icon : <TimeIcon width={20} height={20} color={Colors.black2}/>,
+                    stackName : 'Profile'
+                },
+                {
+                    label : '내 북마크', 
+                    icon : <BookmarkIcon width={20} height={20} color={Colors.black2}/>,
+                    stackName : 'Profile'
+                },
+                {
+                    label : '내 작성글', 
+                    icon : <WriteIcon width={20} height={20} color={Colors.black2}/>,
+                    stackName : 'Profile'
                 }
-            }
-            fetchUserProfile()
-        }, [])
-    )
+            ]
+        },
+    ]
+    const linkSection = {
+        title : '고객 센터',
+        sections : [
+            {
+                label : '이용 약관', 
+                icon : <InfoIcon width={20} height={20} color={Colors.black2}/>,
+                link : 'https://www.dominilbo.com/news/articleView.html?idxno=216474'
+            },
+            {
+                label : '고객 센터', 
+                icon : <ServiceIcon width={20} height={20} color={Colors.black2}/>,
+                link : 'https://www.dominilbo.com/news/articleView.html?idxno=216474'
+            },
+        ]
+    }
 
     return (
         <View style={styles.safeArea}>
@@ -88,22 +98,24 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                 style={styles.scroll} 
                 contentContainerStyle={styles.scrollContent}
             >
-                <TouchableOpacity onPress={() => navigation.navigate("Profile", {...user})}>
-                    <View style={styles.profileCardInner}>
-                        <Image source={{uri: user.profileImage}} style={styles.profileImage}/>
-                            <View style={styles.profileInfo}>
-                                <Text style={styles.profileCompany}>{companyName}</Text>
-                                <Text style={styles.profileName}>{user.username}</Text>
-                            </View>
-                        <RightArrow width={16} height={16} color={Colors.black2}/>
-                    </View>
-                </TouchableOpacity>
-                {sections.map((value, index) => ( 
+                {navSections.map((value, index) => ( 
                     <View key={index} style={styles.sectionCard}>
                         <Text style={styles.sectionTitle}>{value.title}</Text>
                         <View style={styles.sectionRowWrap}>
-                            {value.sections.map(({label, icon}, idx) => (
-                                <TouchableOpacity onPress={() => onPress()} key={idx} style={styles.sectionRow}>
+                            {value.sections.map(({label, icon, stackName}, idx) => (
+                                <TouchableOpacity 
+                                    onPress={() => {
+                                        switch(stackName){
+                                            case "Profile":
+                                                navigation.navigate(stackName)
+                                                break
+                                            default:
+                                                onPress()
+                                        }
+                                    }} 
+                                    key={idx} 
+                                    style={styles.sectionRow}
+                                >
                                     <View style={styles.sectionRowLeft}>
                                         {icon}
                                         <Text style={styles.sectionRowText}>{label}</Text>
@@ -114,6 +126,24 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                         </View>
                     </View>
                 ))}
+                <View style={styles.sectionCard}>
+                    <Text style={styles.sectionTitle}>{linkSection.title}</Text>
+                    <View style={styles.sectionRowWrap}>
+                        {linkSection.sections.map(({label, icon, link}, idx) => (
+                            <TouchableOpacity 
+                                onPress={() => Linking.openURL(link)} 
+                                key={idx} 
+                                style={styles.sectionRow}
+                            >
+                                <View style={styles.sectionRowLeft}>
+                                    {icon}
+                                    <Text style={styles.sectionRowText}>{label}</Text>
+                                </View>
+                                <RightArrow width={16} height={16} color={Colors.black2}/>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
                 <TouchableOpacity 
                     hitSlop={16}
                     style={{
