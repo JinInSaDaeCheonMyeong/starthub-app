@@ -1,10 +1,9 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { SystemStackParamList } from "../../navigation/SystemStack";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import BackButton from "../../component/BackButton";
 import EditIcon from "../../assets/icons/header/edit.svg"
 import { Colors } from "../../constants/Color";
-import { Shadow } from "react-native-shadow-2";
 import { Fonts } from "../../constants/Fonts";
 import { GetMeResponse } from "../../type/user/user.type";
 import { useFocusEffect } from "@react-navigation/native"
@@ -12,36 +11,74 @@ import { useCallback, useState } from "react";
 import { getMe } from "../../api/user";
 import { isAxiosError } from "axios";
 import { ShowToast, ToastType } from "../../util/ShowToast";
-import { ErrorResponse } from "../../type/util/response.type";
+import { ErrorResponse } from "../../type/util/response.type"
+import StartupType from "../../constants/StartupType";
 
 type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'Profile'>
 
 export default function ProfileScreen({navigation} : ProfileScreenProps){
     const DEFAULT_DATA = "내용을 불러올 수 없습니다";
-    const {width} = useWindowDimensions();
     const genderMap = new Map<string, string>([['MALE', "남"], ["FEMALE", "여"]])
+    const startupTypeMap = new Map<StartupType, string>([
+        [StartupType.EARLY_STARTUP, "초기 창업"],
+        [StartupType.PRE_STARTUP, "예비 창업"]
+    ]);
     const [loading, setLoading] = useState(true);
     const [profileData, setProfileData] = useState<GetMeResponse["data"]>({
         id : -1, 
-        email : DEFAULT_DATA,
         username : DEFAULT_DATA,
         birth : DEFAULT_DATA,
         gender : DEFAULT_DATA,
-        profileImage : DEFAULT_DATA,
-        introduction : DEFAULT_DATA
+        startupType : StartupType.EARLY_STARTUP
     })
     
     const profileList = [
         {label : '이름', data : profileData.username},
-        {label : '소개', data : profileData.introduction},
-        {label : '성별', data : genderMap.get(profileData.gender) ?? "내용을 불러올 수 없습니다"},
-        {label : '생년월일', data : new Date(profileData.birth).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) ?? "내용을 불러올 수 없습니다"},
-        {label : '이메일', data : profileData.email ?? "내용을 불러올 수 없습니다"},
+        {label : '성별', data : genderMap.get(profileData.gender) ?? DEFAULT_DATA},
+        {label : '생년월일', data : 
+            profileData.birth && !isNaN(Date.parse(profileData.birth)) 
+                ? new Date(profileData.birth).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) 
+                : DEFAULT_DATA
+        },
+        { label: "창업 형태", data: startupTypeMap.get(profileData.startupType) ?? DEFAULT_DATA }
+    ]    
+
+    // 창업형태가 초기 창업이라면
+    const earlyStarupList = [
+        {label : '기업명', data : profileData.earlyStartup?.companyName ?? DEFAULT_DATA},
+        {label : '기업 소개', data : profileData.earlyStartup?.companyIntro ?? DEFAULT_DATA},
+        {label : '기업 인원', data : `${profileData.earlyStartup?.personNumber}명`},
+        {label : '기업 사이트', data : profileData.earlyStartup?.companySite ?? DEFAULT_DATA},
+        {label : '연매출액', data : `${profileData.earlyStartup?.getMoneyYear}원`},
+        {label : '창업위치', data : profileData.earlyStartup?.companyLocation ?? DEFAULT_DATA},
+    ]
+
+    // 창업형태가 예비 창업이라면
+    const preStarupList = [
+        {label : '창업위치', data : profileData.preStartup?.companyLocation ?? DEFAULT_DATA},
     ]
 
     const getProfileData = async () => {
         try {
             const profileData = (await getMe()).data;
+            switch(profileData.startupType){
+                case StartupType.EARLY_STARTUP:
+                    profileData.earlyStartup = {
+                        companyName : DEFAULT_DATA,
+                        companyIntro : DEFAULT_DATA,
+                        personNumber : 0,
+                        companySite : DEFAULT_DATA,
+                        getMoneyYear : 0,
+                        companyLocation : DEFAULT_DATA
+                    }
+                    break;
+                case StartupType.PRE_STARTUP:
+                    profileData.preStartup = {
+                        companyLocation : DEFAULT_DATA
+                    }
+                    break;
+            }
+            profileData.startupType = StartupType.EARLY_STARTUP
             setProfileData(profileData)
         } catch (error: unknown) {
             if (isAxiosError(error)) {
@@ -63,9 +100,12 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
 
     useFocusEffect(
         useCallback(() => {
-            setLoading(true);
-            getProfileData()
-            setLoading(false)
+            const fetchData = async () => {
+                setLoading(true);
+                await getProfileData();
+                setLoading(false);
+            };
+            fetchData();
         }, [])
     );
 
@@ -79,40 +119,45 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                     onClick={() => {navigation.goBack()}}
                 />
                 <Text style={styles.headerTitle}>프로필</Text>
-                <TouchableOpacity 
-                    onPress={()=>{navigation.navigate('EditProfile', profileData)}}
-                    style={styles.headerRight}
-                >
-                    <EditIcon style={styles.headerRight}/>
-                </TouchableOpacity>
+                <EditIcon 
+                    style={styles.headerRight} 
+                    width={24}
+                    height={24}
+                    hitSlop={16}
+                    onTouchEnd={()=>{navigation.navigate('EditProfile', profileData)}}
+                />
             </View>
             <ScrollView 
                 style={styles.scorllContainer}
-                contentContainerStyle={{gap : 18}}
+                contentContainerStyle={{gap : 24, paddingBottom : 16}}
             >
-                <View style={styles.imgContainer}>
-                    <Shadow
-                        distance={4} 
-                        offset={[0, 4]}
-                        startColor="rgba(185, 185, 185, 0.2)"
-                        style={{borderRadius : 80}}
-                    >
-                        <Image 
-                            style={{
-                                width : width/4, 
-                                height : width/4,
-                                borderRadius : 80
-                            }}
-                            source={{uri : profileData.profileImage}}
-                        />
-                    </Shadow>
-                </View>
                 {profileList.map(({label, data}, index) => (
-                    <View style={styles.dataContainer} key={index}>
+                    <View style={styles.labelContainer} key={index}>
                         <Text style={styles.labelText}>{label}</Text>
-                        <Text style={styles.dataText}>{data}</Text>
+                        <View style={styles.dataContainer}>
+                            <Text style={styles.dataText}>{data}</Text>
+                        </View>
                     </View>
                 ))}
+                <View style={styles.line}/>
+                {profileData.startupType === '초기 창업' ?
+                    earlyStarupList.map(({label, data}, index) => (
+                        <View style={styles.labelContainer} key={index}>
+                            <Text style={styles.labelText}>{label}</Text>
+                            <View style={styles.dataContainer}>
+                                <Text style={styles.dataText}>{data}</Text>
+                            </View>
+                        </View>
+                    )) : 
+                    preStarupList.map(({label, data}, index) => (
+                        <View style={styles.labelContainer} key={index}>
+                            <Text style={styles.labelText}>{label}</Text>
+                            <View style={styles.dataContainer}>
+                                <Text style={styles.dataText}>{data}</Text>
+                            </View>
+                        </View>
+                    ))
+                }
             </ScrollView>
         </View>
     )
@@ -133,38 +178,40 @@ const styles = StyleSheet.create({
     headerRight: {
         width: 24,
         height: 24,
-        color : Colors.primary
+        color : Colors.black2
     },
     mainContainer : {
         flex : 1
     },
     scorllContainer : {
-        padding : 16,
+        paddingHorizontal : 16,
+        paddingTop : 16,
+        paddingBottom : 32,
         flex : 1
     },
-    imgContainer : {
-        flex : 1,
-        justifyContent : "center",
-        alignItems : "center",
-        paddingTop : 16,
-        paddingBottom : 32
+    labelContainer : {
+        width : "100%",
+        gap : 12
+    },
+    line : {
+        width : "100%",
+        borderBottomWidth : 2,
+        borderColor : Colors.white2
     },
     dataContainer : {
         width : "100%",
         padding : 16,
-        flexDirection : "row",
-        justifyContent : "space-between",
         borderRadius : 8,
         backgroundColor : Colors.white2
     },
     labelText : {
         fontSize : 16,
-        fontFamily : Fonts.semiBold,
+        fontFamily : Fonts.bold,
         color : Colors.black2
     },
     dataText : {
-        fontSize : 16,
-        fontFamily : Fonts.reqular,
+        fontSize : 14,
+        fontFamily : Fonts.medium,
         color : Colors.black2
     }
 })
