@@ -1,15 +1,11 @@
 import { StackScreenProps } from "@react-navigation/stack";
-import { Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { SystemStackParamList } from "../../navigation/SystemStack";
 import BackButton from "../../component/BackButton";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import { useState } from "react";
-import { Shadow } from "react-native-shadow-2";
-import { setProfile } from "../../api/user";
 import { ShowToast, ToastType } from "../../util/ShowToast";
-import CameraIcon from "../../assets/icons/category/interest/media-category.svg"
-import { pickerImage } from "../../util/PickerImage";
 
 type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'EditProfile'>
 
@@ -20,7 +16,6 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
     const [month, setMonth] = useState(birthList[1])
     const [day, setDay] = useState(birthList[2])
     const [selectGender, setSelectGender] = useState(user.gender === "MALE")
-    const {width} = useWindowDimensions()
 
     return(
         <View style={styles.mainContainer}>
@@ -35,14 +30,15 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                 <TouchableOpacity
                     onPress={async ()=>{
                         try {
-                            await setProfile({
-                            username : user.username,
-                            introduction : user.introduction,
-                            birth: `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`,
-                            gender : selectGender ? "MALE" : "FEMALE",
-                            profileImage : "https://storage.googleapis.com/starthub-storage/profile-images/default_user_profile.png",
-                            interests : []
-                        })
+                            // 서버 나오면 수정
+                        //     await setProfile({
+                        //     username : user.username,
+                        //     introduction : user.introduction,
+                        //     birth: `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`,
+                        //     gender : selectGender ? "MALE" : "FEMALE",
+                        //     profileImage : "https://storage.googleapis.com/starthub-storage/profile-images/default_user_profile.png",
+                        //     interests : []
+                        // })
                             ShowToast("프로필 수정", "프로필 수정에 성공하셨습니다", ToastType.SUCCESS)
                             navigation.popTo("System")
                         } catch (error : any) {
@@ -50,6 +46,7 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                                 ShowToast("프로필 수정", "프로필 수정에 실패하셨습니다", ToastType.ERROR)
                                 console.log(error.message)
                             }
+                            ShowToast("프로필 수정", "알 수 없는 오류가 발생했습니다", ToastType.ERROR)
                         } 
                     }}
                 >   
@@ -60,61 +57,10 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                     </Text>
                 </TouchableOpacity>
             </View>
-            <View style={styles.dataContainer}>
-                <View style={styles.imgContainer}>
-                    <TouchableOpacity onPress={async () => {
-                        ShowToast("정보", "아직 개발 중입니다", ToastType.INFO)
-                        // const uri = await pickerImage()
-                        // if (uri) setUser({...user, profileImage : uri})
-                    }}>
-                        <Shadow
-                            distance={4}
-                            offset={[0, 4]}
-                            startColor="rgba(185, 185, 185, 0.2)"
-                            style={{ borderRadius: 80 }}
-                        >
-                            <View style={{ position: "relative" }}>
-                                <Image
-                                    style={{
-                                    width: width / 4,
-                                    height: width / 4,
-                                    borderRadius: 80,
-                                    }}
-                                    source={{ uri : user.profileImage }}
-                                />
-                                <View
-                                    style={{
-                                    position: "absolute",
-                                    bottom: 0,
-                                    right: 0,
-                                    }}
-                                >
-                                    <Shadow
-                                    distance={4}
-                                    offset={[0, 4]}
-                                    startColor="rgba(185, 185, 185, 0.2)"
-                                    style={{ borderRadius: 20 }}
-                                    >
-                                        <View
-                                            style={{
-                                            backgroundColor: Colors.white1,
-                                            borderRadius: 20,
-                                            padding: 8,
-                                            }}
-                                        >
-                                            <CameraIcon
-                                                width={20} 
-                                                height={20}
-                                                color={Colors.gray2}
-                                                fill={Colors.gray2}
-                                            />
-                                        </View>
-                                    </Shadow>
-                                </View>
-                            </View>
-                        </Shadow>
-                    </TouchableOpacity>
-                </View>
+            <ScrollView 
+                style={styles.dataContainer}
+                contentContainerStyle={{gap : 24, paddingBottom : 16}}
+            >
                 <View style={styles.dataInputContainer}>
                     <Text style={styles.titleText}>이름</Text>
                     <TextInput
@@ -123,16 +69,6 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                         placeholder="이름을 입력해주세요..."
                         placeholderTextColor={Colors.gray2}
                         onChangeText={(value) => {setUser({...user, username : value})}}
-                    />
-                </View>
-                <View style={styles.dataInputContainer}>
-                    <Text style={styles.titleText}>소개</Text>
-                    <TextInput
-                        style={styles.dataInputText}
-                        value={user.introduction} 
-                        placeholder="자신의 소개를 입력해주세요..."
-                        placeholderTextColor={Colors.gray2}
-                        onChangeText={(value) => {setUser({...user, introduction : value})}}
                     />
                 </View>
                 <View style={styles.dataInputContainer}>
@@ -184,7 +120,128 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                         />
                     </View>
                 </View>
-            </View>
+                <View style={styles.line}/>
+                {user.earlyStartup !== undefined ? (
+                    <>
+                    <View style={styles.dataInputContainer}>
+                        <Text style={styles.titleText}>기업명</Text>
+                        <TextInput
+                            style={styles.dataInputText}
+                            value={user.earlyStartup.companyName} 
+                            placeholder="기업명을 입력해주세요..."
+                            placeholderTextColor={Colors.gray2}
+                            onChangeText={(value) => {setUser({
+                                ...user, 
+                                earlyStartup : {
+                                    ...user.earlyStartup!, 
+                                    companyName : value
+                                }
+                            })}}
+                        />
+                    </View>
+                    <View style={styles.dataInputContainer}>
+                        <Text style={styles.titleText}>(선택) 기업 소개</Text>
+                        <TextInput
+                            style={styles.dataInputText}
+                            value={user.earlyStartup.companyIntro} 
+                            placeholder="기업 소개를 해주세요..."
+                            placeholderTextColor={Colors.gray2}
+                            onChangeText={(value) => {setUser({
+                                ...user, 
+                                earlyStartup : {
+                                    ...user.earlyStartup!,
+                                    companyIntro : value
+                                }
+                            })}}
+                        />
+                    </View>
+                    <View style={styles.dataInputContainer}>
+                        <Text style={styles.titleText}>기업 인원</Text>
+                        <TextInput
+                            style={styles.dataInputText}
+                            value={String(user.earlyStartup.personNumber)} 
+                            placeholder="기업 인원을 입력해주세요..."
+                            keyboardType='numeric'
+                            placeholderTextColor={Colors.gray2}
+                            onChangeText={(value) => {setUser({
+                                ...user, 
+                                earlyStartup : {
+                                    ...user.earlyStartup!,
+                                    personNumber : Number(value)
+                                }
+                            })}}
+                        />
+                    </View>
+                    <View style={styles.dataInputContainer}>
+                        <Text style={styles.titleText}>(선택) 기업 사이트</Text>
+                        <TextInput
+                            style={styles.dataInputText}
+                            value={user.earlyStartup.companySite} 
+                            placeholder="기업 사이트을 입력해주세요..."
+                            placeholderTextColor={Colors.gray2}
+                            onChangeText={(value) => {setUser({
+                                ...user, 
+                                earlyStartup : {
+                                    ...user.earlyStartup!,
+                                    companySite : value
+                                }
+                            })}}
+                        />
+                    </View>
+                    <View style={styles.dataInputContainer}>
+                        <Text style={styles.titleText}>연매출액</Text>
+                        <TextInput
+                            style={styles.dataInputText}
+                            value={String(user.earlyStartup.getMoneyYear)} 
+                            placeholder="연매출액을 입력해주세요..."
+                            keyboardType='numeric'
+                            placeholderTextColor={Colors.gray2}
+                            onChangeText={(value) => {setUser({
+                                ...user, 
+                                earlyStartup : {
+                                    ...user.earlyStartup!,
+                                    getMoneyYear : Number(value)
+                                }
+                            })}}
+                        />
+                    </View>
+                    <View style={styles.dataInputContainer}>
+                        <Text style={styles.titleText}>(선택) 창업 위치</Text>
+                        <TextInput
+                            style={styles.dataInputText}
+                            value={user.earlyStartup.companyLocation} 
+                            placeholder="창업 위치를 입력해주세요..."
+                            placeholderTextColor={Colors.gray2}
+                            onChangeText={(value) => {setUser({
+                                ...user, 
+                                earlyStartup : {
+                                    ...user.earlyStartup!,
+                                    companyLocation : value
+                                }
+                            })}}
+                        />
+                    </View>
+                    </>
+                ) : (
+                    <View style={styles.dataInputContainer}>
+                        <Text style={styles.titleText}>(선택) 창업 위치</Text>
+                        <TextInput
+                            style={styles.dataInputText}
+                            value={user.preStartup!.companyLocation} 
+                            placeholder="창업 위치를 입력해주세요..."
+                            placeholderTextColor={Colors.gray2}
+                            onChangeText={(value) => {
+                                setUser({
+                                    ...user, 
+                                    preStartup : {
+                                        ...user.preStartup!,
+                                        companyLocation : value
+                                    }
+                            })}}
+                        />
+                    </View>
+                )}
+            </ScrollView>
         </View>
     )
 }
@@ -212,7 +269,6 @@ const styles = StyleSheet.create({
     dataContainer : {
         flex : 1,
         padding : 16,
-        gap : 24
     },
     dataInputContainer : {
         gap : 12
@@ -233,8 +289,8 @@ const styles = StyleSheet.create({
         backgroundColor : Colors.white2,
     },
     dataInputText : {
+        fontSize : 14,
         fontFamily : Fonts.medium,
-        fontSize : 16,
         color : Colors.black2,
         backgroundColor : Colors.white2,
         padding : 16,
@@ -250,13 +306,17 @@ const styles = StyleSheet.create({
         borderStyle : "solid",
     },
     titleText : {
-        fontFamily : Fonts.bold,
         fontSize : 16,
-        color : Colors.black2,
+        fontFamily : Fonts.bold,
+        color : Colors.black2
     },
     selectText : {
+        fontSize : 14,
         fontFamily : Fonts.medium,
-        fontSize : 16,
-        color : Colors.gray2,
+        color : Colors.black2
     },
+    line : {
+        borderBottomWidth : 2,
+        borderColor : Colors.white2,
+    }
 })
