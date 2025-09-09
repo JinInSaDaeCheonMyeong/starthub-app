@@ -7,7 +7,9 @@ export interface GetMeResponse extends Response {
         username : string
         birth : string
         gender : string
-        startupType : StartupType
+        startupType : StartupType;
+        earlyStartup ?: EarlyStartupData
+        preStartup ?: PreStartupData
     }
 }
 
@@ -17,4 +19,17 @@ export interface GetUserResponse extends Response {
         profileImage : string,
         companyIds : number[]
     }
+}
+
+export interface EarlyStartupData {
+    companyName : string
+    companyIntro ?: string
+    personNumber : number
+    companySite ?: string
+    getMoneyYear : number
+    companyLocation ?: string
+}
+
+export interface PreStartupData {
+    companyLocation : string
 }
