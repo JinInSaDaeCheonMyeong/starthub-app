@@ -31,5 +31,5 @@ export interface EarlyStartupData {
 }
 
 export interface PreStartupData {
-    companyLocation : string
+    companyLocation ?: string
 }
