@@ -124,6 +124,13 @@ export default function NoticeScreen() {
                 >
                     <View style={{marginStart: 16, paddingBottom: dropDownMargin}}>
                         <DropDown
+                            placeholderStyle={
+                                {
+                                    color : Colors.gray2,
+                                    fontSize : 14,
+                                    fontFamily : Fonts.medium
+                                }
+                            }
                             open={categoryOpen}
                             value={category}
                             items={CategoryItems}
@@ -143,6 +150,13 @@ export default function NoticeScreen() {
                     </View>
                     <View style={{marginStart: 16}}>
                         <DropDown
+                            placeholderStyle={
+                                {
+                                    color : Colors.gray2,
+                                    fontSize : 14,
+                                    fontFamily : Fonts.medium
+                                }
+                            }
                             open={locationOpen}
                             value={location}
                             items={LocationItems}
@@ -162,6 +176,13 @@ export default function NoticeScreen() {
                     </View>
                     <View style={{marginStart: 16}}>
                         <DropDown
+                            placeholderStyle={
+                                {
+                                    color : Colors.gray2,
+                                    fontSize : 14,
+                                    fontFamily : Fonts.medium
+                                }
+                            }
                             open={targetOpen}
                             value={target}
                             items={TargetItems}
@@ -181,6 +202,13 @@ export default function NoticeScreen() {
                     </View>
                     <View style={{ marginStart: 16}}>
                         <DropDown
+                            placeholderStyle={
+                                {
+                                    color : Colors.gray2,
+                                    fontSize : 14,
+                                    fontFamily : Fonts.medium
+                                }
+                            }
                             open={yearsOpen}
                             value={years}
                             items={YearsItems}
@@ -200,6 +228,13 @@ export default function NoticeScreen() {
                     </View>
                     <View style={{marginStart: 16, marginEnd: 16}}>
                         <DropDown
+                            placeholderStyle={
+                                {
+                                    color : Colors.gray2,
+                                    fontSize : 14,
+                                    fontFamily : Fonts.medium
+                                }
+                            }
                             open={entreOpen}
                             value={entre}
                             items={EntreItems}
