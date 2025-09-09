@@ -11,7 +11,7 @@ const Stack = createStackNavigator<SystemStackParamList>();
 
 export type SystemStackParamList = {
     System : undefined,
-    Profile : GetMeResponse["data"],
+    Profile : undefined,
     EditProfile : GetMeResponse["data"]
 };
 
