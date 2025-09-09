@@ -44,6 +44,8 @@ const styles = StyleSheet.create({
         ...Platform.select({
             ios : {
                 gap : 16,
+                paddingHorizontal : 16,
+                paddingVertical : 8,
             },
             android : {
                 paddingVertical : 8,
