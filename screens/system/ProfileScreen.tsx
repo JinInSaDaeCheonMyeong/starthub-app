@@ -29,7 +29,8 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
         username : DEFAULT_DATA,
         birth : DEFAULT_DATA,
         gender : DEFAULT_DATA,
-        startupType : StartupType.EARLY_STARTUP
+        startupType : StartupType.PRE_STARTUP,
+        preStartup : {}
     })
     
     const profileList = [
@@ -47,9 +48,9 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
     const earlyStarupList = [
         {label : '기업명', data : profileData.earlyStartup?.companyName ?? DEFAULT_DATA},
         {label : '기업 소개', data : profileData.earlyStartup?.companyIntro ?? DEFAULT_DATA},
-        {label : '기업 인원', data : `${profileData.earlyStartup?.personNumber}명`},
+        {label : '기업 인원', data : `${profileData.earlyStartup?.personNumber ?? 0}명`},
         {label : '기업 사이트', data : profileData.earlyStartup?.companySite ?? DEFAULT_DATA},
-        {label : '연매출액', data : `${profileData.earlyStartup?.getMoneyYear}원`},
+        {label : '연매출액', data : `${profileData.earlyStartup?.getMoneyYear ?? 0}원`},
         {label : '창업위치', data : profileData.earlyStartup?.companyLocation ?? DEFAULT_DATA},
     ]
 
@@ -61,24 +62,20 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
     const getProfileData = async () => {
         try {
             const profileData = (await getMe()).data;
+            // profileData.startupType = StartupType.PRE_STARTUP; //확인용
             switch(profileData.startupType){
-                case StartupType.EARLY_STARTUP:
+                case StartupType.EARLY_STARTUP: 
                     profileData.earlyStartup = {
-                        companyName : DEFAULT_DATA,
-                        companyIntro : DEFAULT_DATA,
+                        companyName : '더미데이터',
                         personNumber : 0,
-                        companySite : DEFAULT_DATA,
                         getMoneyYear : 0,
-                        companyLocation : DEFAULT_DATA
                     }
+                    profileData.preStartup = undefined
                     break;
                 case StartupType.PRE_STARTUP:
-                    profileData.preStartup = {
-                        companyLocation : DEFAULT_DATA
-                    }
+                    profileData.preStartup = {}
                     break;
             }
-            profileData.startupType = StartupType.EARLY_STARTUP
             setProfileData(profileData)
         } catch (error: unknown) {
             if (isAxiosError(error)) {
@@ -140,7 +137,7 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                     </View>
                 ))}
                 <View style={styles.line}/>
-                {profileData.startupType === '초기 창업' ?
+                {profileData.startupType === StartupType.EARLY_STARTUP ?
                     earlyStarupList.map(({label, data}, index) => (
                         <View style={styles.labelContainer} key={index}>
                             <Text style={styles.labelText}>{label}</Text>
