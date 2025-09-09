@@ -1,24 +1,74 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { SystemStackParamList } from "../../navigation/SystemStack";
-import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import BackButton from "../../component/BackButton";
 import EditIcon from "../../assets/icons/header/edit.svg"
 import { Colors } from "../../constants/Color";
 import { Shadow } from "react-native-shadow-2";
 import { Fonts } from "../../constants/Fonts";
+import { GetMeResponse } from "../../type/user/user.type";
+import { useFocusEffect } from "@react-navigation/native"
+import { useCallback, useState } from "react";
+import { getMe } from "../../api/user";
+import { isAxiosError } from "axios";
+import { ShowToast, ToastType } from "../../util/ShowToast";
+import { ErrorResponse } from "../../type/util/response.type";
 
 type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'Profile'>
 
-export default function ProfileScreen({navigation, route : {params}} : ProfileScreenProps){
-    const {width} = useWindowDimensions()
+export default function ProfileScreen({navigation} : ProfileScreenProps){
+    const DEFAULT_DATA = "내용을 불러올 수 없습니다";
+    const {width} = useWindowDimensions();
     const genderMap = new Map<string, string>([['MALE', "남"], ["FEMALE", "여"]])
+    const [loading, setLoading] = useState(true);
+    const [profileData, setProfileData] = useState<GetMeResponse["data"]>({
+        id : -1, 
+        email : DEFAULT_DATA,
+        username : DEFAULT_DATA,
+        birth : DEFAULT_DATA,
+        gender : DEFAULT_DATA,
+        profileImage : DEFAULT_DATA,
+        introduction : DEFAULT_DATA
+    })
+    
     const profileList = [
-        {label : '이름', data : params.username ?? "내용을 불러올 수 없습니다"},
-        {label : '소개', data : params.introduction ?? "내용을 불러올 수 없습니다"},
-        {label : '성별', data : genderMap.get(params.gender) ?? "내용을 불러올 수 없습니다"},
-        {label : '생년월일', data : new Date(params.birth).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) ?? "내용을 불러올 수 없습니다"},
-        {label : '이메일', data : params.email ?? "내용을 불러올 수 없습니다"},
+        {label : '이름', data : profileData.username},
+        {label : '소개', data : profileData.introduction},
+        {label : '성별', data : genderMap.get(profileData.gender) ?? "내용을 불러올 수 없습니다"},
+        {label : '생년월일', data : new Date(profileData.birth).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) ?? "내용을 불러올 수 없습니다"},
+        {label : '이메일', data : profileData.email ?? "내용을 불러올 수 없습니다"},
     ]
+
+    const getProfileData = async () => {
+        try {
+            const profileData = (await getMe()).data;
+            setProfileData(profileData)
+        } catch (error: unknown) {
+            if (isAxiosError(error)) {
+                const response = error.response;
+                if (!response) {
+                    ShowToast("오류 발생", "네트워크 오류가 발생했습니다", ToastType.ERROR);
+                    navigation.goBack()
+                    return; 
+                }
+                const errorData = response.data as ErrorResponse;
+                ShowToast("오류 발생", errorData.message, ToastType.ERROR);
+                navigation.goBack();
+                return;
+            }
+            ShowToast("오류 발생", "알 수 없는 오류가 발생했습니다", ToastType.ERROR);
+            navigation.goBack();
+        }
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            setLoading(true);
+            getProfileData()
+            setLoading(false)
+        }, [])
+    );
+
     return (
         <View style={styles.mainContainer}>
             <View style={styles.header}>
@@ -30,7 +80,7 @@ export default function ProfileScreen({navigation, route : {params}} : ProfileSc
                 />
                 <Text style={styles.headerTitle}>프로필</Text>
                 <TouchableOpacity 
-                    onPress={()=>{navigation.navigate('EditProfile', params)}}
+                    onPress={()=>{navigation.navigate('EditProfile', profileData)}}
                     style={styles.headerRight}
                 >
                     <EditIcon style={styles.headerRight}/>
@@ -53,7 +103,7 @@ export default function ProfileScreen({navigation, route : {params}} : ProfileSc
                                 height : width/4,
                                 borderRadius : 80
                             }}
-                            source={{uri : params.profileImage}}
+                            source={{uri : profileData.profileImage}}
                         />
                     </Shadow>
                 </View>
