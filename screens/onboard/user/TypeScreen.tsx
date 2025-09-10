@@ -1,34 +1,23 @@
 import {Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
 import { useState } from "react";
-import { Colors } from "../../constants/Color";
-import { Fonts } from "../../constants/Fonts";
+import { Colors } from "../../../constants/Color";
+import { Fonts } from "../../../constants/Fonts";
+import StartupType from "../../../constants/StartupType";
 
-type LocationScreenProps = {
-    introduction : string,
-    setIntroduction : (value : string) => void
+type TypeScreenProps = {
     gender : string,
     setGender : (value : string) => void
+    startupType : string,
+    setStartupType : (value : StartupType) => void
 }
 
-export default function LocationScreen(props : LocationScreenProps) {
+export default function TypeScreen(props : TypeScreenProps) {
 
     const [selectGender, setSelectGender] = useState(props.gender === "MALE" ? true : false)
+    const [selectType, setSelectType] = useState(props.startupType === "초기 창업" ? true : false)
 
     return(
         <View style={styles.mainContainer}>
-            <View style={styles.inputBox}>
-                <View style={styles.textBox}>
-                    <Text style={styles.subText}>{"회원님의 간단한 \n소개를 입력해주세요!"}</Text>
-                    <Text style={styles.mainText}>당신의 소개가 궁금합니다!</Text>
-                </View>
-                <TextInput
-                    style={styles.inputText}
-                    placeholder="자신을 간단히 소개해주세요..."
-                    placeholderTextColor={Colors.gray3}
-                    value={props.introduction}
-                    onChangeText={(s) => {props.setIntroduction(s)}}
-                />
-            </View>
             <View style={styles.inputBox}>
                 <View style={styles.textBox}>
                     <Text style={styles.subText}>회원님의 성별을 선택해주세요!</Text>
@@ -52,6 +41,32 @@ export default function LocationScreen(props : LocationScreenProps) {
                         style={[styles.genderBox, {borderColor : !selectGender ? Colors.primary : Colors.white2 }]}
                     >
                         <Text style={[styles.selectText, {color : !selectGender ? Colors.primary : Colors.gray2 }]}>여</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+            <View style={styles.inputBox}>
+                <View style={styles.textBox}>
+                    <Text style={styles.subText}>창업 형태를 선택해주세요!</Text>
+                    <Text style={styles.mainText}>더 적합한 공고를 찾아 드릴게요!</Text>
+                </View>
+                <View style={styles.genderContainer}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            props.setStartupType(StartupType.EARLY_STARTUP)
+                            setSelectType(true)
+                        }}
+                        style={[styles.genderBox, {borderColor : selectType ? Colors.primary : Colors.white2 }]}
+                    >
+                        <Text style={[styles.selectText, {color : selectType ? Colors.primary : Colors.gray2 }]}>초기 창업</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        onPress={() => {
+                            props.setStartupType(StartupType.PRE_STARTUP)
+                            setSelectType(false)
+                        }}
+                        style={[styles.genderBox, {borderColor : !selectType ? Colors.primary : Colors.white2 }]}
+                    >
+                        <Text style={[styles.selectText, {color : !selectType ? Colors.primary : Colors.gray2 }]}>예비 창업</Text>
                     </TouchableOpacity>
                 </View>
             </View>

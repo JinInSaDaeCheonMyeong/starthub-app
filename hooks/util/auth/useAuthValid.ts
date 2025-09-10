@@ -1,6 +1,4 @@
 import { ValidError } from "../../../type/error/error.type";
-import { InterestInfo, LocationInfo, UserInfo } from "../../../type/user/signupInput.type"
-import { ShowToast, ToastType } from "../../../util/ShowToast";
 
 export const useAuthValid = () => {
 
@@ -48,47 +46,10 @@ export const useAuthValid = () => {
         return {isValid : true}
     }
 
-    const isValidInfo = (
-        data : UserInfo
-    ) : ValidError => {
-        const {name, year, month, day} = data
-        if(!name){
-            return {isValid : false, message : "이름을 입력해주세요!"}
-        }
-        if(!year || !month || !day){
-            return {isValid : false, message : "생년월일을 입력해주세요!"}
-        }
-        const date = new Date(`${year}-${month.padStart(2, "0")}-${day.padStart(2,"0")}`)
-        ShowToast("안내", `${date.getFullYear()}년 ${date.getMonth()+1}월 ${date.getDate()}일로 기록되었습니다`, ToastType.INFO)
-        if(isNaN(date.getTime())){
-            return {isValid : false, message : "올바른 생년월일을 입력해주세요!"}
-        }
-        return {isValid : true}
-    }
-
-    const isValidLocation = (data : LocationInfo) : ValidError => {
-        const {introduction} = data
-        if(!introduction){
-            return {isValid : false, message : "소개를 입력해주세요!"}
-        }
-        return {isValid : true}
-    }
-
-    const isValidInterest = (data : InterestInfo) : ValidError => {
-        const { interestList } = data
-        if(interestList.length === 0){
-            return {isValid : false, message : "주제를 최소 한개 선택해주세요!"}
-        }
-        return {isValid : true}
-    }
-
     return {
         isValidEmail,
         isValidPassword,
         isValidVerifyCode,
         isValidChecked,
-        isValidInfo,
-        isValidLocation,
-        isValidInterest
     }
 }

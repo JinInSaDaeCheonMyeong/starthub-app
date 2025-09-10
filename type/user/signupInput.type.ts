@@ -1,3 +1,4 @@
+import StartupType from "../../constants/StartupType"
 
 export interface UserInfo {
     name : string,
@@ -5,13 +6,27 @@ export interface UserInfo {
     month : string,
     day : string,
 } 
-export interface LocationInfo {
-    introduction : string,
-    gender : string
-} 
-export interface InterestInfo {
-    interestList : string[]
+
+export interface TypeInfo {
+    gender : string,
+    startupType : StartupType
 }
+
+export interface EarlyStartupInfo {
+    companyName : string;
+    companyIntro : string;
+    personNumber : string;
+    companySite : string;
+    getMoneyYear : string;
+    earlyCompanyLocation : string;
+    earlyInterestList : string[];
+}
+
+export interface PreStartupInfo {
+    preCompanyLocation : string;
+    preInterestList : string[];
+}
+
 
 export interface SignupInputRequest{
     name : string,
@@ -20,4 +35,4 @@ export interface SignupInputRequest{
     interestList : string[]
 }
 
-export interface SignupInputFormData extends UserInfo, LocationInfo, InterestInfo {}
+export interface SignupInputFormData extends UserInfo, TypeInfo, EarlyStartupInfo, PreStartupInfo {}

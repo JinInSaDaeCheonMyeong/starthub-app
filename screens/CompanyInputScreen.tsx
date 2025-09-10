@@ -14,10 +14,7 @@ import BackButton from "../component/BackButton";
 import { StackScreenProps } from "@react-navigation/stack";
 import { AuthStackParamList } from "../navigation/AuthStack";
 import * as Progress from 'react-native-progress';
-import InfoScreen from "./onboard/user/InfoScreen";
 import CommonButton from "../component/CommonButton";
-import TypeScreen from "./onboard/user/TypeScreen";
-import { useSignupInputScreen } from "../hooks/auth/signup/input/useSignupInputScreen";
 import { Fonts } from "../constants/Fonts";
 import { CompositeScreenProps } from "@react-navigation/core";
 import { RootStackParamList } from "../navigation/RootStack";
@@ -27,37 +24,44 @@ import MoneyScreen from "./onboard/company/early/MoneyScreen";
 import NameScreen from "./onboard/company/early/NameScreen";
 import PersonScreen from "./onboard/company/early/PersonScreen";
 import PreInterestScreen from "./onboard/company/pre/PreInterestScreen";
+import { useCompanyInputScreen } from "../hooks/auth/signup/input/useCompanyInputScreen";
 
-export type SignupInputScreenProps = CompositeScreenProps<
-    StackScreenProps<AuthStackParamList, 'SignupInput'>,
+export type CompanyInputScreenProps = CompositeScreenProps<
+    StackScreenProps<AuthStackParamList, 'CompanyInput'>,
     StackScreenProps<RootStackParamList>
 >;
 
-const SCREENS = [
-    InfoScreen,
-    TypeScreen,
+const EARLY_SCREENS = [
+    NameScreen,
+    PersonScreen,
+    MoneyScreen,
+    EarlyInterestScreen
 ] as const
 
-const MAXPROGRESS = SCREENS.length;
+const PRE_SCREENS = [
+    PreInterestScreen
+] as const
 
-export default function SignupInputScreen(props : SignupInputScreenProps) {
+export default function CompanyInputScreen(props : CompanyInputScreenProps) {
     const {width} = useWindowDimensions();
     const insets = useSafeAreaInsets()
     const {
         form,
         ui : {
+            MAXPROGRESS,
             currentProgress,
-            errorText,
+            isEarlyStartup,
             errorVisible,
+            errorText,
             disabled
         }, 
-        actions : {
+        action : {
             goBack,
             goNext
         }
-    } = useSignupInputScreen(props, MAXPROGRESS)
+    } = useCompanyInputScreen(props, EARLY_SCREENS.length, PRE_SCREENS.length)
 
-    const CurrentScreen = SCREENS[currentProgress-1]
+    const CurrentScreen = isEarlyStartup ? EARLY_SCREENS[currentProgress - 1] : PRE_SCREENS[currentProgress -1]
 
     return (
         <KeyboardAvoidingView 
@@ -106,7 +110,7 @@ export default function SignupInputScreen(props : SignupInputScreenProps) {
                     >
                         {errorVisible && <Text style={styles.errorText}>{errorText}</Text>}
                         <CommonButton
-                            title={currentProgress == MAXPROGRESS ? "기업 정보 입력" : "다음"}
+                            title={currentProgress == MAXPROGRESS ? "완료" : "다음"}
                             onPress={() => {
                                 goNext();
                             }}
