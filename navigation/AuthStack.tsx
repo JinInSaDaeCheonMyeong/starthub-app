@@ -7,6 +7,8 @@ import SignupScreen from "../screens/SignupScreen";
 import SignupInputScreen from "../screens/SignupInputScreen";
 import {View} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
+import CompanyInputScreen from "../screens/CompanyInputScreen";
+import StartupType from "../constants/StartupType";
 
 const Stack = createStackNavigator<AuthStackParamList>()
 
@@ -16,6 +18,9 @@ export type AuthStackParamList = {
     Signup : undefined;
     Start : undefined;
     SignupInput : undefined;
+    CompanyInput : {
+        startupType : StartupType,
+    };
 };
 
 export default function AuthStack() {
@@ -36,6 +41,7 @@ export default function AuthStack() {
                 <Stack.Screen name="Start" component={StartScreen} />
                 <Stack.Screen name="Signup" component={SignupScreen} />
                 <Stack.Screen name="SignupInput" component={SignupInputScreen} />
+                <Stack.Screen name="CompanyInput" component={CompanyInputScreen} />
             </Stack.Navigator>
         </View>
     )
