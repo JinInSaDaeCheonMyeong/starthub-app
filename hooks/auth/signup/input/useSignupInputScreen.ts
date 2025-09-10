@@ -13,17 +13,6 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
         day: "",
         gender: "MALE",
         startupType: StartupType.EARLY_STARTUP,
-
-        companyName: "",
-        companyIntro: '',
-        personNumber: '',
-        companySite: '',
-        getMoneyYear: '',
-        earlyCompanyLocation: '',
-        earlyInterestList: [],
-
-        preCompanyLocation: '',
-        preInterestList: []
     })
 
     const [currentProgress, setCurrentProgress] = useState(1)
@@ -49,16 +38,7 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
     const setMonth = makeSetter("month")
     const setDay = makeSetter("day")
     const setGender = makeSetter("gender")
-    const setStartupType = makeSetter("startupType")
-    const setCompanyName = makeSetter("companyName");
-    const setCompanyIntro = makeSetter("companyIntro");
-    const setPersonNumber = makeSetter("personNumber");
-    const setCompanySite = makeSetter("companySite");
-    const setGetMoneyYear = makeSetter("getMoneyYear");
-    const setEarlyCompanyLocation = makeSetter("earlyCompanyLocation");
-    const setEarlyInterestList = makeSetter("earlyInterestList");
-    const setPreCompanyLocation = makeSetter("preCompanyLocation");
-    const setPreInterestList = makeSetter("preInterestList");
+    const setStartupType = makeSetter("startupType");
 
     const goBack = () => {
         hideError()
@@ -97,6 +77,7 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
         if (currentProgress >= MAXPROGRESS) {
             console.log("마지막 단계 도착")
             // TODO: 서버 연결
+            navigation.navigate("CompanyInput", {startupType : formData.startupType})
         } else {
             setCurrentProgress(prev => prev + 1)
         }
@@ -110,16 +91,7 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
             setMonth,
             setDay,
             setGender,
-            setStartupType,
-            setCompanyName,
-            setCompanyIntro,
-            setPersonNumber,
-            setCompanySite,
-            setGetMoneyYear,
-            setEarlyCompanyLocation,
-            setEarlyInterestList,
-            setPreCompanyLocation,
-            setPreInterestList
+            setStartupType
         },
         ui: {
             currentProgress,

@@ -36,11 +36,6 @@ export type SignupInputScreenProps = CompositeScreenProps<
 const SCREENS = [
     InfoScreen,
     TypeScreen,
-    MoneyScreen,
-    EarlyInterestScreen,
-    NameScreen,
-    PersonScreen,
-    PreInterestScreen
 ] as const
 
 const MAXPROGRESS = SCREENS.length;
