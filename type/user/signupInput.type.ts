@@ -12,22 +12,6 @@ export interface TypeInfo {
     startupType : StartupType
 }
 
-export interface EarlyStartupInfo {
-    companyName : string;
-    companyIntro : string;
-    personNumber : string;
-    companySite : string;
-    getMoneyYear : string;
-    earlyCompanyLocation : string;
-    earlyInterestList : string[];
-}
-
-export interface PreStartupInfo {
-    preCompanyLocation : string;
-    preInterestList : string[];
-}
-
-
 export interface SignupInputRequest{
     name : string,
     date : Date,
@@ -35,4 +19,4 @@ export interface SignupInputRequest{
     interestList : string[]
 }
 
-export interface SignupInputFormData extends UserInfo, TypeInfo, EarlyStartupInfo, PreStartupInfo {}
+export interface SignupInputFormData extends UserInfo, TypeInfo {}
