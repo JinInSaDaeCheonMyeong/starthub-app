@@ -1,5 +1,5 @@
 import React from "react";
-import { SafeAreaView, StatusBar, StyleSheet, Text, View } from "react-native";
+import { Keyboard, SafeAreaView, StatusBar, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
 import { AuthStackParamList } from "../navigation/AuthStack";
 import { StackScreenProps } from "@react-navigation/stack";
 import { Colors } from "../constants/Color";
@@ -40,6 +40,7 @@ export default function SigninScreen(props: SigninScreenProps) {
     } = useSigninScreen(props)
 
     return (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
             <KeyboardAwareScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
@@ -94,6 +95,7 @@ export default function SigninScreen(props: SigninScreenProps) {
                 </View>
             </KeyboardAwareScrollView>
         </View>
+        </TouchableWithoutFeedback>
     )
 }
 
