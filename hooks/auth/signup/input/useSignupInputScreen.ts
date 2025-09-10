@@ -1,11 +1,9 @@
 import { useCallback, useState } from "react"
 import { useError } from "../../../util/useError"
-import { useSignupInputValid } from "./useSignupInputValid"
 import { SignupInputScreenProps } from "../../../../screens/SignupInputScreen"
 import { TypeInfo, SignupInputFormData, UserInfo } from "../../../../type/user/signupInput.type"
 import { useDisabled } from "../../../util/useDisabled"
 import StartupType from "../../../../constants/StartupType"
-import { InterestType } from "../../../../constants/InterestType"
 
 export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAXPROGRESS: number) => {
     const [formData, setFormData] = useState<SignupInputFormData>({
@@ -33,7 +31,6 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
         value: { errorVisible, errorText },
         handler: { showError, hideError }
     } = useError()
-    const { validSignupInputForm } = useSignupInputValid()
     const { disabled, disabledBtn, enabledBtn } = useDisabled()
 
     const updateFormData = useCallback(<K extends keyof SignupInputFormData>(
