@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { Keyboard, StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 import BottomArrow from "../../assets/icons/bottom-arrow-back.svg"
 import TopArrow from "../../assets/icons/top-arrow-back.svg"
 import { Colors } from "../../constants/Color";
@@ -21,7 +21,8 @@ export default function DateInputText(props : DateInputProps) {
     const items = props.items.map(item => ({ label: item, value: item }))
 
     return (
-        <View style={styles.mainContainer}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={[styles.mainContainer, open && {paddingBottom : 48 * 4}]}>
             <DropDownPicker
                 open={open}
                 value={props.value}
@@ -72,6 +73,7 @@ export default function DateInputText(props : DateInputProps) {
                 )}
             />
         </View>
+        </TouchableWithoutFeedback>
     )
 }
 
