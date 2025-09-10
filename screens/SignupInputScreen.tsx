@@ -22,7 +22,6 @@ import { Fonts } from "../constants/Fonts";
 import { CompositeScreenProps } from "@react-navigation/core";
 import { RootStackParamList } from "../navigation/RootStack";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useEffect, useState } from "react";
 import EarlyInterestScreen from "./onboard/company/early/EarlyInterestScreen";
 import MoneyScreen from "./onboard/company/early/MoneyScreen";
 import NameScreen from "./onboard/company/early/NameScreen";
@@ -64,22 +63,6 @@ export default function SignupInputScreen(props : SignupInputScreenProps) {
     } = useSignupInputScreen(props, MAXPROGRESS)
 
     const CurrentScreen = SCREENS[currentProgress-1]
-    const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-
-    useEffect(() => {
-        const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
-            setKeyboardVisible(true);
-        });
-
-        const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
-            setKeyboardVisible(false);
-        });
-
-        return () => {
-            showSubscription.remove();
-            hideSubscription.remove();
-        };
-    }, []);
 
     return (
         <KeyboardAvoidingView 
@@ -151,6 +134,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         flexGrow: 1,
+        paddingBottom :8
     },
     progressBarContainer : {
         width : "100%",
