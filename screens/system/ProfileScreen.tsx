@@ -1,6 +1,6 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { SystemStackParamList } from "../../navigation/SystemStack";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import BackButton from "../../component/BackButton";
 import EditIcon from "../../assets/icons/header/edit.svg"
 import { Colors } from "../../constants/Color";
@@ -62,7 +62,7 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
     const getProfileData = async () => {
         try {
             const profileData = (await getMe()).data;
-            // profileData.startupType = StartupType.PRE_STARTUP; //확인용
+            profileData.startupType = StartupType.EARLY_STARTUP; //확인용
             switch(profileData.startupType){
                 case StartupType.EARLY_STARTUP: 
                     profileData.earlyStartup = {
@@ -142,7 +142,7 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                         <View style={styles.labelContainer} key={index}>
                             <Text style={styles.labelText}>{label}</Text>
                             <View style={styles.dataContainer}>
-                                <Text style={styles.dataText}>{data}</Text>
+                                <Text onPress={() => {index === 3 && Linking.openURL(data)}} style={[styles.dataText, index === 3 && {color : Colors.info, textDecorationLine : "underline"}]}>{data}</Text>
                             </View>
                         </View>
                     )) : 
