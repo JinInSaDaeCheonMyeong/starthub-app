@@ -33,10 +33,14 @@ export const formatToTime = (data : string) : string => {
     });
 }
 
-export const formatToDate = (data : string) : string => {
+export const formatToDate = (data : string, type : 'dotted' | 'kor' = 'dotted') : string => {
     const dateTime = new Date(data)
     const years = dateTime.getFullYear()
     const months = dateTime.getMonth()+1
     const days = dateTime.getDate()
-    return `${years}.${months}.${days}`
+    if(type === 'dotted'){
+        return `${years}.${months}.${days}`;
+    } else{
+        return `${years}년 ${months}월 ${days}일`;
+    }
 }

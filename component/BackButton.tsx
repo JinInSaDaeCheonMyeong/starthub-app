@@ -9,6 +9,6 @@ type BackButtonProps = {
 
 export default function BackButton(props : BackButtonProps){
     return (
-    <LeftArrow width={props.width} height={props.height} color={props.color} onTouchStart={props.onClick}/>
+    <LeftArrow width={props.width} height={props.height} hitSlop={16} color={props.color} onTouchEnd={props.onClick}/>
 )
 }
