@@ -62,7 +62,6 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
     const getProfileData = async () => {
         try {
             const profileData = (await getMe()).data;
-            profileData.startupType = StartupType.EARLY_STARTUP; //확인용
             switch(profileData.startupType){
                 case StartupType.EARLY_STARTUP: 
                     profileData.earlyStartup = {
@@ -73,7 +72,10 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                     profileData.preStartup = undefined
                     break;
                 case StartupType.PRE_STARTUP:
-                    profileData.preStartup = {}
+                    profileData.preStartup = {
+                        companyLocation : ''
+                    }
+                    
                     break;
             }
             setProfileData(profileData)

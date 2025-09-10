@@ -227,7 +227,7 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                         <Text style={styles.titleText}>(선택) 창업 위치</Text>
                         <TextInput
                             style={styles.dataInputText}
-                            value={user.preStartup!.companyLocation} 
+                            value={user.preStartup?.companyLocation ?? ''} 
                             placeholder="창업 위치를 입력해주세요..."
                             placeholderTextColor={Colors.gray2}
                             onChangeText={(value) => {
