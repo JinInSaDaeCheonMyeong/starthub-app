@@ -38,14 +38,14 @@ export default function NoticeItem({
         return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`
     }
     const categoryMap = {
-        [NoticeCategory.BUSINESS] : {label : "사업화", icon : <BusinessIcon width={16} height={16}/>},
-        [NoticeCategory.EDUCATION] : {label : "교육", icon : <EducationIcon width={16} height={16}/>},
-        [NoticeCategory.EVENT] : {label : "행사", icon : <EventIcon width={16} height={16}/>},
-        [NoticeCategory.FACILITY] : {label : "시설", icon : <FacilityIcon width={16} height={16}/>},
-        [NoticeCategory.FUNDING] : {label : "자금", icon : <FundingIcon width={16} height={16}/>},
-        [NoticeCategory.GLOBAL] : {label : "글로벌", icon : <GlobalIcon width={16} height={16}/>},
-        [NoticeCategory.RND] : {label : "R&D", icon : <RNDIcon width={16} height={16}/>},
-        [NoticeCategory.TALENT] : {label : "인력", icon : <TalentIcon width={16} height={16}/>}
+        [NoticeCategory.BUSINESS] : {label : "사업화", icon : <BusinessIcon width={16} height={16} color={Colors.primary}/>},
+        [NoticeCategory.EDUCATION] : {label : "교육", icon : <EducationIcon width={16} height={16} color={Colors.primary}/>},
+        [NoticeCategory.EVENT] : {label : "행사", icon : <EventIcon width={16} height={16} color={Colors.primary}/>},
+        [NoticeCategory.FACILITY] : {label : "시설", icon : <FacilityIcon width={16} height={16} color={Colors.primary}/>},
+        [NoticeCategory.FUNDING] : {label : "자금", icon : <FundingIcon width={16} height={16} color={Colors.primary}/>},
+        [NoticeCategory.GLOBAL] : {label : "글로벌", icon : <GlobalIcon width={16} height={16} color={Colors.primary}/>},
+        [NoticeCategory.RND] : {label : "R&D", icon : <RNDIcon width={16} height={16} color={Colors.primary}/>},
+        [NoticeCategory.TALENT] : {label : "인력", icon : <TalentIcon width={16} height={16} color={Colors.primary}/>}
     }
     return (
         <TouchableOpacity 
