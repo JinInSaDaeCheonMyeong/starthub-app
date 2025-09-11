@@ -29,6 +29,29 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
     ];
     const carouselMaxIndex = carouselList.length 
 
+    const navList = [
+        {
+            icon : require("../../assets/images/analyzeNotice.png"),
+            label : '경쟁사\n분석',
+            navItem : 'Analyze'
+        },
+        {
+            icon : require("../../assets/images/compareNotice.png"),
+            label : '공고\n비교',
+            navItem : 'Compare'
+        },
+        {
+            icon : require("../../assets/images/suggestionAI.png"),
+            label : 'AI 추천\n공고',
+            navItem : 'Suggestion'
+        },
+        {
+            icon : require("../../assets/images/calendar.png"),
+            label : '달력\n보기',
+            navItem : 'Calendar'
+        }
+    ]
+
     const noticeCategoryList = [
         {
             label : '사업화',
@@ -116,7 +139,8 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
             noticeItems,
             carouselList,
             carouselMaxIndex,
-            noticeCategoryList
+            noticeCategoryList,
+            navList
         },
         ui : {
             width,

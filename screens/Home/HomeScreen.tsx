@@ -1,4 +1,4 @@
-import { FlatList, ScrollView,  StyleSheet, Text, View } from "react-native";
+import { FlatList, Image, ScrollView,  StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import NoticeItem from "../../component/notice/NoticeItem";
@@ -43,7 +43,8 @@ export default function HomeScreen(props : HomeScreenProps) {
             noticeItems,
             carouselList,
             carouselMaxIndex,
-            noticeCategoryList
+            noticeCategoryList,
+            navList
         },
         ui : {
             width,
@@ -75,6 +76,16 @@ export default function HomeScreen(props : HomeScreenProps) {
                             />
                         )}
                     />
+                    <View style={styles.navIconContainer}>
+                        {navList.map(({icon, label, navItem}, index) => (
+                            <View key={index} style={styles.navIconWrapper}>
+                                <Image style={styles.navIcon} source={icon}/>
+                                <Text style={styles.navIconText}>
+                                    {label}
+                                </Text>
+                            </View>
+                        ))}
+                    </View>
                 </View>
                 <View style={styles.flatListWrapper}>
                     <View style={styles.textWrapper}>
@@ -224,5 +235,23 @@ const styles = StyleSheet.create({
         fontSize : 14,
         fontFamily : Fonts.medium,
         color : Colors.black2
+    },
+    navIconContainer : {
+        flexDirection : 'row',
+        paddingHorizontal : 16
+    },
+    navIconWrapper : {
+        flex : 1,
+        alignItems : 'center',
+        gap : 8
+    },
+    navIcon : {
+        width : 48, 
+        height : 48
+    },
+    navIconText : {
+        textAlign : 'center', 
+        fontFamily : Fonts.medium, 
+        fontSize : 14
     }
 });
