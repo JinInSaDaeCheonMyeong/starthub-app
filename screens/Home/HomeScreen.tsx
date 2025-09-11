@@ -11,6 +11,15 @@ import { StackScreenProps } from "@react-navigation/stack";
 import Carousel from "react-native-reanimated-carousel";
 import useHomeScreen from "../../hooks/home/useHomeScreen";
 import Banner from "../../component/home/Banner";
+import { NoticeCategory } from "../../constants/NoticeCategory";
+import BusinessIcon from "../../assets/icons/category/notice/business.svg"
+import EducationIcon from "../../assets/icons/category/notice/education.svg"
+import EventIcon from "../../assets/icons/category/notice/event.svg"
+import FacilityIcon from "../../assets/icons/category/notice/facility.svg"
+import FundingIcon from "../../assets/icons/category/notice/funding.svg"
+import GlobalIcon from "../../assets/icons/category/notice/global.svg"
+import RNDIcon from "../../assets/icons/category/notice/rnd.svg"
+import TalentIcon from "../../assets/icons/category/notice/talent.svg"
 
 export type HomeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Home">,
@@ -18,11 +27,23 @@ export type HomeScreenProps = CompositeScreenProps<
 >;
 
 export default function HomeScreen(props : HomeScreenProps) {
+    const categoryMap = {
+        [NoticeCategory.BUSINESS] : BusinessIcon,
+        [NoticeCategory.EDUCATION] : EducationIcon,
+        [NoticeCategory.EVENT] : EventIcon,
+        [NoticeCategory.FACILITY] : FacilityIcon,
+        [NoticeCategory.FUNDING] : FundingIcon,
+        [NoticeCategory.GLOBAL] : GlobalIcon,
+        [NoticeCategory.RND] : RNDIcon,
+        [NoticeCategory.TALENT] : TalentIcon
+    }
+
     const {
         form : {
             noticeItems,
-            carouselData,
-            carouselMaxIndex
+            carouselList,
+            carouselMaxIndex,
+            noticeCategoryList
         },
         ui : {
             width,
@@ -42,7 +63,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                         width={width}
                         height={carouselHeight}
                         autoPlay
-                        data={carouselData}
+                        data={carouselList}
                         autoPlayInterval={5000}
                         scrollAnimationDuration={1300}
                         renderItem={({index, item : props}) => (
@@ -60,15 +81,25 @@ export default function HomeScreen(props : HomeScreenProps) {
                         <Text style={styles.titleText}>지원 사업 공고</Text>
                         <Text style={styles.captionText}>카테고리를 눌러 공고를 조회할 수 있어요</Text>
                     </View>
-                    <View>
-                        <View>
-                            <View>
-                                
-                            </View>
-                            <Text>
-                                사업화
-                            </Text>
-                        </View>
+                    <View style={styles.noticeItemListWrapper}>
+                        {noticeCategoryList.map(({
+                            label, 
+                            noticeType, 
+                            backgroundColor, 
+                            iconColor
+                        }, index) => {
+                            const IconComponent = categoryMap[noticeType];
+                            return (
+                                <View key={index} style={styles.iconWrapper}>
+                                    <View style={[styles.iconBox, {backgroundColor}]}>
+                                        {IconComponent && <IconComponent width={30} height={30} color={iconColor} />}
+                                    </View>
+                                    <Text style={styles.iconLabel}>
+                                        {label}
+                                    </Text>
+                                </View>
+                            )
+                        })}
                     </View>
                 </View>
                 <View style={styles.flatListWrapper}>
@@ -172,4 +203,26 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.semiBold,
         color: Colors.gray2,
     },
+    noticeItemListWrapper : {
+        flexDirection : "row", 
+        paddingHorizontal : 16, 
+        gap : 16,
+        flexWrap: "wrap",
+    },
+    iconWrapper : {
+        alignItems : "center",
+        gap : 6
+    },
+    iconBox : {
+        width: 59.4,
+        height: 59.4,
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    iconLabel : {
+        fontSize : 14,
+        fontFamily : Fonts.medium,
+        color : Colors.black2
+    }
 });
