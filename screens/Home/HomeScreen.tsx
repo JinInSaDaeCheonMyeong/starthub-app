@@ -1,4 +1,4 @@
-import { FlatList, Image, Linking, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, Linking, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import { Shadow } from "react-native-shadow-2";
@@ -21,6 +21,7 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { RootStackParamList } from "../../navigation/RootStack";
 import { StackScreenProps } from "@react-navigation/stack";
 import { BMCDummyData } from "../../constants/dummy/BMCDummy";
+import Carousel from "react-native-reanimated-carousel";
 
 export type HomeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Home">,
@@ -29,41 +30,11 @@ export type HomeScreenProps = CompositeScreenProps<
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
     const [noticeItems, setNoticeItems] = useState<NoticeItemType[]>([]);
-    const [recruitsItems, setRecruitsItems] = useState<RecruitsItemType[]>([]);
 
     const fetchNoticeItems = async () => {
         try {
         const response = await notice(1, "", "", "", "", "", "");
         setNoticeItems(response); // data 구조에 따라 조정
-        } catch (error: unknown) {
-        if (isAxiosError(error)) {
-            const response = error.response;
-            if (!response) {
-            ShowToast("오류 발생", "네트워크 오류가 발생했습니다", ToastType.ERROR);
-            return;
-            }
-            const errorData = response.data as ErrorResponse;
-            ShowToast("오류 발생", errorData.message, ToastType.ERROR);
-            return;
-        }
-        ShowToast("오류 발생", "알 수 없는 오류가 발생했습니다", ToastType.ERROR);
-        }
-    };
-
-    const getRecruitsItems = async (reset: boolean = false) => {
-        try {
-        const response = (await getRecruitsList(0, 10)).data;
-
-        if (reset) {
-            setRecruitsItems(response.content);
-        } else {
-            const map = new Map(recruitsItems.map((item) => [item.id, item]));
-            response.content.forEach((item) => {
-            map.set(item.id, item); // 덮어쓰기
-            });
-            const updatedList = Array.from(map.values());
-            setRecruitsItems(updatedList);
-        }
         } catch (error: unknown) {
         if (isAxiosError(error)) {
             const response = error.response;
@@ -105,120 +76,76 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             Linking.openURL(link);
         }; handlePress()
     }
-
-    const closestNotice = getClosestNotice(noticeItems);
+    const {width, height} = useWindowDimensions()
+    const data = ["배너1", "배너2", "배너3"];
 
     useFocusEffect(
         useCallback(() => {
-        fetchNoticeItems();
-        getRecruitsItems(true);
+            fetchNoticeItems();
         }, [])
     );
 
     return (
         <ScrollView showsVerticalScrollIndicator={false}>
-            <ImminentView
-                title={closestNotice ? closestNotice.title : "마감 임박 공고가 없습니다."}
-                onPress={() => {
-                    closestNotice ? goWeb(closestNotice.webLink) : ShowToast("오류 발생", "공고가 존재하지 않습니다", ToastType.ERROR)
-                }}
-            />
-            <View style={{ height: 16 }} />
-            <View style={commonContainer.container}>
-            <TouchableOpacity 
-                onPress={() => {navigation.navigate("InBMC", {BMC : BMCDummyData[0]})}}
-            >
-                <Shadow
-                    distance={4}
-                    offset={[0, 4]}
-                    startColor="rgba(185, 185, 185, 0.2)"
-                    style={{
-                    width: "100%",
-                    }}
-                >
-                    <View style={styles.BMCContainer}>
-                        {/* <BMCNote width={50} height={50} />
-                        <Text style={styles.BMCText}>내 BMC가 없어요...</Text> */}
-                        <Image style={{
-                            backgroundColor : Colors.white1,
-                            resizeMode : "contain",
-                            width : "100%",
-                            borderRadius : 8
-
-                            }} source={BMCDummyData[0].thumbnail}
-                               resizeMode={"cover"}
-                        />
-                    </View>
-                </Shadow>
-            </TouchableOpacity>
-            </View>
-            <View style={{ height: 16 }} />
-            <View style={[commonContainer.container, styles.flatListContainer]}>
-            <Text style={styles.listText}>추천 공고</Text>
-            <FlatList
-                contentContainerStyle={{ gap: 16, paddingHorizontal: 16, paddingBottom: 16 }}
-                showsHorizontalScrollIndicator={false}
-                horizontal={true}
-                onEndReached={() => {}}
-                style={{ overflow: "visible" }}
-                data={noticeItems.length > 0 ? noticeItems : NoticeItemList}
-                renderItem={({ item }) => (
-                <NoticeItem
-                    webLink={item.webLink}
-                    id={item.id}
-                    category={item.category}
-                    title={item.title}
-                    startTime={item.startTime}
-                    endTime={item.endTime}
-                    location={item.location}
-                    years={item.years}
-                    target={item.target}
-                    entre={item.entre}
-                    isHome={true}
-                    onPress={() => {
-                        goWeb(item.webLink)
-                    }}
+            <View style={[styles.flatListContainer]}>
+                <Carousel
+                    loop
+                    width={width}
+                    height={height * 0.18}
+                    autoPlay
+                    data={data}
+                    autoPlayInterval={5000}
+                    scrollAnimationDuration={1000}
+                    renderItem={({ item }) => (
+                        <View
+                            style={{
+                                flex: 1,
+                                justifyContent: "center",
+                                alignItems: "center",
+                                backgroundColor : Colors.primary,
+                                marginHorizontal : 16,
+                                borderRadius : 16
+                            }}
+                        >
+                            <Text style={{ fontSize: 24, color: "#fff" }}>{item}</Text>
+                        </View>
+                    )}
                 />
-                )}
-            />
-            </View>
-            <View style={[commonContainer.container, styles.flatListContainer]}>
-            <Text style={styles.listText}>멤버 모집</Text>
-            <FlatList
-                contentContainerStyle={{ gap: 16, paddingHorizontal: 16, paddingBottom: 16 }}
-                showsHorizontalScrollIndicator={false}
-                horizontal={true}
-                style={{ overflow: "visible" }}
-                data={recruitsItems}
-                renderItem={({ item }) => (
-                <RecruitsItem
-                    id={item.id}
-                    title={item.title}
-                    companyName={item.companyName}
-                    endDate={item.endDate}
-                    viewCount={item.viewCount}
-                    isClosed={item.isClosed}
-                    createdAt={item.createdAt}
-                    isHome={true}
-                    onPress={(id) => {
-                    navigation.navigate("InMatch", { matchId: id });
-                    }}
+                <View style={{gap : 6}}>
+                    <Text style={styles.titleText}>맞춤 추천 공고</Text>
+                    <Text style={styles.captionText}>사용자님의 관심을 분석하여 제공해 드려요</Text>
+                </View>
+                <FlatList
+                    contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
+                    showsHorizontalScrollIndicator={false}
+                    horizontal={true}
+                    onEndReached={() => {}}
+                    style={{ overflow: "visible" }}
+                    data={noticeItems.length > 0 ? noticeItems : NoticeItemList}
+                    renderItem={({ item }) => (
+                    <NoticeItem
+                        webLink={item.webLink}
+                        id={item.id}
+                        category={item.category}
+                        title={item.title}
+                        startTime={item.startTime}
+                        endTime={item.endTime}
+                        location={item.location}
+                        years={item.years}
+                        target={item.target}
+                        entre={item.entre}
+                        isHome={true}
+                        onPress={() => {
+                            goWeb(item.webLink)
+                        }}
+                    />
+                    )}
                 />
-                )}
-            />
             </View>
         </ScrollView>
     );
 }
-
-const commonContainer = StyleSheet.create({
-    container: {
-        overflow: "visible",
-        paddingHorizontal: 16,
-    },
-    });
-
-    const styles = StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: "column",
@@ -245,10 +172,16 @@ const commonContainer = StyleSheet.create({
         fontSize: 16,
         flexShrink: 1,
     },
-    listText: {
+    titleText: {
         fontSize: 18,
         marginStart: 16,
         fontFamily: Fonts.semiBold,
         color: Colors.black2,
+    },
+    captionText: {
+        fontSize: 14,
+        marginStart: 16,
+        fontFamily: Fonts.semiBold,
+        color: Colors.gray2,
     },
 });
