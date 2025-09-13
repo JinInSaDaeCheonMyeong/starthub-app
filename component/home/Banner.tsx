@@ -1,4 +1,4 @@
-import { Image, ImageBackground, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { Image, ImageBackground, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { Colors } from "../../constants/Color";
 import { BannerType } from "../../type/banner/banner.type";
 import { Fonts } from "../../constants/Fonts";
@@ -8,8 +8,13 @@ export default function Banner({
     peroid,
     index,
     maxIndex,
-} : BannerType) {
+    onPress
+} : BannerType & {onPress : () => void}) {
     return (
+        <Pressable
+            onPress={() => {onPress()}}
+            style={{flex : 1}}
+        >
         <ImageBackground
             source={require('../../assets/images/banner/banner.png')}
             style={styles.bannerContainer}
@@ -29,14 +34,15 @@ export default function Banner({
                     {title}
                 </Text>
                 <Text style={styles.peroidText}>{`모집 : ${peroid}`}</Text>
-            </View>
-            <Text style={styles.indexText}>
-                {index}/
-                <Text style={{color : Colors.white2}}>
-                    {maxIndex}
+                <Text style={styles.indexText}>
+                    {index}/
+                    <Text style={{color : Colors.white2}}>
+                        {maxIndex}
+                    </Text>
                 </Text>
-            </Text>
+            </View>
         </ImageBackground>
+        </Pressable>
     )
 }
 
