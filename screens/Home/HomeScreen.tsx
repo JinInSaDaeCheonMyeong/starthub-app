@@ -1,4 +1,4 @@
-import { FlatList, Image, ScrollView,  StyleSheet, Text, View } from "react-native";
+import { FlatList, Image, ScrollView,  StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import NoticeItem from "../../component/notice/NoticeItem";
@@ -73,17 +73,22 @@ export default function HomeScreen(props : HomeScreenProps) {
                                 index={index + 1}
                                 maxIndex={carouselMaxIndex}
                                 height={carouselHeight}
+                                onPress={() => {console.log('안녕')}}
                             />
                         )}
                     />
                     <View style={styles.navIconContainer}>
                         {navList.map(({icon, label, navItem}, index) => (
-                            <View key={index} style={styles.navIconWrapper}>
+                            <TouchableOpacity 
+                                onPress={() => {console.log(navItem)}}
+                                key={index} 
+                                style={styles.navIconWrapper}
+                            >
                                 <Image style={styles.navIcon} source={icon}/>
                                 <Text style={styles.navIconText}>
                                     {label}
                                 </Text>
-                            </View>
+                            </TouchableOpacity>
                         ))}
                     </View>
                 </View>
@@ -101,14 +106,18 @@ export default function HomeScreen(props : HomeScreenProps) {
                         }, index) => {
                             const IconComponent = categoryMap[noticeType];
                             return (
-                                <View key={index} style={styles.iconWrapper}>
+                                <TouchableOpacity 
+                                    onPress={() => {console.log(label)}} 
+                                    key={index} 
+                                    style={styles.iconWrapper}
+                                >
                                     <View style={[styles.iconBox, {backgroundColor}]}>
                                         {IconComponent && <IconComponent width={30} height={30} color={iconColor} />}
                                     </View>
                                     <Text style={styles.iconLabel}>
                                         {label}
                                     </Text>
-                                </View>
+                                </TouchableOpacity>
                             )
                         })}
                     </View>
@@ -222,7 +231,7 @@ const styles = StyleSheet.create({
     },
     iconWrapper : {
         alignItems : "center",
-        gap : 6
+        gap : 6,
     },
     iconBox : {
         width: 59.4,
@@ -238,12 +247,13 @@ const styles = StyleSheet.create({
     },
     navIconContainer : {
         flexDirection : 'row',
-        paddingHorizontal : 16
+        paddingHorizontal : 16,
+        gap : 16
     },
     navIconWrapper : {
-        flex : 1,
         alignItems : 'center',
-        gap : 8
+        gap : 8,
+        flex : 1,
     },
     navIcon : {
         width : 48, 
