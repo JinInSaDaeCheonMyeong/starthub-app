@@ -1,9 +1,9 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
-import { Colors } from "../../constants/Color";
-import DateInputText from "../../component/auth/DateInputText";
-import { DayList, MonthList, YearList } from "../../constants/DateNumber";
+import { Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
+import { Colors } from "../../../constants/Color";
+import DateInputText from "../../../component/auth/DateInputText";
+import { DayList, MonthList, YearList } from "../../../constants/DateNumber";
 import { useState } from "react";
-import { Fonts } from "../../constants/Fonts";
+import { Fonts } from "../../../constants/Fonts";
 
 type InfoScreenProps = {
     name : string,
@@ -17,8 +17,6 @@ type InfoScreenProps = {
 }
 
 export default function InfoScreen(props : InfoScreenProps) {
-
-    const [open, setOpen] = useState(false)
 
     return(
         <View style={styles.mainContainer}>
@@ -38,7 +36,7 @@ export default function InfoScreen(props : InfoScreenProps) {
             <View style={styles.inputBox}>
                 <View style={styles.textBox}>
                     <Text style={styles.subText}>회원님의 생년월일을 입력해주세요!</Text>
-                    <Text style={styles.mainText}>{"생일축하를 해드리고 싶어요!"}</Text>
+                    <Text style={styles.mainText}>{"나이 대에 맞는 공고를 추천 해드릴게요!"}</Text>
                 </View>
                 <View style={styles.birthDateContainer}>
                     <DateInputText 

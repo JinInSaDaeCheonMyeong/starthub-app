@@ -40,6 +40,7 @@ export default function DateInputText(props : DateInputProps) {
                 placeholder={props.placeholder}
                 placeholderStyle={styles.placeholderStyle}
                 style={styles.mainStyle}
+                listMode="SCROLLVIEW"
                 dropDownContainerStyle={styles.dropdownContainerStyle}
                 textStyle={styles.textStyle}
                 labelStyle={styles.lableStyle}
