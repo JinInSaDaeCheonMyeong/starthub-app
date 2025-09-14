@@ -43,8 +43,9 @@ const styles = StyleSheet.create({
         borderRadius : 8,
         ...Platform.select({
             ios : {
-                padding : 16,
                 gap : 16,
+                paddingHorizontal : 16,
+                paddingVertical : 8,
             },
             android : {
                 paddingVertical : 8,
@@ -55,7 +56,8 @@ const styles = StyleSheet.create({
     },
     textInput : {
         flex : 1,
-        fontSize : 16,
+        height: 35,
+        fontSize : 12,
         color : Colors.black2,
         fontFamily : Fonts.medium
     }
