@@ -25,6 +25,7 @@ export type HomeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Home">,
     StackScreenProps<RootStackParamList>
 >;
+
 export default function HomeScreen(props : HomeScreenProps) {
     const categoryMap = {
         [NoticeCategory.BUSINESS] : BusinessIcon,
