@@ -1,6 +1,5 @@
 import {
     FlatList,
-    SafeAreaView,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -9,14 +8,15 @@ import {
 } from "react-native";
 import {Fonts} from "../../constants/Fonts";
 import {Colors} from "../../constants/Color";
-import {Shadow} from "react-native-shadow-2";
-import {BMCDummyData} from "../../constants/dummy/BMCDummy";
 import {PaperProvider} from "react-native-paper";
 import {CompositeScreenProps} from "@react-navigation/core";
 import {BottomTabScreenProps} from "@react-navigation/bottom-tabs";
 import {HomeStackParamList} from "../../navigation/HomeStack";
 import {StackScreenProps} from "@react-navigation/stack";
 import {RootStackParamList} from "../../navigation/RootStack";
+import {getBMCs} from "../../api/bmc";
+import {useEffect, useState} from "react";
+import {BMCType, GetBMCsResponse} from "../../type/BMC/BMC.type";
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -26,88 +26,99 @@ export type BMCScreenProps = CompositeScreenProps<
 >
 
 export default function BMCScreen(navigation: BMCScreenProps) {
-    const recentBMC = BMCDummyData
-        .sort((a, b) => b.date.getTime() - a.date.getTime())
-        .slice(0, 8);
+    const [allBMCs, setAllBMCs] = useState<BMCType[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchBMCs = async () => {
+            try {
+                const response: GetBMCsResponse = await getBMCs();
+                setAllBMCs(response.data);
+            } catch (error) {
+                console.error('BMC 데이터 로딩 실패:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBMCs();
+    }, []);
+
+    const BMCs = async ()=> {
+        return await getBMCs();
+    }
     return (
         <View style={styles.container}>
             <PaperProvider>
-            <FlatList
-                data={BMCDummyData}
-                numColumns={2}
-                columnWrapperStyle={{ paddingHorizontal: 16, justifyContent: 'space-between' }}
-                ListHeaderComponent={
-                <View style={{ paddingHorizontal: 0 }}>
-                    <Text style={[styles.headerText, {marginTop: 16}]}>최근 BMC </Text>
-                    <FlatList
-                        data={recentBMC}
-                        horizontal={true}
-                        showsHorizontalScrollIndicator={false}
-                        ListHeaderComponent={
-                            <View style={styles.flatMargin}/>
-                        }
-                        ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-                        renderItem={({item}) => (
-                            <Shadow
-                                distance={4}
-                                offset={[0, 4]}
-                                startColor="rgba(185, 185, 185, 0.2)"
-                                style={{ marginVertical: 4, marginHorizontal: 2, borderRadius: 8}}
-                            >
-                            <TouchableOpacity>
-                                <View style={styles.recentBMCBox}>
-                                    <Image
-                                        source={item.thumbnail}
-                                        style={styles.thumbnail}
-                                    />
-                                    <View style={styles.BMCContentContainer}>
-                                        <View style={styles.BMCTextContainer}>
-                                            <Text style={styles.titleText}>{item.title}</Text>
-                                            <Text style={styles.dateText}>
-                                                {item.date.toLocaleDateString('ko-KR')}
-                                            </Text>
+                <FlatList
+                    data={allBMCs}
+                    ItemSeparatorComponent={() => <View style={{ height: 16 }} />} // 세로 간격
+                    ListHeaderComponent={
+                        <View style={{ paddingHorizontal: 0 }}>
+                            <Text style={[styles.headerText, {marginTop: 16}]}>최근 BMC </Text>
+                            <FlatList
+                                data={allBMCs.slice(0,8)}
+                                horizontal={true}
+                                ItemSeparatorComponent={() => <View style={{ width: 12 }} />} // 세로 간격
+                                showsHorizontalScrollIndicator={false}
+                                ListHeaderComponent={
+                                    <View style={styles.flatMargin}/>
+                                }
+                                renderItem={({item}) => (
+                                    <TouchableOpacity>
+                                        <View style={{backgroundColor: Colors.white2, borderRadius: 8, padding:2}}>
+                                            <View style={styles.recentBMCBox}>
+                                                <Image
+                                                    source={require('../../assets/images/bmc-thumbnail-exam.png')}
+                                                    style={styles.thumbnail}
+                                                />
+                                                <View style={styles.BMCContentContainer}>
+                                                    <View style={styles.BMCTextContainer}>
+                                                        <Text style={styles.titleText}>{item.title}</Text>
+                                                        <Text style={styles.dateText}>
+                                                            {item.updatedAt}
+                                                        </Text>
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    </TouchableOpacity>
+                                )
+                                }
+                            />
+                            <Text style={styles.middleText}>내 BMC</Text>
+                        </View>
+                    }
+                    renderItem={({ item }) => (
+                        <View style={{paddingHorizontal:16}}>
+                            <TouchableOpacity onPress={()=>{navigation.navigation.navigate('InBMC', {
+                                BMC:item
+                            })}}>
+                                <View style={{backgroundColor: Colors.white2, borderRadius: 8, padding:2}}>
+                                    <View style={[styles.myBMCBox, {width : '100%'}]}>
+                                        <View style={{backgroundColor: Colors.white2, borderTopLeftRadius: 8, borderTopRightRadius: 8}}>
+                                            <Image
+                                                source={require('../../assets/images/bmc-thumbnail-exam.png')}
+                                                style={styles.myBMCThumbnail}
+                                            />
+                                        </View>
+                                        <View style={[styles.BMCContentContainer,{backgroundColor:Colors.white1}]}>
+                                            <View style={styles.BMCTextContainer}>
+                                                <Text style={styles.titleText}>{item.title}</Text>
+                                                <Text style={styles.dateText}>
+                                                    {item.updatedAt}
+                                                </Text>
+                                            </View>
                                         </View>
                                     </View>
-                                    </View>
-                            </TouchableOpacity>
-                            </Shadow>
-                        )
-                    }
-                    />
-                    <Text style={styles.middleText}>내 BMC</Text>
-                </View>
-                }
-                renderItem={({ item }) => (
-                    <Shadow
-                        distance={4}
-                        offset={[0, 4]}
-                        startColor="rgba(185, 185, 185, 0.2)"
-                        style={{ marginVertical: 4, marginHorizontal: 2, borderRadius: 8 ,marginBottom: 16}}
-                    >
-                        <TouchableOpacity onPress={()=>{navigation.navigation.navigate('InBMC', {
-                            BMC:item
-                        })}}>
-                            <View style={[styles.myBMCBox, {width : screenWidth/2-30}]}>
-                                <Image
-                                    source={item.thumbnail}
-                                    style={styles.thumbnail}
-                                />
-                                <View style={styles.BMCContentContainer}>
-                                    <View style={styles.BMCTextContainer}>
-                                        <Text style={styles.titleText}>{item.title}</Text>
-                                        <Text style={styles.dateText}>
-                                            {item.date.toLocaleDateString('ko-KR')}
-                                        </Text>
-                                    </View>
                                 </View>
-                            </View>
-                        </TouchableOpacity>
-                    </Shadow>
-                )}
-                ListFooterComponent={
-                    <View style={{marginTop: 20}}/>
-                }
-            />
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    ListFooterComponent={
+                        <View style={{marginTop: 20}}/>
+                    }
+                />
             </PaperProvider>
         </View>
     )
@@ -138,13 +149,16 @@ const styles = StyleSheet.create({
     BMCContentContainer: {
         width: '100%',
         flexDirection: 'row',
-        marginHorizontal: 8,
+        backgroundColor: Colors.white1,
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8,
     },
     BMCTextContainer: {
         flexDirection: 'column',
+        paddingStart: 12
     },
     titleText: {
         fontSize: 14,
@@ -166,11 +180,26 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.white1,
         borderRadius: 8,
         flexDirection: 'column',
-        height: 153,
+        height: 260,
+        borderColor: Colors.white2,
+        borderWidth: 2,
     },
     thumbnail: {
+        borderTopRightRadius: 8,
+        borderTopLeftRadius: 8,
+        paddingHorizontal: 8,
+        paddingVertical :8,
+        backgroundColor: Colors.white2,
         width: '100%',
         resizeMode: 'cover',
         height: 100,
+    },
+    myBMCThumbnail: {
+        paddingHorizontal: 8,
+        paddingVertical :8,
+        backgroundColor: Colors.white2,
+        width: '100%',
+        resizeMode: 'cover',
+        height: 200,
     }
 })

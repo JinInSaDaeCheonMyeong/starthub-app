@@ -116,13 +116,24 @@ export default function NoticeScreen() {
                         onPress={(text)=> setSearch(text)}
                     />
                 </View>
+                <View style={
+                    {
+                        marginTop:80,
+                        position: "absolute",
+                        width: '100%',
+                        backgroundColor: Colors.white1,
+                        height: 60,
+                        zIndex: 700
+                    }
+                }/>
                 <ScrollView
+                    style={{position: "absolute",zIndex: 999, paddingTop: 80}}
                     keyboardShouldPersistTaps="handled"
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     nestedScrollEnabled={true}
                 >
-                    <View style={{marginStart: 16, paddingBottom: dropDownMargin}}>
+                    <View style={{paddingBottom: dropDownMargin, marginStart: 16}}>
                         <DropDown
                             placeholderStyle={
                                 {
@@ -255,6 +266,7 @@ export default function NoticeScreen() {
                 </ScrollView>
             </View>
             <FlatList
+                style={{paddingTop: 50}}
                 data={items}
                 viewabilityConfig={{
                     itemVisiblePercentThreshold: 50
