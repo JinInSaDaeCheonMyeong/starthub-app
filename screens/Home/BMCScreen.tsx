@@ -1,6 +1,5 @@
 import {
     FlatList,
-    SafeAreaView,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -9,14 +8,15 @@ import {
 } from "react-native";
 import {Fonts} from "../../constants/Fonts";
 import {Colors} from "../../constants/Color";
-import {Shadow} from "react-native-shadow-2";
-import {BMCDummyData} from "../../constants/dummy/BMCDummy";
 import {PaperProvider} from "react-native-paper";
 import {CompositeScreenProps} from "@react-navigation/core";
 import {BottomTabScreenProps} from "@react-navigation/bottom-tabs";
 import {HomeStackParamList} from "../../navigation/HomeStack";
 import {StackScreenProps} from "@react-navigation/stack";
 import {RootStackParamList} from "../../navigation/RootStack";
+import {getBMCs} from "../../api/bmc";
+import {useEffect, useState} from "react";
+import {BMCType, GetBMCsResponse} from "../../type/BMC/BMC.type";
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -26,20 +26,38 @@ export type BMCScreenProps = CompositeScreenProps<
 >
 
 export default function BMCScreen(navigation: BMCScreenProps) {
-    const recentBMC = BMCDummyData
-        .sort((a, b) => b.date.getTime() - a.date.getTime())
-        .slice(0, 8);
+    const [allBMCs, setAllBMCs] = useState<BMCType[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchBMCs = async () => {
+            try {
+                const response: GetBMCsResponse = await getBMCs();
+                setAllBMCs(response.data);
+            } catch (error) {
+                console.error('BMC 데이터 로딩 실패:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBMCs();
+    }, []);
+
+    const BMCs = async ()=> {
+        return await getBMCs();
+    }
     return (
         <View style={styles.container}>
             <PaperProvider>
                 <FlatList
-                    data={BMCDummyData}
+                    data={allBMCs}
                     ItemSeparatorComponent={() => <View style={{ height: 16 }} />} // 세로 간격
                     ListHeaderComponent={
                         <View style={{ paddingHorizontal: 0 }}>
                             <Text style={[styles.headerText, {marginTop: 16}]}>최근 BMC </Text>
                             <FlatList
-                                data={recentBMC}
+                                data={allBMCs.slice(0,8)}
                                 horizontal={true}
                                 ItemSeparatorComponent={() => <View style={{ width: 12 }} />} // 세로 간격
                                 showsHorizontalScrollIndicator={false}
@@ -51,14 +69,14 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                                         <View style={{backgroundColor: Colors.white2, borderRadius: 8, padding:2}}>
                                             <View style={styles.recentBMCBox}>
                                                 <Image
-                                                    source={item.thumbnail}
+                                                    source={require('../../assets/images/bmc-thumbnail-exam.png')}
                                                     style={styles.thumbnail}
                                                 />
                                                 <View style={styles.BMCContentContainer}>
                                                     <View style={styles.BMCTextContainer}>
                                                         <Text style={styles.titleText}>{item.title}</Text>
                                                         <Text style={styles.dateText}>
-                                                            {item.date.toLocaleDateString('ko-KR')}
+                                                            {item.updatedAt}
                                                         </Text>
                                                     </View>
                                                 </View>
@@ -80,7 +98,7 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                                     <View style={[styles.myBMCBox, {width : '100%'}]}>
                                         <View style={{backgroundColor: Colors.white2, borderTopLeftRadius: 8, borderTopRightRadius: 8}}>
                                             <Image
-                                                source={item.thumbnail}
+                                                source={require('../../assets/images/bmc-thumbnail-exam.png')}
                                                 style={styles.myBMCThumbnail}
                                             />
                                         </View>
@@ -88,7 +106,7 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                                             <View style={styles.BMCTextContainer}>
                                                 <Text style={styles.titleText}>{item.title}</Text>
                                                 <Text style={styles.dateText}>
-                                                    {item.date.toLocaleDateString('ko-KR')}
+                                                    {item.updatedAt}
                                                 </Text>
                                             </View>
                                         </View>
