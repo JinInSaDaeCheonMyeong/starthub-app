@@ -2,21 +2,19 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from "../screens/Home/HomeScreen";
 import {BottomBar} from "../component/nav/BottomBar";
 import NoticeScreen from "../screens/Home/NoticeScreen";
-import MatchScreen from "../screens/Home/match/MatchScreen";
 import BMCScreen from "../screens/Home/BMCScreen";
-import ChatScreen from "../screens/Home/chat/ChatScreen";
 import { Colors } from '../constants/Color';
 import {Easing, StyleSheet, View} from 'react-native';
 import HeaderBar from '../component/HeaderBar';
 import {useSafeAreaInsets} from "react-native-safe-area-context";
+import CalendarScreen from '../screens/Home/Calendar/CalendarScreen';
 
 const Tab = createBottomTabNavigator();
 
 export type HomeStackParamList = {
-    Home : undefined,
-    Notice : undefined,
-    Match : undefined,
-    Chat : undefined,
+    Home : undefined
+    Notice : undefined
+    Calendar : undefined
     BMC : undefined
 }
 
@@ -47,8 +45,7 @@ export function HomeStack({ navigation }: any) {
             >
                 <Tab.Screen name="Home" component={HomeScreen}/>
                 <Tab.Screen name="Notice" component={NoticeScreen}/>
-                <Tab.Screen name="Match" component={MatchScreen}/>
-                <Tab.Screen name="Chat" component={ChatScreen}/>
+                <Tab.Screen name="Calendar" component={CalendarScreen}/>
                 <Tab.Screen name="BMC" component={BMCScreen}/>
             </Tab.Navigator>
         </View>
