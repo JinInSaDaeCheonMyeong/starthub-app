@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import StartupType from "../../../../constants/StartupType"
+import StartupStatus from "../../../../constants/StartupStatus"
 import { CompanyInputScreenProps } from "../../../../screens/CompanyInputScreen"
 import { useError } from "../../../util/useError";
 import { useDisabled } from "../../../util/useDisabled";
@@ -17,7 +17,7 @@ export const useCompanyInputScreen = (
     earlyScreenNumber : number,
     preScreenNumber : number
 ) => {
-    const isEarlyStartup = startupType === StartupType.EARLY_STARTUP; 
+    const isEarlyStartup = startupType === StartupStatus.EARLY_STAGE; 
     const MAXPROGRESS = isEarlyStartup ? earlyScreenNumber : preScreenNumber
     const [currentProgress, setCurrentProgress] = useState(1)
     const [formData, setFormData] = useState<CompanyInputFormData>({

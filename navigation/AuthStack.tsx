@@ -8,7 +8,7 @@ import SignupInputScreen from "../screens/SignupInputScreen";
 import {View} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import CompanyInputScreen from "../screens/CompanyInputScreen";
-import StartupType from "../constants/StartupType";
+import StartupStatus from "../constants/StartupStatus";
 
 const Stack = createStackNavigator<AuthStackParamList>()
 
@@ -19,7 +19,7 @@ export type AuthStackParamList = {
     Start : undefined;
     SignupInput : undefined;
     CompanyInput : {
-        startupType : StartupType,
+        startupType : StartupStatus,
     };
 };
 

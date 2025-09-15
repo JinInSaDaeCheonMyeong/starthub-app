@@ -2,7 +2,7 @@ import {Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View} from "r
 import { useState } from "react";
 import { Colors } from "../../../constants/Color";
 import { Fonts } from "../../../constants/Fonts";
-import StartupType from "../../../constants/StartupType";
+import StartupType from "../../../constants/StartupStatus";
 
 type TypeScreenProps = {
     gender : string,

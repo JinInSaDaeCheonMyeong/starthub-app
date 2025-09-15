@@ -3,7 +3,7 @@ import { useError } from "../../../util/useError"
 import { SignupInputScreenProps } from "../../../../screens/SignupInputScreen"
 import { TypeInfo, SignupInputFormData, UserInfo } from "../../../../type/user/signupInput.type"
 import { useDisabled } from "../../../util/useDisabled"
-import StartupType from "../../../../constants/StartupType"
+import StartupType from "../../../../constants/StartupStatus"
 
 export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAXPROGRESS: number) => {
     const [formData, setFormData] = useState<SignupInputFormData>({
@@ -12,7 +12,7 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
         month: "",
         day: "",
         gender: "MALE",
-        startupType: StartupType.EARLY_STARTUP,
+        startupType: StartupType.EARLY_STAGE,
     })
 
     const [currentProgress, setCurrentProgress] = useState(1)
