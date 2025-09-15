@@ -101,7 +101,7 @@ export default function CalendarScreen() {
                         </View>
                     </View>
                 )}
-                dayComponent={({ date, state, marking }) => {
+                dayComponent={({ date, state, marking, onPress }) => {
                     const isToday = state === 'today';
                     const isEnabled = state !== 'disabled';
                     return (
@@ -111,6 +111,7 @@ export default function CalendarScreen() {
                                 { backgroundColor: isEnabled ? Colors.white1 : Colors.white2 },
                             ]}
                             onPress={() => {
+                                onPress?.(date)
                                 useDay(`${date !== undefined ? `${date.month}월 ${date.day}일 공고 일정` : "날짜를 찾을 수 없습니다"}`)
                                 handleModalOpen()
                             }}

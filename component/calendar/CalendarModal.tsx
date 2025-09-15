@@ -23,13 +23,23 @@ export default function CalendarModal({
 } : CalendarModalProps){
     const insets = useSafeAreaInsets()
     const {height : windowHeight} = useWindowDimensions()
-    const snapPoints = useMemo(() => ['50%', '100%'], []);
+    const snapPoints = useMemo(() => ['50%','100%'], []);
     const [headerHeight, setHeaderHeight] = useState(0);
     const [currentSnapIndex, setCurrentSnapIndex] = useState(0);
     const currentSnapHeight = currentSnapIndex === 0 ? windowHeight * 0.5 : windowHeight;
     const listMaxHeight = currentSnapHeight - headerHeight - 32 - insets.top - insets.bottom;
     return(            
         <BottomSheetModal
+            handleStyle={{
+                borderRadius : 16,
+                backgroundColor : Colors.white1,
+                paddingVertical : 16
+            }}
+            handleIndicatorStyle={{
+                width : 60,
+                height : 4,
+                backgroundColor : Colors.gray3,
+            }}
             ref={bottomSheetModalRef}
             snapPoints={snapPoints}
             topInset={insets.top}
@@ -47,18 +57,44 @@ export default function CalendarModal({
         >
             <BottomSheetView style={{
                     flex : 1,
-                    paddingBottom : insets.bottom
+                    paddingTop : insets.top,
+                    paddingBottom : insets.bottom,
+                    position: 'relative',
+                    borderRadius : 16
                 }}>
+                    <FlatList
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{
+                            gap : 16,
+                            padding : 16,
+                        }}
+                        style={{ 
+                            maxHeight: listMaxHeight, 
+                            overflow : 'visible'
+                        }}
+                        keyExtractor={(item : any) => item.id.toString()}
+                        keyboardShouldPersistTaps="handled"
+                        data={scheduleList}
+                        renderItem={({item} : any) => (
+                            <NoticeItem 
+                                {...item}
+                                isHome={false}
+                                onPress={() => {console.log(`${item.target}`)}}
+                            />
+                        )}
+                    />
                     <View style={{
+                            position : 'absolute',
                             flexDirection : 'row', 
                             alignItems : 'center', 
                             justifyContent : 'space-between',
                             width : "100%",
                             paddingHorizontal : 16,
-                            paddingVertical : 24,
+                            paddingTop : 8,
+                            paddingBottom : 24,
                             borderBottomWidth : 2,
                             borderColor : Colors.white2,
-                            flex : 1,
+                            backgroundColor : Colors.white1
                         }}
                         onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
                     >
@@ -74,24 +110,6 @@ export default function CalendarModal({
                             <XIcon width={16} height={16} color={Colors.black1}/>
                         </TouchableOpacity>
                     </View>
-                    <FlatList
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{
-                            gap : 16,
-                            padding : 16,
-                        }}
-                        style={{ maxHeight: listMaxHeight }}
-                        keyExtractor={(item : any) => item.id.toString()}
-                        keyboardShouldPersistTaps="handled"
-                        data={scheduleList}
-                        renderItem={({item} : any) => (
-                            <NoticeItem 
-                                {...item}
-                                isHome={false}
-                                onPress={() => {console.log(`${item.target}`)}}
-                            />
-                        )}
-                    />
             </BottomSheetView>
         </BottomSheetModal>
     )
