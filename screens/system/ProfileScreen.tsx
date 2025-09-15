@@ -12,25 +12,32 @@ import { getMe } from "../../api/user";
 import { isAxiosError } from "axios";
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import { ErrorResponse } from "../../type/util/response.type"
-import StartupType from "../../constants/StartupType";
+import StartupStatus from "../../constants/StartupStatus";
 
 type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'Profile'>
 
 export default function ProfileScreen({navigation} : ProfileScreenProps){
     const DEFAULT_DATA = "내용을 불러올 수 없습니다";
     const genderMap = new Map<string, string>([['MALE', "남"], ["FEMALE", "여"]])
-    const startupTypeMap = new Map<StartupType, string>([
-        [StartupType.EARLY_STARTUP, "초기 창업"],
-        [StartupType.PRE_STARTUP, "예비 창업"]
-    ]);
+    const startupStatusMap = new Map<string, string>([
+        ['EARLY_STAGE', '예비창업'], 
+        ['PRE_STARTUP', '초기창업']
+    ])
     const [loading, setLoading] = useState(true);
     const [profileData, setProfileData] = useState<GetMeResponse["data"]>({
         id : -1, 
         username : DEFAULT_DATA,
         birth : DEFAULT_DATA,
         gender : DEFAULT_DATA,
-        startupType : StartupType.PRE_STARTUP,
-        preStartup : {}
+        email : DEFAULT_DATA,
+        startupStatus : StartupStatus.EARLY_STAGE,
+        companyName : DEFAULT_DATA,
+        companyDescription : DEFAULT_DATA,
+        numberOfEmployees : -1,
+        companyWebsite : DEFAULT_DATA,
+        startupLocation : DEFAULT_DATA,
+        annualRevenue : -1,
+        startupFields : []
     })
     
     const profileList = [
@@ -41,43 +48,26 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                 ? new Date(profileData.birth).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) 
                 : DEFAULT_DATA
         },
-        { label: "창업 형태", data: startupTypeMap.get(profileData.startupType) ?? DEFAULT_DATA }
-    ]    
+        { label: "창업 형태", data: startupStatusMap.get(profileData.startupStatus) ?? DEFAULT_DATA }
+    ] 
 
-    // 창업형태가 초기 창업이라면
     const earlyStarupList = [
-        {label : '기업명', data : profileData.earlyStartup?.companyName ?? DEFAULT_DATA},
-        {label : '기업 소개', data : profileData.earlyStartup?.companyIntro ?? DEFAULT_DATA},
-        {label : '기업 인원', data : `${profileData.earlyStartup?.personNumber ?? 0}명`},
-        {label : '기업 사이트', data : profileData.earlyStartup?.companySite ?? DEFAULT_DATA},
-        {label : '연매출액', data : `${profileData.earlyStartup?.getMoneyYear ?? 0}원`},
-        {label : '창업위치', data : profileData.earlyStartup?.companyLocation ?? DEFAULT_DATA},
+        {label : '기업명', data : profileData?.companyName ?? DEFAULT_DATA},
+        {label : '기업 소개', data : profileData?.companyDescription ?? DEFAULT_DATA},
+        {label : '기업 인원', data : `${profileData?.numberOfEmployees ?? 0}명`},
+        {label : '기업 사이트', data : profileData?.companyWebsite ?? DEFAULT_DATA},
+        {label : '연매출액', data : `${profileData?.annualRevenue ?? 0}원`},
+        {label : '창업위치', data : profileData?.startupLocation ?? DEFAULT_DATA},
     ]
 
-    // 창업형태가 예비 창업이라면
     const preStarupList = [
-        {label : '창업위치', data : profileData.preStartup?.companyLocation ?? DEFAULT_DATA},
+        {label : '창업위치', data : profileData?.startupLocation ?? DEFAULT_DATA},
     ]
 
     const getProfileData = async () => {
         try {
             const profileData = (await getMe()).data;
-            switch(profileData.startupType){
-                case StartupType.EARLY_STARTUP: 
-                    profileData.earlyStartup = {
-                        companyName : '더미데이터',
-                        personNumber : 0,
-                        getMoneyYear : 0,
-                    }
-                    profileData.preStartup = undefined
-                    break;
-                case StartupType.PRE_STARTUP:
-                    profileData.preStartup = {
-                        companyLocation : ''
-                    }
-                    
-                    break;
-            }
+            console.log(JSON.stringify(profileData))
             setProfileData(profileData)
         } catch (error: unknown) {
             if (isAxiosError(error)) {
@@ -139,7 +129,7 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                     </View>
                 ))}
                 <View style={styles.line}/>
-                {profileData.startupType === StartupType.EARLY_STARTUP ?
+                {profileData.startupStatus === StartupStatus.EARLY_STAGE ?
                     earlyStarupList.map(({label, data}, index) => (
                         <View style={styles.labelContainer} key={index}>
                             <Text style={styles.labelText}>{label}</Text>
