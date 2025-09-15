@@ -1,14 +1,31 @@
-import { NoticeCategory } from "../../constants/NoticeCategory"
+import {Response} from "../util/response.type";
 
-export interface NoticeItemType {
-    id : number
-    category : NoticeCategory
-    title : string
-    startTime : Date
-    endTime : Date
-    location : string
-    target  : string
-    years : string[]
-    entre : string
-    webLink : string
+export interface NoticeTypeTrailer {
+    content: NoticeType[],
+    page: number,
+    size: number,
+    totalPages: number,
+    totalElements: number,
+    isLast: boolean,
+}
+
+export interface GetNoticesResponse extends Response{
+    data : NoticeTypeTrailer[];
+}
+
+export interface NoticeType {
+    id: number,
+    title: string,
+    url: string,
+    organization: string,
+    receptionPeriod: number,
+    likeCount: number,
+    supportField: string,
+    targetAge: string,
+    contactNumber: string,
+    region: string,
+    organizationType: string,
+    startupHistory: string,
+    departmentInCharge: string,
+    content: string
 }
