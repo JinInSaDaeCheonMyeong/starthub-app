@@ -1,10 +1,14 @@
-import { ScrollView, Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, StyleSheet, useWindowDimensions } from "react-native";
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { Colors } from "../../../constants/Color";
 import { Fonts } from "../../../constants/Fonts";
 import { formatToDate } from "../../../util/DateFormat";
 import LeftIcon from "../../../assets/icons/left-arrow-back.svg";
 import RightIcon from "../../../assets/icons/right-arrow-back.svg";
+import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
+import { useCallback, useMemo, useRef } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import CalendarModal from "../../../component/calendar/CalendarModal";
 
 LocaleConfig.locales['ko'] = {
     monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
@@ -23,6 +27,16 @@ export default function CalendarScreen() {
     ];
     const dayDataList = ['일', '월', '화', '수', '목', '금', '토'];
 
+    const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+    const handleModalClose = useCallback(() => {
+        bottomSheetModalRef.current?.dismiss();
+    }, []);
+
+    const handleModalOpen = useCallback(() => {
+        bottomSheetModalRef.current?.present();
+    }, []);
+
     return (
         <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
             <Calendar
@@ -31,7 +45,6 @@ export default function CalendarScreen() {
                     calendarBackground: Colors.white1,
                     weekVerticalMargin: 0,
                 }}
-                onDayPress={(day) => { console.log(day) }}
                 markingType={"multi-dot"}
                 markedDates={{
                     "2025-09-15": {
@@ -85,7 +98,7 @@ export default function CalendarScreen() {
                         </View>
                     </View>
                 )}
-                dayComponent={({ date, state, marking, onPress }) => {
+                dayComponent={({ date, state, marking }) => {
                     const isToday = state === 'today';
                     const isEnabled = state !== 'disabled';
                     return (
@@ -94,7 +107,10 @@ export default function CalendarScreen() {
                                 styles.dayContainer,
                                 { backgroundColor: isEnabled ? Colors.white1 : Colors.white2 },
                             ]}
-                            onPress={() => { onPress?.(date) }}
+                            onPress={() => {
+                                console.log(bottomSheetModalRef)
+                                handleModalOpen()
+                            }}
                         >
                             <View
                                 style={[
@@ -128,6 +144,10 @@ export default function CalendarScreen() {
                         </TouchableOpacity>
                     )
                 }}
+            />
+            <CalendarModal
+                bottomSheetModalRef={bottomSheetModalRef}
+                handleModalClose={() => {handleModalClose()}}
             />
         </ScrollView>
     )
