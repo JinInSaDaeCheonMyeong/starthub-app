@@ -1,25 +1,37 @@
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
-import React, { useCallback, useMemo } from "react";
-import { Text } from "react-native"
+import { BottomSheetBackdrop, BottomSheetFlashList, BottomSheetFlatList, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
+import React, { useCallback, useMemo, useState } from "react";
+import { FlatList, Text, TouchableOpacity, useWindowDimensions, View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import XIcon from "../../assets/icons/xmark.svg"
+import { Colors } from "../../constants/Color";
+import { Fonts } from "../../constants/Fonts";
+import { NoticeItemType } from "../../type/notice/notice.type";
+import NoticeItem from "../notice/NoticeItem";
 
 export type CalendarModalProps = {
+    day : string
+    scheduleList : NoticeItemType[]
     bottomSheetModalRef : React.RefObject<BottomSheetModal | null>,
     handleModalClose : () => void
 }
 
 export default function CalendarModal({
+    day,
+    scheduleList,
     bottomSheetModalRef,
     handleModalClose
 } : CalendarModalProps){
     const insets = useSafeAreaInsets()
+    const {height : windowHeight} = useWindowDimensions()
     const snapPoints = useMemo(() => ['50%', '100%'], []);
-
+    const [headerHeight, setHeaderHeight] = useState(0);
+    const [currentSnapIndex, setCurrentSnapIndex] = useState(0);
+    const currentSnapHeight = currentSnapIndex === 0 ? windowHeight * 0.5 : windowHeight;
+    const listMaxHeight = currentSnapHeight - headerHeight - 32 - insets.top - insets.bottom;
     return(            
         <BottomSheetModal
             ref={bottomSheetModalRef}
             snapPoints={snapPoints}
-            index={0}
             topInset={insets.top}
             enablePanDownToClose={true}
             backdropComponent={(props) => (
@@ -31,13 +43,55 @@ export default function CalendarModal({
                     onPress={() => {handleModalClose()}}
                 />
             )}
+            onChange={(index) => setCurrentSnapIndex(index)}
         >
             <BottomSheetView style={{
-                    flex: 1,
-                    alignItems: 'center',
+                    flex : 1,
                     paddingBottom : insets.bottom
                 }}>
-                    <Text>안녕</Text>
+                    <View style={{
+                            flexDirection : 'row', 
+                            alignItems : 'center', 
+                            justifyContent : 'space-between',
+                            width : "100%",
+                            paddingHorizontal : 16,
+                            paddingVertical : 24,
+                            borderBottomWidth : 2,
+                            borderColor : Colors.white2,
+                            flex : 1,
+                        }}
+                        onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+                    >
+                        <View style={{width : 16, height : 16}}/>
+                        <Text style={{
+                            color : Colors.black1,
+                            fontFamily : Fonts.medium,
+                            fontSize : 14
+                        }}>
+                            {day}
+                        </Text>
+                        <TouchableOpacity onPress={handleModalClose} hitSlop={16}>
+                            <XIcon width={16} height={16} color={Colors.black1}/>
+                        </TouchableOpacity>
+                    </View>
+                    <FlatList
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{
+                            gap : 16,
+                            padding : 16,
+                        }}
+                        style={{ maxHeight: listMaxHeight }}
+                        keyExtractor={(item : any) => item.id.toString()}
+                        keyboardShouldPersistTaps="handled"
+                        data={scheduleList}
+                        renderItem={({item} : any) => (
+                            <NoticeItem 
+                                {...item}
+                                isHome={false}
+                                onPress={() => {console.log(`${item.target}`)}}
+                            />
+                        )}
+                    />
             </BottomSheetView>
         </BottomSheetModal>
     )

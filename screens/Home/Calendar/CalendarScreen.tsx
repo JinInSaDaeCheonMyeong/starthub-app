@@ -6,9 +6,10 @@ import { formatToDate } from "../../../util/DateFormat";
 import LeftIcon from "../../../assets/icons/left-arrow-back.svg";
 import RightIcon from "../../../assets/icons/right-arrow-back.svg";
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CalendarModal from "../../../component/calendar/CalendarModal";
+import { NoticeItemList } from "../../../constants/NoticeItemList";
 
 LocaleConfig.locales['ko'] = {
     monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
@@ -28,6 +29,8 @@ export default function CalendarScreen() {
     const dayDataList = ['일', '월', '화', '수', '목', '금', '토'];
 
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+    const [day, useDay] = useState('')
 
     const handleModalClose = useCallback(() => {
         bottomSheetModalRef.current?.dismiss();
@@ -108,7 +111,7 @@ export default function CalendarScreen() {
                                 { backgroundColor: isEnabled ? Colors.white1 : Colors.white2 },
                             ]}
                             onPress={() => {
-                                console.log(bottomSheetModalRef)
+                                useDay(`${date !== undefined ? `${date.month}월 ${date.day}일 공고 일정` : "날짜를 찾을 수 없습니다"}`)
                                 handleModalOpen()
                             }}
                         >
@@ -146,6 +149,8 @@ export default function CalendarScreen() {
                 }}
             />
             <CalendarModal
+                scheduleList={[...NoticeItemList,]}
+                day={day}
                 bottomSheetModalRef={bottomSheetModalRef}
                 handleModalClose={() => {handleModalClose()}}
             />
