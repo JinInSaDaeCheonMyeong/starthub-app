@@ -16,6 +16,7 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
     const [month, setMonth] = useState(birthList[1])
     const [day, setDay] = useState(birthList[2])
     const [selectGender, setSelectGender] = useState(user.gender === "MALE")
+    const [selectStartupStatus, setSelectStartupStatus] = useState(user.startupStatus === "EARLY_STAGE")
 
     return(
         <View style={styles.mainContainer}>
@@ -31,14 +32,14 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                     onPress={async ()=>{
                         try {
                             // 서버 나오면 수정
-                        //     await setProfile({
-                        //     username : user.username,
-                        //     introduction : user.introduction,
-                        //     birth: `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`,
-                        //     gender : selectGender ? "MALE" : "FEMALE",
-                        //     profileImage : "https://storage.googleapis.com/starthub-storage/profile-images/default_user_profile.png",
-                        //     interests : []
-                        // })
+                            // await setProfile({
+                            //     username : user.username,
+                            //     introduction : user.introduction,
+                            //     birth: `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`,
+                            //     gender : selectGender ? "MALE" : "FEMALE",
+                            //     profileImage : "https://storage.googleapis.com/starthub-storage/profile-images/default_user_profile.png",
+                            //     interests : []
+                            // })
                             ShowToast("프로필 수정", "프로필 수정에 성공하셨습니다", ToastType.SUCCESS)
                             navigation.popTo("System")
                         } catch (error : any) {
@@ -120,22 +121,36 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                         />
                     </View>
                 </View>
+                <View style={styles.dataInputContainer}>
+                    <Text style={styles.titleText}>창업 형태</Text>
+                    <View style={styles.genderContainer}>
+                        <TouchableOpacity 
+                            onPress={() => setSelectStartupStatus(true)}
+                            style={[styles.genderBox, {borderColor : selectStartupStatus ? Colors.primary : Colors.white2 }]}
+                        >
+                            <Text style={[styles.selectText, {color : selectStartupStatus ? Colors.primary : Colors.gray2 }]}>초기 창업</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            onPress={() => setSelectStartupStatus(false)}
+                            style={[styles.genderBox, {borderColor : !selectStartupStatus ? Colors.primary : Colors.white2 }]}
+                        >
+                            <Text style={[styles.selectText, {color : !selectStartupStatus ? Colors.primary : Colors.gray2 }]}>예비 창업</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
                 <View style={styles.line}/>
-                {user.earlyStartup !== undefined ? (
+                {selectStartupStatus ? (
                     <>
                     <View style={styles.dataInputContainer}>
                         <Text style={styles.titleText}>기업명</Text>
                         <TextInput
                             style={styles.dataInputText}
-                            value={user.earlyStartup.companyName} 
+                            value={user.companyName} 
                             placeholder="기업명을 입력해주세요..."
                             placeholderTextColor={Colors.gray2}
                             onChangeText={(value) => {setUser({
                                 ...user, 
-                                earlyStartup : {
-                                    ...user.earlyStartup!, 
-                                    companyName : value
-                                }
+                                companyName : value
                             })}}
                         />
                     </View>
@@ -143,15 +158,12 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                         <Text style={styles.titleText}>(선택) 기업 소개</Text>
                         <TextInput
                             style={styles.dataInputText}
-                            value={user.earlyStartup.companyIntro} 
+                            value={user.companyDescription} 
                             placeholder="기업 소개를 해주세요..."
                             placeholderTextColor={Colors.gray2}
                             onChangeText={(value) => {setUser({
                                 ...user, 
-                                earlyStartup : {
-                                    ...user.earlyStartup!,
-                                    companyIntro : value
-                                }
+                                companyDescription : value
                             })}}
                         />
                     </View>
@@ -159,16 +171,13 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                         <Text style={styles.titleText}>기업 인원</Text>
                         <TextInput
                             style={styles.dataInputText}
-                            value={String(user.earlyStartup.personNumber)} 
+                            value={String(user.numberOfEmployees)} 
                             placeholder="기업 인원을 입력해주세요..."
                             keyboardType='numeric'
                             placeholderTextColor={Colors.gray2}
                             onChangeText={(value) => {setUser({
                                 ...user, 
-                                earlyStartup : {
-                                    ...user.earlyStartup!,
-                                    personNumber : Number(value)
-                                }
+                                numberOfEmployees : Number(value)
                             })}}
                         />
                     </View>
@@ -176,15 +185,12 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                         <Text style={styles.titleText}>(선택) 기업 사이트</Text>
                         <TextInput
                             style={styles.dataInputText}
-                            value={user.earlyStartup.companySite} 
+                            value={user.companyWebsite} 
                             placeholder="기업 사이트을 입력해주세요..."
                             placeholderTextColor={Colors.gray2}
                             onChangeText={(value) => {setUser({
                                 ...user, 
-                                earlyStartup : {
-                                    ...user.earlyStartup!,
-                                    companySite : value
-                                }
+                                companyWebsite : value
                             })}}
                         />
                     </View>
@@ -192,16 +198,13 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                         <Text style={styles.titleText}>연매출액</Text>
                         <TextInput
                             style={styles.dataInputText}
-                            value={String(user.earlyStartup.getMoneyYear)} 
+                            value={String(user.annualRevenue)} 
                             placeholder="연매출액을 입력해주세요..."
                             keyboardType='numeric'
                             placeholderTextColor={Colors.gray2}
                             onChangeText={(value) => {setUser({
                                 ...user, 
-                                earlyStartup : {
-                                    ...user.earlyStartup!,
-                                    getMoneyYear : Number(value)
-                                }
+                                annualRevenue : Number(value)
                             })}}
                         />
                     </View>
@@ -209,15 +212,12 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                         <Text style={styles.titleText}>(선택) 창업 위치</Text>
                         <TextInput
                             style={styles.dataInputText}
-                            value={user.earlyStartup.companyLocation} 
+                            value={user.startupLocation} 
                             placeholder="창업 위치를 입력해주세요..."
                             placeholderTextColor={Colors.gray2}
                             onChangeText={(value) => {setUser({
                                 ...user, 
-                                earlyStartup : {
-                                    ...user.earlyStartup!,
-                                    companyLocation : value
-                                }
+                                startupLocation : value
                             })}}
                         />
                     </View>
@@ -227,16 +227,13 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                         <Text style={styles.titleText}>(선택) 창업 위치</Text>
                         <TextInput
                             style={styles.dataInputText}
-                            value={user.preStartup?.companyLocation ?? ''} 
+                            value={user.startupLocation ?? ''} 
                             placeholder="창업 위치를 입력해주세요..."
                             placeholderTextColor={Colors.gray2}
                             onChangeText={(value) => {
                                 setUser({
                                     ...user, 
-                                    preStartup : {
-                                        ...user.preStartup!,
-                                        companyLocation : value
-                                    }
+                                    startupLocation : value
                             })}}
                         />
                     </View>
