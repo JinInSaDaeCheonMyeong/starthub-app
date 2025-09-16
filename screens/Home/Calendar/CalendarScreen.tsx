@@ -10,6 +10,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CalendarModal from "../../../component/calendar/CalendarModal";
 import { NoticeItemList } from "../../../constants/NoticeItemList";
+import { buildDeadlineMarks } from "../../../util/MarkedDates";
 
 LocaleConfig.locales['ko'] = {
     monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
@@ -30,7 +31,7 @@ export default function CalendarScreen() {
 
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-    const [day, useDay] = useState('')
+    const [day, setDay] = useState('')
 
     const handleModalClose = useCallback(() => {
         bottomSheetModalRef.current?.dismiss();
@@ -39,6 +40,17 @@ export default function CalendarScreen() {
     const handleModalOpen = useCallback(() => {
         bottomSheetModalRef.current?.present();
     }, []);
+
+    const getNoticeItem = (ids : number[]) => {
+
+    }
+    
+    const markedDates = buildDeadlineMarks([
+        { id: 1, startTime: "2025-09-14", endTime: "2025-10-15" },
+        { id: 2, startTime: "2025-09-15", endTime: "2025-10-16" },
+        { id: 3, startTime: "2025-09-16", endTime: "2025-10-17" },
+        { id: 4, startTime: "2025-09-01", endTime: "2025-10-01" },
+    ]);
 
     return (
         <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
@@ -49,18 +61,7 @@ export default function CalendarScreen() {
                     weekVerticalMargin: 0,
                 }}
                 markingType={"multi-dot"}
-                markedDates={{
-                    "2025-09-15": {
-                        dots: [{ color: "blue" }, { color: "red" }, { color: "blue" }],
-                        selected: true,
-                        selectedColor: "blue",
-                    },
-                    "2025-09-16": {
-                        dots: [{ color: "blue" }, { color: "red" }, { color: "blue" }],
-                        selected: true,
-                        selectedColor: "blue",
-                    },
-                }}
+                markedDates={markedDates}
                 customHeader={(props: any) => (
                     <View style={styles.headerContainer}>
                         <View style={styles.headerTop}>
@@ -101,33 +102,34 @@ export default function CalendarScreen() {
                         </View>
                     </View>
                 )}
-                dayComponent={({ date, state, marking, onPress }) => {
-                    const isToday = state === 'today';
-                    const isEnabled = state !== 'disabled';
+                dayComponent={({date, state, marking, onPress}) => {
+                    const dotIds = marking?.dots?.map((dot : any) => dot.id) ?? [];
+
                     return (
                         <TouchableOpacity
                             style={[
                                 styles.dayContainer,
-                                { backgroundColor: isEnabled ? Colors.white1 : Colors.white2 },
+                                { backgroundColor: state !== 'disabled' ? Colors.white1 : Colors.white2 },
                             ]}
                             onPress={() => {
-                                onPress?.(date)
-                                useDay(`${date !== undefined ? `${date.month}월 ${date.day}일 공고 일정` : "날짜를 찾을 수 없습니다"}`)
-                                handleModalOpen()
+                                console.log('Dot IDs:', dotIds);
+                                onPress?.(date);
+                                setDay(`${date ? `${date.month}월 ${date.day}일 공고 일정` : "날짜를 찾을 수 없습니다"}`);
+                                handleModalOpen();
                             }}
                         >
                             <View
                                 style={[
                                     styles.dayCircle,
-                                    { backgroundColor: isToday ? Colors.primary : undefined },
+                                    { backgroundColor: state === 'today' ? Colors.primary : undefined },
                                 ]}
                             >
                                 <Text
                                     style={[
                                         styles.dayText,
-                                        isToday
+                                        state === 'today'
                                             ? { color: Colors.white1 }
-                                            : isEnabled
+                                            : state !== 'disabled'
                                             ? { color: Colors.black2 }
                                             : { color: Colors.gray3 },
                                     ]}
