@@ -92,6 +92,7 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
             const fetchData = async () => {
                 setLoading(true);
                 await getProfileData();
+                console.log(profileData.companyWebsite)
                 setLoading(false);
             };
             fetchData();
@@ -138,23 +139,22 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                         <View style={styles.labelContainer} key={index}>
                             <Text style={styles.labelText}>{label}</Text>
                             <View style={styles.dataContainer}>
-                                {
-                                    index === 3 && profileData?.startupLocation?.includes(DEFAULT_DATA) ? (
-                                        <Text 
-                                            onPress={() => {Linking.openURL(data)}} 
-                                            style={[styles.dataText, index === 3 && {
-                                                color : Colors.info, 
-                                                textDecorationLine : "underline"
-                                        }]}>
-                                            {data}
-                                        </Text>
-                                    ) : (
-                                        <Text 
-                                            style={styles.dataText}>
-                                            {data}
-                                        </Text>
-                                    )
-                                }
+                            {
+                                index === 3 && profileData.companyWebsite?.trim() !== "" && profileData.companyWebsite !== DEFAULT_DATA ? (
+                                    <Text 
+                                    onPress={async () => {
+                                        const canOpen = await Linking.canOpenURL(data);
+                                        if (canOpen) Linking.openURL(data);
+                                        else ShowToast("오류 발생", "찾을 수 없는 사이트입니다", ToastType.ERROR);
+                                    }} 
+                                    style={[styles.dataText, { color : Colors.info, textDecorationLine : "underline" }]}
+                                    >
+                                    {data}
+                                    </Text>
+                                ) : (
+                                    <Text style={styles.dataText}>{data}</Text>
+                                )
+                            }
                             </View>
                         </View>
                     )) : 
