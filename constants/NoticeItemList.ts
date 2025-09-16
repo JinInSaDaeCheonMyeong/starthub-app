@@ -37,5 +37,17 @@ export const NoticeItemList : NoticeItemType[] = [
         target : "청소년",
         entre : "1년 이내",
         webLink : "https://naver.com"
+    },
+    {
+        id : 4,
+        category : NoticeCategory.BUSINESS,
+        title : "string4",
+        startTime : new Date(),
+        endTime : new Date(),
+        location : "전국",
+        years : ["10","20","30","40"],
+        target : "청소년",
+        entre : "1년 이내",
+        webLink : "https://naver.com"
     }
 ]
