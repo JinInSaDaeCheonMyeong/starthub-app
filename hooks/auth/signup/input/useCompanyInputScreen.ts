@@ -4,6 +4,8 @@ import { CompanyInputScreenProps } from "../../../../screens/CompanyInputScreen"
 import { useError } from "../../../util/useError";
 import { useDisabled } from "../../../util/useDisabled";
 import { CompanyInputFormData } from "../../../../type/user/companyInput.type";
+import { ShowToast, ToastType } from "../../../../util/ShowToast";
+import { setProfile } from "../../../../api/user";
 
 export const useCompanyInputScreen = (
     {
@@ -38,7 +40,7 @@ export const useCompanyInputScreen = (
             errorVisible,
             errorText
         },
-        handler: { hideError }
+        handler: { showError, hideError }
     } = useError()
     const { disabled, disabledBtn, enabledBtn } = useDisabled()
 
@@ -69,16 +71,72 @@ export const useCompanyInputScreen = (
 
     const goNext = async () => {
         disabledBtn()
+        const companyName = formData.companyName.trim()
+        const companyDescription = formData.companyDescription.trim()
+        const numberOfEmployees = formData.numberOfEmployees.trim()
+        const companyWebsite = formData.companyWebsite.trim()
+        const annualRevenue = formData.annualRevenue.trim()
+        const startupLocation = formData.startupLocation.trim()
+        const startupFields = formData.startupFields
 
-        hideError()
-        enabledBtn()
+        if(!companyName){
+            showError('기업명을 입력해주세요')
+            enabledBtn();
+            return
+        } else if (
+            !numberOfEmployees && 
+            currentProgress === 2 && 
+            startupType === StartupStatus.EARLY_STAGE
+        ) {
+            showError("총 인원 수를 입력해주세요");
+            enabledBtn();
+            return;
+        } else if (
+            !annualRevenue &&
+            currentProgress === 3
+        ) {
+            showError("연간 매출액을 입력해주세요");
+            enabledBtn();
+            return;
+        } else if (
+            startupFields.length === 0
+            && currentProgress === MAXPROGRESS
+        ) {
+            showError("창업 분야를 1개 이상 선택해주세요");
+            enabledBtn();
+            return;
+        }
 
         if (currentProgress >= MAXPROGRESS) {
             console.log("마지막 단계 도착")
-            // TODO: 서버 연결
+            try {
+                await setProfile({
+                    username,
+                    birth,
+                    gender,
+                    startupStatus: startupType,
+                    companyName,
+                    companyDescription,
+                    numberOfEmployees : Number(numberOfEmployees),
+                    companyWebsite,
+                    annualRevenue : Number(annualRevenue),
+                    startupLocation,
+                    startupFields
+                })
+                ShowToast("프로필 수정", "프로필 수정에 성공하셨습니다", ToastType.SUCCESS)
+            } catch (error : any) {
+                if(error.isAxiosError){
+                    ShowToast("프로필 수정", "프로필 수정에 실패하셨습니다", ToastType.ERROR)
+                    console.log(error.message)
+                    return
+                }
+                ShowToast("프로필 수정", "알 수 없는 오류가 발생했습니다", ToastType.ERROR)
+            }
         } else {
             setCurrentProgress(prev => prev + 1)
         }
+        hideError();
+        enabledBtn();
     }
 
     return {

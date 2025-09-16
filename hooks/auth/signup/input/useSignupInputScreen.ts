@@ -54,17 +54,13 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
         const year = formData.year.trim()
         const month = formData.month.trim()
         const day = formData.day.trim()
-        const birth = `${year}-${month}-${day}`;
+        const birth = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         const startupType = formData.startupType;
-
         if(!username || !year || !month || !day){
             showError('이름 또는 생년월일을 입력해주세요')
             enabledBtn();
             return
         }
-        hideError()
-        enabledBtn()
-
         if (currentProgress >= MAXPROGRESS) {
             console.log("마지막 단계 도착")
             // TODO: 서버 연결
@@ -77,6 +73,8 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
         } else {
             setCurrentProgress(prev => prev + 1)
         }
+        hideError();
+        enabledBtn();
     }
 
     return {
