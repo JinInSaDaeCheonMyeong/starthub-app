@@ -45,6 +45,7 @@ const useEditProfileScreen = ({navigation, route : {params}} : ProfileScreenProp
                 companyWebsite: selectStartupStatus ? user.companyWebsite?.trim() : undefined,
                 annualRevenue: selectStartupStatus ? Number(annualRevenue.trim()) : undefined,
                 startupLocation: user.startupLocation?.trim(),
+                startupFields : params.startupFields
             })
             ShowToast("프로필 수정", "프로필 수정에 성공하셨습니다", ToastType.SUCCESS)
             navigation.goBack()
