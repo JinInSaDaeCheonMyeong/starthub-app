@@ -13,92 +13,27 @@ import { isAxiosError } from "axios";
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import { ErrorResponse } from "../../type/util/response.type"
 import StartupStatus from "../../constants/StartupStatus";
+import useProfileScreen from "../../hooks/system/useProfileScreen";
 
-type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'Profile'>
+export type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'Profile'>
 
-export default function ProfileScreen({navigation} : ProfileScreenProps){
-    const DEFAULT_DATA = "내용을 불러올 수 없습니다";
-    const genderMap = new Map<string, string>([['MALE', "남"], ["FEMALE", "여"]])
-    const startupStatusMap = new Map<string, string>([
-        ['EARLY_STAGE', '예비창업'], 
-        ['PRE_STARTUP', '초기창업']
-    ])
-    const [loading, setLoading] = useState(true);
-    const [profileData, setProfileData] = useState<GetMeResponse["data"]>({
-        id : -1, 
-        username : DEFAULT_DATA,
-        birth : DEFAULT_DATA,
-        gender : DEFAULT_DATA,
-        email : DEFAULT_DATA,
-        startupStatus : StartupStatus.EARLY_STAGE,
-        companyName : DEFAULT_DATA,
-        companyDescription : DEFAULT_DATA,
-        numberOfEmployees : -1,
-        companyWebsite : DEFAULT_DATA,
-        startupLocation : DEFAULT_DATA,
-        annualRevenue : -1,
-        startupFields : []
-    })
-    
-    const profileList = [
-        {label : '이름', data : profileData.username},
-        {label : '성별', data : genderMap.get(profileData.gender) ?? DEFAULT_DATA},
-        {label : '생년월일', data : 
-            profileData.birth && !isNaN(Date.parse(profileData.birth)) 
-                ? new Date(profileData.birth).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) 
-                : DEFAULT_DATA
+export default function ProfileScreen(props : ProfileScreenProps){
+    const {
+        form : {
+            profileData
         },
-        { label: "창업 형태", data: startupStatusMap.get(profileData.startupStatus) ?? DEFAULT_DATA }
-    ] 
-
-    const earlyStarupList = [
-        { label: "기업명", data: profileData?.companyName?.trim() === "" ? DEFAULT_DATA : profileData?.companyName ?? DEFAULT_DATA },
-        { label: "기업 소개", data: profileData?.companyDescription?.trim() === "" ? DEFAULT_DATA : profileData?.companyDescription ?? DEFAULT_DATA },
-        { label: "기업 인원", data: profileData?.numberOfEmployees != null ? `${profileData.numberOfEmployees}명` : DEFAULT_DATA },
-        { label: "기업 사이트", data: profileData?.companyWebsite?.trim() === "" ? DEFAULT_DATA : profileData?.companyWebsite ?? DEFAULT_DATA },
-        { label: "연매출액", data: profileData?.annualRevenue != null ? `${profileData.annualRevenue}원` : DEFAULT_DATA },
-        { label: "창업위치", data: profileData?.startupLocation?.trim() === "" ? DEFAULT_DATA : profileData?.startupLocation ?? DEFAULT_DATA },
-    ];
-
-    const preStarupList = [
-        { label: "창업위치", data: profileData?.startupLocation?.trim() === "" ? DEFAULT_DATA : profileData?.startupLocation ?? DEFAULT_DATA },
-    ]
-
-    const getProfileData = async () => {
-        try {
-            const profileData = (await getMe()).data;
-            console.log(JSON.stringify(profileData))
-            setProfileData(profileData)
-        } catch (error: unknown) {
-            if (isAxiosError(error)) {
-                const response = error.response;
-                if (!response) {
-                    ShowToast("오류 발생", "네트워크 오류가 발생했습니다", ToastType.ERROR);
-                    navigation.goBack()
-                    return; 
-                }
-                const errorData = response.data as ErrorResponse;
-                ShowToast("오류 발생", errorData.message, ToastType.ERROR);
-                navigation.goBack();
-                return;
-            }
-            ShowToast("오류 발생", "알 수 없는 오류가 발생했습니다", ToastType.ERROR);
-            navigation.goBack();
+        ui : {
+            profileList,
+            earlyStarupList,
+            preStarupList,
+            isWebLink
+        },
+        action : {
+            goBack,
+            goEditProfile,
+            goWeb
         }
-    }
-
-    useFocusEffect(
-        useCallback(() => {
-            const fetchData = async () => {
-                setLoading(true);
-                await getProfileData();
-                console.log(profileData.companyWebsite)
-                setLoading(false);
-            };
-            fetchData();
-        }, [])
-    );
-
+    } = useProfileScreen(props)
     return (
         <View style={styles.mainContainer}>
             <View style={styles.header}>
@@ -106,7 +41,7 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                     width={24}
                     height={24}
                     color={Colors.black2}
-                    onClick={() => {navigation.goBack()}}
+                    onClick={() => {goBack()}}
                 />
                 <Text style={styles.headerTitle}>프로필</Text>
                 <EditIcon 
@@ -114,7 +49,7 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                     width={24}
                     height={24}
                     hitSlop={16}
-                    onTouchEnd={()=>{navigation.navigate('EditProfile', {...profileData})}}
+                    onTouchEnd={()=>{goEditProfile()}}
                 />
             </View>
             <ScrollView 
@@ -140,13 +75,9 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                             <Text style={styles.labelText}>{label}</Text>
                             <View style={styles.dataContainer}>
                             {
-                                index === 3 && profileData.companyWebsite?.trim() !== "" && profileData.companyWebsite !== DEFAULT_DATA ? (
+                                isWebLink(index) ? (
                                     <Text 
-                                    onPress={async () => {
-                                        const canOpen = await Linking.canOpenURL(data);
-                                        if (canOpen) Linking.openURL(data);
-                                        else ShowToast("오류 발생", "찾을 수 없는 사이트입니다", ToastType.ERROR);
-                                    }} 
+                                    onPress={() => {goWeb(data)}} 
                                     style={[styles.dataText, { color : Colors.info, textDecorationLine : "underline" }]}
                                     >
                                     {data}
