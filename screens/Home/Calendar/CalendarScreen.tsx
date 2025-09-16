@@ -131,9 +131,9 @@ export default function CalendarScreen() {
                                     {date?.day}
                                 </Text>
                             </View>
-                            {marking?.dots?.splice(3) && (
+                            {marking?.dots && (
                                 <View style={styles.dotsContainer}>
-                                    {marking.dots.map((dot, index) => (
+                                    {marking.dots.slice(0,3).map((dot, index) => (
                                         <View
                                             key={index}
                                             style={[styles.dot, { backgroundColor: dot.color }]}

@@ -31,9 +31,9 @@ const useCalendarScreen = () => {
     }, []);
 
     const getNoticeItem = (ids: number[]) => {
-        const noticeItemList = NoticeItemList.filter((value) => {
-            return ids.includes(value.id);
-        });
+        const noticeItemList = ids
+            .map((id) => NoticeItemList.find((item) => item.id === id))
+            .filter((item): item is NoticeItemType => item !== undefined);
         setNoticeItemList(noticeItemList);
     };
 
