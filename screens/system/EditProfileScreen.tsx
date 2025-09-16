@@ -1,69 +1,60 @@
 import { StackScreenProps } from "@react-navigation/stack";
-import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, useWindowDimensions, View } from "react-native";
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { SystemStackParamList } from "../../navigation/SystemStack";
 import BackButton from "../../component/BackButton";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
-import { useState } from "react";
-import { ShowToast, ToastType } from "../../util/ShowToast";
-import { setProfile } from "../../api/user";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import useEditProfileScreen from "../../hooks/system/useEditProfileScreen";
 
-type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'EditProfile'>
+export type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'EditProfile'>
 
-export default function EditProfileScreen({navigation, route : {params}} : ProfileScreenProps){
-    const birthList = params.birth.split('-')
-    const insets = useSafeAreaInsets()
-    const [user, setUser] = useState(params)
-    const [year, setYear] = useState(birthList[0])
-    const [month, setMonth] = useState(birthList[1])
-    const [numberPerson, setNumberPerson] = useState(String(user.numberOfEmployees) ?? '');
-    const [annualRevenue, setAnnualRevenue] = useState(String(user.annualRevenue) ?? '');
-    const [day, setDay] = useState(birthList[2])
-    const [selectGender, setSelectGender] = useState(user.gender === "MALE")
-    const [selectStartupStatus, setSelectStartupStatus] = useState(user.startupStatus === "EARLY_STAGE")
+export default function EditProfileScreen(props: ProfileScreenProps){
+    const {
+        form : {
+            user,
+            year,
+            month,
+            day,
+            numberPerson,
+            annualRevenue,
+            selectGender,
+            selectStartupStatus,
+            setUser,
+            setYear,
+            setMonth,
+            setDay,
+            setNumberPerson,
+            setAnnualRevenue,
+            setSelectGender,
+            setSelectStartupStatus
+        },
+        ui : {
+            insets
+        },
+        action : {
+            sendEditProfile,
+            goBack
+        }
+    } = useEditProfileScreen(props)
 
     return(
-        <KeyboardAvoidingView
+        <KeyboardAvoidingView 
             style={{flex : 1}}
-            behavior='height'
-            keyboardVerticalOffset={Platform.OS === 'ios' ? insets.bottom + 20 : 20}
-        >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : Keyboard.isVisible() ? insets.top : 0}
+            contentContainerStyle={{backgroundColor : Colors.black2}}
+        > 
         <View style={styles.mainContainer}>
             <View style={styles.header}>
                 <BackButton
                     width={24}
                     height={24}
                     color={Colors.black2}
-                    onClick={() => {navigation.goBack()}}
+                    onClick={() => {goBack()}}
                 />
                 <Text style={styles.headerTitle}>프로필</Text>
                 <TouchableOpacity
-                    onPress={async ()=>{
-                        try {
-                            await setProfile({
-                                username: user.username,
-                                birth: `${year}-${month}-${day}`,
-                                gender: selectGender ? "MALE" : "FEMALE",
-                                startupStatus: selectStartupStatus ? "EARLY_STAGE" : "PREPARATION",
-                                companyName: selectStartupStatus ? user.companyName : undefined,
-                                companyDescription: selectStartupStatus ? user.companyDescription : undefined,
-                                numberOfEmployees: selectStartupStatus ? Number(numberPerson) : undefined,
-                                companyWebsite: selectStartupStatus ? user.companyWebsite : undefined,
-                                annualRevenue: selectStartupStatus ? Number(annualRevenue) : undefined,
-                                startupLocation: user.startupLocation,
-                            })
-                            ShowToast("프로필 수정", "프로필 수정에 성공하셨습니다", ToastType.SUCCESS)
-                            navigation.goBack()
-                        } catch (error : any) {
-                            if(error.isAxiosError){
-                                ShowToast("프로필 수정", "프로필 수정에 실패하셨습니다", ToastType.ERROR)
-                                console.log(error.message)
-                            }
-                            ShowToast("프로필 수정", "알 수 없는 오류가 발생했습니다", ToastType.ERROR)
-                        } 
-                    }}
+                    onPress={() => {sendEditProfile()}}
                 >   
                     <Text
                         style={styles.headerRight}
@@ -72,11 +63,15 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                     </Text>
                 </TouchableOpacity>
             </View>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <ScrollView 
                 style={styles.dataContainer}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{gap : 24, paddingBottom : 16}}
-            >
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{
+                    gap : 24,
+                    paddingBottom : 16
+            }}>
                 <View style={styles.dataInputContainer}>
                     <Text style={styles.titleText}>이름</Text>
                     <TextInput
@@ -172,9 +167,12 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                     <View style={styles.dataInputContainer}>
                         <Text style={styles.titleText}>(선택) 기업 소개</Text>
                         <TextInput
-                            style={styles.dataInputText}
+                            style={[styles.dataInputText]}
                             value={user.companyDescription} 
                             placeholder="기업 소개를 해주세요..."
+                            multiline
+                            textAlignVertical="top" 
+                            scrollEnabled={false}
                             placeholderTextColor={Colors.gray2}
                             onChangeText={(value) => {setUser({
                                 ...user, 
@@ -200,7 +198,9 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                         <TextInput
                             style={styles.dataInputText}
                             value={user.companyWebsite} 
+                            keyboardType="url"
                             placeholder="기업 사이트을 입력해주세요..."
+                            autoCapitalize="none"
                             placeholderTextColor={Colors.gray2}
                             onChangeText={(value) => {setUser({
                                 ...user, 
@@ -219,7 +219,7 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                             onChangeText={(value) => {setAnnualRevenue(value)}}
                         />
                     </View>
-                    <View style={styles.dataInputContainer}>
+                    <View style={[styles.dataInputContainer]}>
                         <Text style={styles.titleText}>(선택) 창업 위치</Text>
                         <TextInput
                             style={styles.dataInputText}
@@ -234,7 +234,7 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                     </View>
                     </>
                 ) : (
-                    <View style={styles.dataInputContainer}>
+                    <View style={[styles.dataInputContainer]}>
                         <Text style={styles.titleText}>(선택) 창업 위치</Text>
                         <TextInput
                             style={styles.dataInputText}
@@ -250,8 +250,8 @@ export default function EditProfileScreen({navigation, route : {params}} : Profi
                     </View>
                 )}
             </ScrollView>
+            </TouchableWithoutFeedback>
         </View>
-        </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
     )
 }
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     },
     dataContainer : {
         flex : 1,
-        padding : 16,
+        paddingHorizontal : 16,
     },
     dataInputContainer : {
         gap : 12
@@ -303,8 +303,8 @@ const styles = StyleSheet.create({
         fontFamily : Fonts.medium,
         color : Colors.black2,
         backgroundColor : Colors.white2,
-        padding : 16,
-        borderRadius : 8
+        borderRadius : 8,
+        padding : 16
     },
     genderBox : {
         flex : 1,
