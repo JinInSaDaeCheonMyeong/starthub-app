@@ -5,10 +5,10 @@ import { InterestTypeList } from "../../../../constants/InterestTypeList";
 import { Fonts } from "../../../../constants/Fonts";
 
 type PreInterestScreenProps = {
-    preCompanyLocation : string
-    setPreCompanyLocation : (companyLocation : string) => void
-    preInterestList : string[]
-    setPreInterestList : (list : string[]) => void
+    startupLocation : string
+    setStartupLocation : (companyLocation : string) => void
+    startupFields : string[]
+    setStartupFields : (list : string[]) => void
 }
 
 export default function PreInterestScreen(props : PreInterestScreenProps){
@@ -24,8 +24,8 @@ export default function PreInterestScreen(props : PreInterestScreenProps){
                         style={styles.inputText}
                         placeholder="창업 위치를 입력해주세요..."
                         placeholderTextColor={Colors.gray3}
-                        value={props.preCompanyLocation}
-                        onChangeText={(s) => {props.setPreCompanyLocation(s)}}
+                        value={props.startupLocation}
+                        onChangeText={(s) => {props.setStartupLocation(s)}}
                     />
                 </View>
             <View style={{gap : 24}}>
@@ -46,15 +46,15 @@ export default function PreInterestScreen(props : PreInterestScreenProps){
                     text={text}
                     icons={icon}
                     onClick={(id) => {
-                        if (props.preInterestList.includes(id)) {
-                            props.setPreInterestList(props.preInterestList.filter(key => key !== id))
+                        if (props.startupFields.includes(id)) {
+                            props.setStartupFields(props.startupFields.filter(key => key !== id))
                         } else {
-                            const interestList = [...props.preInterestList]
+                            const interestList = [...props.startupFields]
                             interestList.push(id)
-                            props.setPreInterestList(interestList)
+                            props.setStartupFields(interestList)
                         }
                     }}
-                    selected = {props.preInterestList.includes(id)}
+                    selected = {props.startupFields.includes(id)}
                 />
             )}
             />

@@ -1,15 +1,13 @@
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { Colors } from "../../../../constants/Color";
-import DateInputText from "../../../../component/auth/DateInputText";
-import { DayList, MonthList, YearList } from "../.../../../../../constants/DateNumber";
 import { Fonts } from "../../../../constants/Fonts";
 
 type MoneyScreenProps = {
-    getMoneyYear : string,
-    earlyCompanyLocation : string
-    setGetMoneyYear : (getMoneyYear : string) => void,
-    setEarlyCompanyLocation : (companyLocation : string) => void,
-}
+    annualRevenue: string;
+    startupLocation: string;
+    setAnnualRevenue: (annualRevenue: string) => void;
+    setStartupLocation: (startupLocation: string) => void;
+};
 
 export default function MoneyScreen(props : MoneyScreenProps) {
 
@@ -25,8 +23,8 @@ export default function MoneyScreen(props : MoneyScreenProps) {
                     placeholder="연매출액을 입력해주세요..."
                     placeholderTextColor={Colors.gray3}
                     keyboardType='numeric'
-                    value={props.getMoneyYear}
-                    onChangeText={(s) => {props.setGetMoneyYear(s)}}
+                    value={props.annualRevenue}
+                    onChangeText={(s) => {props.setAnnualRevenue(s)}}
                 />
             </View>
             <View style={styles.inputBox}>
@@ -38,8 +36,8 @@ export default function MoneyScreen(props : MoneyScreenProps) {
                     style={styles.inputText}
                     placeholder="창업 위치를 입력해주세요..."
                     placeholderTextColor={Colors.gray3}
-                    value={props.earlyCompanyLocation}
-                    onChangeText={(s) => {props.setEarlyCompanyLocation(s)}}
+                    value={props.startupLocation}
+                    onChangeText={(s) => {props.setStartupLocation(s);}}
                 />
             </View>
         </View>

@@ -6,11 +6,11 @@ import { Fonts } from "../../../../constants/Fonts";
 import { useState } from "react";
 
 type PersonScreenProps = {
-    personNumber : string,
-    companySite : string
-    setPersonNumber : (personNumber : string) => void,
-    setCompanySite : (companySite : string) => void,
-}
+    numberOfEmployees: string;
+    companyWebsite: string;
+    setNumberOfEmployees: (personNumber: string) => void;
+    setCompanyWebsite: (companySite: string) => void;
+};
 
 export default function PersonScreen(props : PersonScreenProps) {
 
@@ -26,8 +26,8 @@ export default function PersonScreen(props : PersonScreenProps) {
                     placeholder="기업 인원을 입력해주세요..."
                     keyboardType='numeric'
                     placeholderTextColor={Colors.gray3}
-                    value={props.personNumber}
-                    onChangeText={(s) => {props.setPersonNumber(s)}}
+                    value={props.numberOfEmployees}
+                    onChangeText={(s) => {props.setNumberOfEmployees(s);}}
                 />
             </View>
             <View style={styles.inputBox}>
@@ -39,8 +39,8 @@ export default function PersonScreen(props : PersonScreenProps) {
                     style={styles.inputText}
                     placeholder="기업 사이트를 입력해주세요..."
                     placeholderTextColor={Colors.gray3}
-                    value={props.companySite}
-                    onChangeText={(s) => {props.setCompanySite(s)}}
+                    value={props.companyWebsite}
+                    onChangeText={(s) => {props.setCompanyWebsite(s)}}
                 />
             </View>
         </View>

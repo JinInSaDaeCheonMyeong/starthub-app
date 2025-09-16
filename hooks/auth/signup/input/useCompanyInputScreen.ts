@@ -10,6 +10,9 @@ export const useCompanyInputScreen = (
         navigation, 
         route : {
             params : {
+                username,
+                birth,
+                gender,
                 startupType,
             }
         }
@@ -21,16 +24,13 @@ export const useCompanyInputScreen = (
     const MAXPROGRESS = isEarlyStartup ? earlyScreenNumber : preScreenNumber
     const [currentProgress, setCurrentProgress] = useState(1)
     const [formData, setFormData] = useState<CompanyInputFormData>({
-        companyName: "",
-        companyIntro: "",
-        personNumber: "",
-        companySite: "",
-        getMoneyYear: "",
-        earlyCompanyLocation: "",
-        earlyInterestList: [],
-        
-        preCompanyLocation: "",
-        preInterestList: [],
+        startupFields : [],
+        companyName : '',
+        companyDescription : '',
+        numberOfEmployees : '',
+        companyWebsite : '',
+        startupLocation : '',
+        annualRevenue : '',
     });
 
     const {
@@ -54,14 +54,12 @@ export const useCompanyInputScreen = (
         (value: CompanyInputFormData[K]) => updateFormData(key, value), [updateFormData])
 
     const setCompanyName = makeSetter("companyName");
-    const setCompanyIntro = makeSetter("companyIntro");
-    const setPersonNumber = makeSetter("personNumber");
-    const setCompanySite = makeSetter("companySite");
-    const setGetMoneyYear = makeSetter("getMoneyYear");
-    const setEarlyCompanyLocation = makeSetter("earlyCompanyLocation");
-    const setEarlyInterestList = makeSetter("earlyInterestList");
-    const setPreCompanyLocation = makeSetter("preCompanyLocation");
-    const setPreInterestList = makeSetter("preInterestList");
+    const setCompanyDescription = makeSetter("companyDescription");
+    const setNumberOfEmployees = makeSetter("numberOfEmployees");
+    const setCompanyWebsite = makeSetter("companyWebsite");
+    const setAnnualRevenue = makeSetter("annualRevenue");
+    const setStartupLocation = makeSetter("startupLocation");
+    const setStartupFields = makeSetter("startupFields");
 
     const goBack = () => {
         hideError();
@@ -87,14 +85,12 @@ export const useCompanyInputScreen = (
         form : {
             ...formData,
             setCompanyName,
-            setCompanyIntro,
-            setPersonNumber,
-            setCompanySite,
-            setGetMoneyYear,
-            setEarlyCompanyLocation,
-            setEarlyInterestList,
-            setPreCompanyLocation,
-            setPreInterestList
+            setCompanyDescription,
+            setNumberOfEmployees,
+            setCompanyWebsite,
+            setAnnualRevenue,
+            setStartupLocation,
+            setStartupFields
         },
         ui : {
             MAXPROGRESS,
