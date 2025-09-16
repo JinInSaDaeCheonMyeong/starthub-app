@@ -41,7 +41,7 @@ export default function EditProfileScreen(props: ProfileScreenProps){
         <KeyboardAvoidingView 
             style={{flex : 1}}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : Keyboard.isVisible() ? insets.top : 0}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : insets.top}
             contentContainerStyle={{backgroundColor : Colors.black2}}
         > 
         <View style={styles.mainContainer}>
