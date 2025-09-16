@@ -1,7 +1,7 @@
 import {Response} from "../util/response.type";
 
 export interface NoticeTypeTrailer {
-    content: NoticeType[],
+    content: BeforeNoticeType[],
     page: number,
     size: number,
     totalPages: number,
@@ -10,7 +10,24 @@ export interface NoticeTypeTrailer {
 }
 
 export interface GetNoticesResponse extends Response{
-    data : NoticeTypeTrailer[];
+    data : NoticeTypeTrailer;
+}
+
+export interface BeforeNoticeType {
+    id: number,
+    title: string,
+    url: string,
+    organization: string,
+    receptionPeriod: string,
+    likeCount: number,
+    supportField: string,
+    targetAge: string,
+    contactNumber: string,
+    region: string,
+    organizationType: string,
+    startupHistory: string,
+    departmentInCharge: string,
+    content: string
 }
 
 export interface NoticeType {
@@ -18,7 +35,9 @@ export interface NoticeType {
     title: string,
     url: string,
     organization: string,
-    receptionPeriod: number,
+    receptionPeriod: string,
+    startDate: Date;         // Date 타입
+    endDate: Date;
     likeCount: number,
     supportField: string,
     targetAge: string,
