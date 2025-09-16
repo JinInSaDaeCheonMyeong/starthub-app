@@ -1,20 +1,20 @@
-import {Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import { useState } from "react";
 import { Colors } from "../../../constants/Color";
 import { Fonts } from "../../../constants/Fonts";
-import StartupType from "../../../constants/StartupStatus";
+import StartupStatus from "../../../constants/StartupStatus";
 
 type TypeScreenProps = {
     gender : string,
     setGender : (value : string) => void
-    startupType : string,
-    setStartupType : (value : StartupType) => void
+    startupType : StartupStatus,
+    setStartupType : (value : StartupStatus) => void
 }
 
 export default function TypeScreen(props : TypeScreenProps) {
 
     const [selectGender, setSelectGender] = useState(props.gender === "MALE" ? true : false)
-    const [selectType, setSelectType] = useState(props.startupType === "초기 창업" ? true : false)
+    const [selectType, setSelectType] = useState(props.startupType === StartupStatus.EARLY_STAGE ? true : false)
 
     return(
         <View style={styles.mainContainer}>
@@ -52,7 +52,7 @@ export default function TypeScreen(props : TypeScreenProps) {
                 <View style={styles.genderContainer}>
                     <TouchableOpacity
                         onPress={() => {
-                            props.setStartupType(StartupType.EARLY_STARTUP)
+                            props.setStartupType(StartupStatus.EARLY_STAGE)
                             setSelectType(true)
                         }}
                         style={[styles.genderBox, {borderColor : selectType ? Colors.primary : Colors.white2 }]}
@@ -61,7 +61,7 @@ export default function TypeScreen(props : TypeScreenProps) {
                     </TouchableOpacity>
                     <TouchableOpacity 
                         onPress={() => {
-                            props.setStartupType(StartupType.PRE_STARTUP)
+                            props.setStartupType(StartupStatus.PRE_STARTUP)
                             setSelectType(false)
                         }}
                         style={[styles.genderBox, {borderColor : !selectType ? Colors.primary : Colors.white2 }]}
