@@ -113,7 +113,7 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                     width={24}
                     height={24}
                     hitSlop={16}
-                    onTouchEnd={()=>{navigation.navigate('EditProfile', profileData)}}
+                    onTouchEnd={()=>{navigation.navigate('EditProfile', {...profileData})}}
                 />
             </View>
             <ScrollView 
