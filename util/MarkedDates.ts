@@ -11,13 +11,13 @@ export type Dot = {
     color : DotColor
 }
 
-type Item = {
+export type ScheduleItem = {
     id: number;
     startTime: string;
     endTime: string;
 };
 
-type MarkedDates = Record<
+export type MarkedDates = Record<
     string,
     {
         dots: Dot[];
@@ -26,7 +26,7 @@ type MarkedDates = Record<
     }
 >;
 
-export function buildDeadlineMarks(items: Item[]): MarkedDates {
+export function buildDeadlineMarks(items: ScheduleItem[]): MarkedDates {
     const marked: MarkedDates = {};
 
     items.forEach((event) => {
@@ -55,7 +55,7 @@ export function buildDeadlineMarks(items: Item[]): MarkedDates {
         });
 
         marked[key] = {
-            dots: dots.slice(0, 3),
+            dots: dots,
             selected: true,
             selectedColor: "transparent",
         };
