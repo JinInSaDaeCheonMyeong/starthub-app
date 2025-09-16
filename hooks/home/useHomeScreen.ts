@@ -8,6 +8,7 @@ import { Linking, useWindowDimensions } from "react-native";
 import { useFocusEffect } from "@react-navigation/native"
 import type { HomeScreenProps } from "../../screens/Home/HomeScreen";
 import { NoticeCategory } from "../../constants/NoticeCategory";
+import { saveScheduleList } from "../../util/Schedule";
 
 const useHomeScreen = ({navigation} : HomeScreenProps) => {
     const [noticeItems, setNoticeItems] = useState<NoticeItemType[]>([]);
@@ -105,19 +106,25 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
 
     const fetchNoticeItems = async () => {
         try {
-        const response = await notice(1, "", "", "", "", "", "");
-        setNoticeItems(response);
+            const response = await notice(1, "", "", "", "", "", "");
+            setNoticeItems(response);
+            await saveScheduleList([
+                { id: 1, startTime: "2025-09-14", endTime: "2025-10-15" },
+                { id: 2, startTime: "2025-09-15", endTime: "2025-10-16" },
+                { id: 3, startTime: "2025-09-16", endTime: "2025-10-17" },
+                { id: 4, startTime: "2025-09-01", endTime: "2025-10-01" },
+            ]);
         } catch (error: unknown) {
-        if (isAxiosError(error)) {
-            const response = error.response;
-            if (!response) {
-            ShowToast("오류 발생", "네트워크 오류가 발생했습니다", ToastType.ERROR);
-            return;
+            if (isAxiosError(error)) {
+                const response = error.response;
+                if (!response) {
+                    ShowToast("오류 발생", "네트워크 오류가 발생했습니다", ToastType.ERROR);
+                    return;
+                }
+                const errorData = response.data as ErrorResponse;
+                ShowToast("오류 발생", errorData.message, ToastType.ERROR);
+                return;
             }
-            const errorData = response.data as ErrorResponse;
-            ShowToast("오류 발생", errorData.message, ToastType.ERROR);
-            return;
-        }
         ShowToast("오류 발생", "알 수 없는 오류가 발생했습니다", ToastType.ERROR);
         }
     };
