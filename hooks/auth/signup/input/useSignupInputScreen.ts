@@ -3,7 +3,7 @@ import { useError } from "../../../util/useError"
 import { SignupInputScreenProps } from "../../../../screens/SignupInputScreen"
 import { TypeInfo, SignupInputFormData, UserInfo } from "../../../../type/user/signupInput.type"
 import { useDisabled } from "../../../util/useDisabled"
-import StartupType from "../../../../constants/StartupStatus"
+import StartupStatus from "../../../../constants/StartupStatus"
 
 export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAXPROGRESS: number) => {
     const [formData, setFormData] = useState<SignupInputFormData>({
@@ -12,7 +12,7 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
         month: "",
         day: "",
         gender: "MALE",
-        startupType: StartupType.EARLY_STAGE,
+        startupType: StartupStatus.EARLY_STAGE,
     })
 
     const [currentProgress, setCurrentProgress] = useState(1)
@@ -46,38 +46,34 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
         else setCurrentProgress(prev => prev - 1)
     }
 
-    const getValidData = (): UserInfo | TypeInfo | undefined => {
-        const { name, year, month, day, startupType, gender } = formData
-        const stepData: Record<number, UserInfo | TypeInfo> = {
-            1: { name: name.trim(), year: year.trim(), month: month.trim(), day: day.trim() },
-            2: { startupType, gender }
-        }
-        return stepData[currentProgress]
-    }
-
     /** 다음 단계 */
     const goNext = async () => {
         disabledBtn()
-        // const validData = getValidData()
-        // if (!validData) {
-        //     enabledBtn()
-        //     return
-        // }
-        // const validResult = validSignupInputForm(currentProgress, validData)
+        const username = formData.name.trim()
+        const gender = formData.gender
+        const year = formData.year.trim()
+        const month = formData.month.trim()
+        const day = formData.day.trim()
+        const birth = `${year}-${month}-${day}`;
+        const startupType = formData.startupType;
 
-        // if (!validResult.isValid) {
-        //     showError(validResult.message)
-        //     enabledBtn()
-        //     return
-        // }
-
+        if(!username || !year || !month || !day){
+            showError('이름 또는 생년월일을 입력해주세요')
+            enabledBtn();
+            return
+        }
         hideError()
         enabledBtn()
 
         if (currentProgress >= MAXPROGRESS) {
             console.log("마지막 단계 도착")
             // TODO: 서버 연결
-            navigation.navigate("CompanyInput", {startupType : formData.startupType})
+            navigation.navigate("CompanyInput", {
+                username,
+                birth,
+                gender,
+                startupType
+            })
         } else {
             setCurrentProgress(prev => prev + 1)
         }

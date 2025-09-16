@@ -19,7 +19,10 @@ export type AuthStackParamList = {
     Start : undefined;
     SignupInput : undefined;
     CompanyInput : {
-        startupType : StartupStatus,
+        username : string
+        birth : string
+        gender : string
+        startupType : StartupStatus
     };
 };
 
