@@ -5,12 +5,9 @@ import { Fonts } from "../../../constants/Fonts";
 import { formatToDate } from "../../../util/DateFormat";
 import LeftIcon from "../../../assets/icons/left-arrow-back.svg";
 import RightIcon from "../../../assets/icons/right-arrow-back.svg";
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
-import { useCallback, useMemo, useRef, useState } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CalendarModal from "../../../component/calendar/CalendarModal";
-import { NoticeItemList } from "../../../constants/NoticeItemList";
-import { buildDeadlineMarks } from "../../../util/MarkedDates";
+import * as Progress from "react-native-progress";
+import useCalendarScreen from "../../../hooks/home/useCalendarScreen";
 
 LocaleConfig.locales['ko'] = {
     monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
@@ -22,37 +19,29 @@ LocaleConfig.locales['ko'] = {
 LocaleConfig.defaultLocale = 'ko';
 
 export default function CalendarScreen() {
-    const dotInfoList = [
-        { color: Colors.info, text: "마감 4주전" },
-        { color: Colors.warning, text: "마감 2주전" },
-        { color: Colors.error, text: "마감 1주전" },
-    ];
-    const dayDataList = ['일', '월', '화', '수', '목', '금', '토'];
-
-    const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
-    const [day, setDay] = useState('')
-
-    const handleModalClose = useCallback(() => {
-        bottomSheetModalRef.current?.dismiss();
-    }, []);
-
-    const handleModalOpen = useCallback(() => {
-        bottomSheetModalRef.current?.present();
-    }, []);
-
-    const getNoticeItem = (ids : number[]) => {
-
-    }
-    
-    const markedDates = buildDeadlineMarks([
-        { id: 1, startTime: "2025-09-14", endTime: "2025-10-15" },
-        { id: 2, startTime: "2025-09-15", endTime: "2025-10-16" },
-        { id: 3, startTime: "2025-09-16", endTime: "2025-10-17" },
-        { id: 4, startTime: "2025-09-01", endTime: "2025-10-01" },
-    ]);
+    const {
+        form : {
+            day,
+            loading,
+            noticeItemList,
+            getNoticeItem,
+            setDay,
+            setLoading,
+        },
+        ui : {
+            dotInfoList,
+            dayDataList,
+            markedDates,
+            bottomSheetModalRef
+        },
+        action : {
+            handleModalClose,
+            handleModalOpen
+        }
+    } = useCalendarScreen()
 
     return (
+        <>
         <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
             <Calendar
                 style={styles.calendar}
@@ -104,17 +93,22 @@ export default function CalendarScreen() {
                 )}
                 dayComponent={({date, state, marking, onPress}) => {
                     const dotIds = marking?.dots?.map((dot : any) => dot.id) ?? [];
-
                     return (
                         <TouchableOpacity
                             style={[
                                 styles.dayContainer,
                                 { backgroundColor: state !== 'disabled' ? Colors.white1 : Colors.white2 },
                             ]}
-                            onPress={() => {
+                            onPress={async () => {
                                 console.log('Dot IDs:', dotIds);
-                                onPress?.(date);
-                                setDay(`${date ? `${date.month}월 ${date.day}일 공고 일정` : "날짜를 찾을 수 없습니다"}`);
+                                setLoading(true)
+                                onPress?.(date)
+                                getNoticeItem(dotIds)
+                                setDay(
+                                    `${date ? `${date.month}월 ${date.day}일 공고 일정` : "날짜를 찾을 수 없습니다"}`
+                                );
+                                setLoading(false);
+                                console.log(loading);
                                 handleModalOpen();
                             }}
                         >
@@ -137,7 +131,7 @@ export default function CalendarScreen() {
                                     {date?.day}
                                 </Text>
                             </View>
-                            {marking?.dots && (
+                            {marking?.dots?.splice(3) && (
                                 <View style={styles.dotsContainer}>
                                     {marking.dots.map((dot, index) => (
                                         <View
@@ -152,18 +146,33 @@ export default function CalendarScreen() {
                 }}
             />
             <CalendarModal
-                scheduleList={[...NoticeItemList,]}
+                scheduleList={noticeItemList}
                 day={day}
                 bottomSheetModalRef={bottomSheetModalRef}
                 handleModalClose={() => {handleModalClose()}}
             />
         </ScrollView>
+        {loading && (
+            <View style={styles.progressContainer}>
+                <View>
+                <Progress.Circle
+                    color={Colors.primary}
+                    size={50}
+                    indeterminate = {true}
+                    thickness = {300}
+                    borderWidth={4}
+                />
+                </View>
+            </View>
+        )}
+        </>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
         padding: 16,
+        position : 'relative'
     },
     calendar: {
         gap: 8,
@@ -248,4 +257,13 @@ const styles = StyleSheet.create({
         height: 6,
         borderRadius: 3,
     },
+    progressContainer : {
+        position : 'absolute',
+        width : '100%',
+        height : '100%',
+        alignItems : 'center',
+        justifyContent : "center",
+        backgroundColor : Colors.black1,
+        opacity : 0.5
+    }
 });
