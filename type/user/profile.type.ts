@@ -1,10 +1,15 @@
 import { InterestType } from "../../constants/InterestType"
 
 export interface SetProfileRequest {
-    username : string
-    introduction : string
-    birth : string,
-    gender : string,
-    interests : string[],
-    profileImage : string
+    username: string;
+    birth: string;
+    gender: string;
+    startupFields?: string[];
+    startupStatus: string;
+    companyName?: string;
+    companyDescription?: string;
+    numberOfEmployees?: number;
+    companyWebsite?: string;
+    startupLocation?: string;
+    annualRevenue?: number;
 }

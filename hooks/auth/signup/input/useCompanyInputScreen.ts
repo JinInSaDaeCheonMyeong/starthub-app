@@ -1,15 +1,20 @@
 import { useCallback, useState } from "react";
-import StartupType from "../../../../constants/StartupType"
+import StartupStatus from "../../../../constants/StartupStatus"
 import { CompanyInputScreenProps } from "../../../../screens/CompanyInputScreen"
 import { useError } from "../../../util/useError";
 import { useDisabled } from "../../../util/useDisabled";
 import { CompanyInputFormData } from "../../../../type/user/companyInput.type";
+import { ShowToast, ToastType } from "../../../../util/ShowToast";
+import { setProfile } from "../../../../api/user";
 
 export const useCompanyInputScreen = (
     {
         navigation, 
         route : {
             params : {
+                username,
+                birth,
+                gender,
                 startupType,
             }
         }
@@ -17,20 +22,17 @@ export const useCompanyInputScreen = (
     earlyScreenNumber : number,
     preScreenNumber : number
 ) => {
-    const isEarlyStartup = startupType === StartupType.EARLY_STARTUP; 
+    const isEarlyStartup = startupType === StartupStatus.EARLY_STAGE; 
     const MAXPROGRESS = isEarlyStartup ? earlyScreenNumber : preScreenNumber
     const [currentProgress, setCurrentProgress] = useState(1)
     const [formData, setFormData] = useState<CompanyInputFormData>({
-        companyName: "",
-        companyIntro: "",
-        personNumber: "",
-        companySite: "",
-        getMoneyYear: "",
-        earlyCompanyLocation: "",
-        earlyInterestList: [],
-        
-        preCompanyLocation: "",
-        preInterestList: [],
+        startupFields : [],
+        companyName : '',
+        companyDescription : '',
+        numberOfEmployees : '',
+        companyWebsite : '',
+        startupLocation : '',
+        annualRevenue : '',
     });
 
     const {
@@ -38,7 +40,7 @@ export const useCompanyInputScreen = (
             errorVisible,
             errorText
         },
-        handler: { hideError }
+        handler: { showError, hideError }
     } = useError()
     const { disabled, disabledBtn, enabledBtn } = useDisabled()
 
@@ -54,14 +56,12 @@ export const useCompanyInputScreen = (
         (value: CompanyInputFormData[K]) => updateFormData(key, value), [updateFormData])
 
     const setCompanyName = makeSetter("companyName");
-    const setCompanyIntro = makeSetter("companyIntro");
-    const setPersonNumber = makeSetter("personNumber");
-    const setCompanySite = makeSetter("companySite");
-    const setGetMoneyYear = makeSetter("getMoneyYear");
-    const setEarlyCompanyLocation = makeSetter("earlyCompanyLocation");
-    const setEarlyInterestList = makeSetter("earlyInterestList");
-    const setPreCompanyLocation = makeSetter("preCompanyLocation");
-    const setPreInterestList = makeSetter("preInterestList");
+    const setCompanyDescription = makeSetter("companyDescription");
+    const setNumberOfEmployees = makeSetter("numberOfEmployees");
+    const setCompanyWebsite = makeSetter("companyWebsite");
+    const setAnnualRevenue = makeSetter("annualRevenue");
+    const setStartupLocation = makeSetter("startupLocation");
+    const setStartupFields = makeSetter("startupFields");
 
     const goBack = () => {
         hideError();
@@ -71,30 +71,84 @@ export const useCompanyInputScreen = (
 
     const goNext = async () => {
         disabledBtn()
+        const companyName = formData.companyName.trim()
+        const companyDescription = formData.companyDescription.trim()
+        const numberOfEmployees = formData.numberOfEmployees.trim()
+        const companyWebsite = formData.companyWebsite.trim()
+        const annualRevenue = formData.annualRevenue.trim()
+        const startupLocation = formData.startupLocation.trim()
+        const startupFields = formData.startupFields
 
-        hideError()
-        enabledBtn()
+        if(!companyName){
+            showError('기업명을 입력해주세요')
+            enabledBtn();
+            return
+        } else if (
+            !numberOfEmployees && 
+            currentProgress === 2 && 
+            startupType === StartupStatus.EARLY_STAGE
+        ) {
+            showError("총 인원 수를 입력해주세요");
+            enabledBtn();
+            return;
+        } else if (
+            !annualRevenue &&
+            currentProgress === 3
+        ) {
+            showError("연간 매출액을 입력해주세요");
+            enabledBtn();
+            return;
+        } else if (
+            startupFields.length === 0
+            && currentProgress === MAXPROGRESS
+        ) {
+            showError("창업 분야를 1개 이상 선택해주세요");
+            enabledBtn();
+            return;
+        }
 
         if (currentProgress >= MAXPROGRESS) {
             console.log("마지막 단계 도착")
-            // TODO: 서버 연결
+            try {
+                await setProfile({
+                    username,
+                    birth,
+                    gender,
+                    startupStatus: startupType,
+                    companyName,
+                    companyDescription,
+                    numberOfEmployees : Number(numberOfEmployees),
+                    companyWebsite,
+                    annualRevenue : Number(annualRevenue),
+                    startupLocation,
+                    startupFields
+                })
+                ShowToast("프로필 수정", "프로필 수정에 성공하셨습니다", ToastType.SUCCESS)
+            } catch (error : any) {
+                if(error.isAxiosError){
+                    ShowToast("프로필 수정", "프로필 수정에 실패하셨습니다", ToastType.ERROR)
+                    console.log(error.message)
+                    return
+                }
+                ShowToast("프로필 수정", "알 수 없는 오류가 발생했습니다", ToastType.ERROR)
+            }
         } else {
             setCurrentProgress(prev => prev + 1)
         }
+        hideError();
+        enabledBtn();
     }
 
     return {
         form : {
             ...formData,
             setCompanyName,
-            setCompanyIntro,
-            setPersonNumber,
-            setCompanySite,
-            setGetMoneyYear,
-            setEarlyCompanyLocation,
-            setEarlyInterestList,
-            setPreCompanyLocation,
-            setPreInterestList
+            setCompanyDescription,
+            setNumberOfEmployees,
+            setCompanyWebsite,
+            setAnnualRevenue,
+            setStartupLocation,
+            setStartupFields
         },
         ui : {
             MAXPROGRESS,
