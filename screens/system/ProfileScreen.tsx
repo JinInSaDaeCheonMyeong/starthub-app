@@ -1,6 +1,6 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { SystemStackParamList } from "../../navigation/SystemStack";
-import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import BackButton from "../../component/BackButton";
 import EditIcon from "../../assets/icons/header/edit.svg"
 import { Colors } from "../../constants/Color";
@@ -52,16 +52,16 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
     ] 
 
     const earlyStarupList = [
-        {label : '기업명', data : profileData?.companyName ?? DEFAULT_DATA},
-        {label : '기업 소개', data : profileData?.companyDescription ?? DEFAULT_DATA},
-        {label : '기업 인원', data : `${profileData?.numberOfEmployees ?? 0}명`},
-        {label : '기업 사이트', data : profileData?.companyWebsite ?? DEFAULT_DATA},
-        {label : '연매출액', data : `${profileData?.annualRevenue ?? 0}원`},
-        {label : '창업위치', data : profileData?.startupLocation ?? DEFAULT_DATA},
-    ]
+        { label: "기업명", data: profileData?.companyName?.trim() === "" ? DEFAULT_DATA : profileData?.companyName ?? DEFAULT_DATA },
+        { label: "기업 소개", data: profileData?.companyDescription?.trim() === "" ? DEFAULT_DATA : profileData?.companyDescription ?? DEFAULT_DATA },
+        { label: "기업 인원", data: profileData?.numberOfEmployees != null ? `${profileData.numberOfEmployees}명` : DEFAULT_DATA },
+        { label: "기업 사이트", data: profileData?.companyWebsite?.trim() === "" ? DEFAULT_DATA : profileData?.companyWebsite ?? DEFAULT_DATA },
+        { label: "연매출액", data: profileData?.annualRevenue != null ? `${profileData.annualRevenue}원` : DEFAULT_DATA },
+        { label: "창업위치", data: profileData?.startupLocation?.trim() === "" ? DEFAULT_DATA : profileData?.startupLocation ?? DEFAULT_DATA },
+    ];
 
     const preStarupList = [
-        {label : '창업위치', data : profileData?.startupLocation ?? DEFAULT_DATA},
+        { label: "창업위치", data: profileData?.startupLocation?.trim() === "" ? DEFAULT_DATA : profileData?.startupLocation ?? DEFAULT_DATA },
     ]
 
     const getProfileData = async () => {
@@ -118,7 +118,11 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
             </View>
             <ScrollView 
                 style={styles.scorllContainer}
-                contentContainerStyle={{gap : 24, paddingBottom : 16}}
+                contentContainerStyle={{
+                    gap : 24, 
+                    paddingBottom : Platform.select({ios : 16, android : 32})
+                }}
+                showsVerticalScrollIndicator={false}
             >
                 {profileList.map(({label, data}, index) => (
                     <View style={styles.labelContainer} key={index}>
@@ -134,7 +138,23 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                         <View style={styles.labelContainer} key={index}>
                             <Text style={styles.labelText}>{label}</Text>
                             <View style={styles.dataContainer}>
-                                <Text onPress={() => {index === 3 && Linking.openURL(data)}} style={[styles.dataText, index === 3 && {color : Colors.info, textDecorationLine : "underline"}]}>{data}</Text>
+                                {
+                                    index === 3 && profileData?.startupLocation?.includes(DEFAULT_DATA) ? (
+                                        <Text 
+                                            onPress={() => {Linking.openURL(data)}} 
+                                            style={[styles.dataText, index === 3 && {
+                                                color : Colors.info, 
+                                                textDecorationLine : "underline"
+                                        }]}>
+                                            {data}
+                                        </Text>
+                                    ) : (
+                                        <Text 
+                                            style={styles.dataText}>
+                                            {data}
+                                        </Text>
+                                    )
+                                }
                             </View>
                         </View>
                     )) : 
@@ -170,7 +190,7 @@ const styles = StyleSheet.create({
         color : Colors.black2
     },
     mainContainer : {
-        flex : 1
+        flex : 1,
     },
     scorllContainer : {
         paddingHorizontal : 16,
