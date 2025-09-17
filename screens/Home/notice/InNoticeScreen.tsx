@@ -4,7 +4,6 @@ import {
     ScrollView,
     StyleSheet,
     Text,
-    Touchable,
     TouchableOpacity,
     useWindowDimensions,
     View
@@ -29,7 +28,8 @@ import ComparisonIcon from "../../../assets/icons/notice/comparison.svg";
 import {deleteLikes, postLikes} from "../../../api/likes";
 import BookMarkFill from "../../../assets/icons/bookMark/bookmark.fill.svg";
 import BookMark from "../../../assets/icons/bookMark/bookmark.svg";
-import { CustomRendererProps, TNode } from 'react-native-render-html';
+import { getScheduleList, isScheduleExist, removeScheduleById, saveScheduleList } from '../../../util/Schedule';
+import { ShowToast, ToastType } from '../../../util/ShowToast';
 
 
 
@@ -65,6 +65,21 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
             setIsBookmarkLoading(false)
         }
     }
+    const handleSaveScheduleList = async () => {
+        try {
+            const preScheduleList = await getScheduleList()
+            if(!(await isScheduleExist(notice.id))){
+                await saveScheduleList([...preScheduleList, notice])
+                ShowToast("추가 성공", "일정을 추가하였습니다", ToastType.SUCCESS)
+            } else {
+                await removeScheduleById(notice.id)
+                ShowToast("삭제 성공", "일정을 삭제하였습니다", ToastType.SUCCESS)
+            }
+        } catch (error) {
+            ShowToast("오류 발생", "알 수 없는 오류가 발생하였습니다", ToastType.ERROR)
+        }
+    }
+
     const targetAge = notice.targetAge == "전체" ? "전체연령" : notice.targetAge;
     const startupHistory = notice.startupHistory == "전체" ? "업력상관없음" : notice.startupHistory;
     const transformDate = (date : Date) => {
@@ -124,22 +139,22 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                 <View style={styles.buttons}>
                     <View style={styles.featureButtons}>
                         <TouchableOpacity onPress={() => {
-
+                            
                         }}>
                             <View style={styles.buttonsContainer}>
                                 <ComparisonIcon width={18} height={18} color={Colors.primary}/>
                                 <Text style={styles.buttonText}>
-                                    공고비교
+                                    공고 비교
                                 </Text>
                             </View>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => {
-
+                            handleSaveScheduleList()
                         }}>
                             <View style={styles.buttonsContainer}>
                                 <CalendarIcon width={18} height={18} color={Colors.primary}/>
                                 <Text style={styles.buttonText}>
-                                    공고비교
+                                    일정 추가
                                 </Text>
                             </View>
                         </TouchableOpacity>
