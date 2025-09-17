@@ -39,6 +39,7 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
             getNoticeItem,
             setDay,
             setLoading,
+            setNoticeItemList
         },
         ui : {
             dotInfoList,
@@ -115,12 +116,14 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                                 try {
                                     onPress?.(date);
                                     setLoading(true);
-                                    await getNoticeItem(dotIds); // noticeItemList가 업데이트된 후
-                                    handleModalOpen();           // 모달을 띄움
+                                    const result = await getNoticeItem(dotIds);
+                                    setNoticeItemList(result)
                                     setDay(
                                         `${date ? `${date.month}월 ${date.day}일 공고 일정` : "날짜를 찾을 수 없습니다"}`
                                     );
+                                    console.log(JSON.stringify(noticeItemList));
                                     setLoading(false);
+                                    handleModalOpen();
                                 } catch (error) {
                                     ShowToast("오류 발생", "일정 리스트를 불러 올 수 없습니다", ToastType.ERROR)
                                 }
@@ -166,7 +169,9 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                 scheduleList={noticeItemList}
                 day={day}
                 bottomSheetModalRef={bottomSheetModalRef}
-                handleModalClose={() => {handleModalClose()}}
+                handleModalClose={() => {
+                    handleModalClose()
+                }}
                 onNoticeItemPress={(Notice) => {
                     handleModalClose();
                     navigation.navigate('InNotice', {Notice})
