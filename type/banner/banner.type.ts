@@ -1,8 +1,8 @@
+import { NoticeType } from "../notice/notice.type"
 
 export interface BannerType {
-    title : string,
-    peroid : string
-    index : number,
+    item : NoticeType
+    index : number
     maxIndex : number,
     height : number
 }

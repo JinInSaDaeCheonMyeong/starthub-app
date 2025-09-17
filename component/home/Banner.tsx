@@ -4,8 +4,7 @@ import { BannerType } from "../../type/banner/banner.type";
 import { Fonts } from "../../constants/Fonts";
 
 export default function Banner({
-    title,
-    peroid,
+    item,
     index,
     maxIndex,
     onPress
@@ -31,9 +30,9 @@ export default function Banner({
                     ellipsizeMode="tail" 
                     style={styles.titleText}
                 >
-                    {title}
+                    {item.title}
                 </Text>
-                <Text style={styles.peroidText}>{`모집 : ${peroid}`}</Text>
+                <Text style={styles.peroidText}>{`모집 : ${item.startDate}`}</Text>
                 <Text style={styles.indexText}>
                     {index}/
                     <Text style={{color : Colors.white2}}>
