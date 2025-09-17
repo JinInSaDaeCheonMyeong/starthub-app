@@ -8,6 +8,8 @@ import SystemStack from "./SystemStack";
 import InMatchScreen from "../screens/Home/match/InMatchScreen";
 import InBMCScreen from "../screens/Home/BMC/InBMCScreen";
 import {BMCType} from "../type/BMC/BMC.type";
+import InNoticeScreen from "../screens/Home/notice/InNoticeScreen";
+import {NoticeType} from "../type/notice/notice.type";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -27,6 +29,9 @@ export type RootStackParamList = {
     },
     InBMC : {
         BMC: BMCType
+    },
+    InNotice : {
+        Notice : NoticeType
     }
 };
 
@@ -47,6 +52,7 @@ export default function RootStack() {
             <Stack.Screen name="SystemStack" component={SystemStack}/>
             <Stack.Screen name="InMatch" component={InMatchScreen}/>
             <Stack.Screen name="InBMC" component={InBMCScreen}/>
+            <Stack.Screen name="InNotice" component={InNoticeScreen}/>
         </Stack.Navigator>
     )
 };
