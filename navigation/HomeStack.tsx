@@ -7,7 +7,7 @@ import { Colors } from '../constants/Color';
 import {Easing, StyleSheet, View} from 'react-native';
 import HeaderBar from '../component/HeaderBar';
 import {useSafeAreaInsets} from "react-native-safe-area-context";
-import CalendarScreen from '../screens/Home/Calendar/CalendarScreen';
+import CalendarScreen from '../screens/Home/calendar/CalendarScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -16,8 +16,7 @@ export type HomeStackParamList = {
     Notice : {
         supportField ?: string
     },
-    Match : undefined,
-    Chat : undefined,
+    Calendar : undefined,
     BMC : undefined
 }
 
