@@ -12,9 +12,12 @@ import CalendarScreen from '../screens/Home/Calendar/CalendarScreen';
 const Tab = createBottomTabNavigator();
 
 export type HomeStackParamList = {
-    Home : undefined
-    Notice : undefined
-    Calendar : undefined
+    Home : undefined,
+    Notice : {
+        supportField ?: string
+    },
+    Match : undefined,
+    Chat : undefined,
     BMC : undefined
 }
 

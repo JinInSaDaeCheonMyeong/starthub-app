@@ -24,12 +24,12 @@ import {TargetAgeItems} from "../../constants/TargetAgeItems";
 const {height} = Dimensions.get('window');
 
 export type NoticeScreenProps = CompositeScreenProps<
-    BottomTabScreenProps<HomeStackParamList, 'BMC'>,
+    BottomTabScreenProps<HomeStackParamList, 'Notice'>,
     StackScreenProps<RootStackParamList>
 >
 
 
-export default function NoticeScreen(navigation: NoticeScreenProps) {
+export default function NoticeScreen({navigation, route : {params}}: NoticeScreenProps) {
     const parseReceptionPeriod = (period: string) => {
         try {
             if (!period || typeof period !== 'string') {
@@ -100,7 +100,16 @@ export default function NoticeScreen(navigation: NoticeScreenProps) {
         }
     };
     const [title, setTitle] = useState("");
-    const [supportField, setSupportField] = useState("");
+    const [supportField, setSupportField] = useState<string>(
+        typeof params?.supportField === "string" ? params.supportField : ""
+    );
+
+    // params.supportField가 바뀔 때마다 state 동기화
+    useEffect(() => {
+        if (typeof params?.supportField === "string") {
+            setSupportField(params.supportField);
+        }
+    }, [params?.supportField]);
     const [supportFieldOpen, setSupportFieldOpen] = useState(false);
     const [region, setRegion] = useState("");
     const [regionOpen, setRegionOpen] = useState(false);
@@ -120,10 +129,8 @@ export default function NoticeScreen(navigation: NoticeScreenProps) {
     useEffect(() => {
         const fetchNotices = async () => {
             try {
+                console.log(supportField);
                 const response: GetNoticesResponse = await getNotices(title, supportField, region, targetAge, businessExperience, 0);
-                console.log(supportField)
-                console.log(response);
-
                 const mapped = response.data.content.map((notice: BeforeNoticeType) => {
                     const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                     return {
@@ -142,10 +149,7 @@ export default function NoticeScreen(navigation: NoticeScreenProps) {
         };
 
         fetchNotices();
-    },[title, supportField, region, targetAge, businessExperience]);
-
-
-
+    },[title, supportField, region, targetAge, businessExperience, params?.supportField]);
 
     const loadNextPage = async () => {
         const now = Date.now();
@@ -200,12 +204,6 @@ export default function NoticeScreen(navigation: NoticeScreenProps) {
             loadNextPage();
         }
     };
-
-    function goWeb(link: string) {
-        const handlePress = () => {
-            Linking.openURL(link);
-        }; handlePress()
-    }
 
     return (
         <View style={styles.container}>
@@ -352,7 +350,7 @@ export default function NoticeScreen(navigation: NoticeScreenProps) {
                         <NoticeItem
                             item={item}
                             isHome={false}
-                            onPress={()=>{navigation.navigation.navigate('InNotice', {
+                            onPress={()=>{navigation.navigate('InNotice', {
                                 Notice:item
                             })}}
                         />
