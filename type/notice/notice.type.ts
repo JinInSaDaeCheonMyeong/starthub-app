@@ -27,24 +27,11 @@ export interface BeforeNoticeType {
     organizationType: string,
     startupHistory: string,
     departmentInCharge: string,
-    content: string
+    content: string,
+    isLiked: boolean,
 }
 
-export interface NoticeType {
-    id: number,
-    title: string,
-    url: string,
-    organization: string,
-    receptionPeriod: string,
-    startDate: Date;         // Date 타입
+export interface NoticeType extends BeforeNoticeType {
+    startDate: Date;
     endDate: Date;
-    likeCount: number,
-    supportField: string,
-    targetAge: string,
-    contactNumber: string,
-    region: string,
-    organizationType: string,
-    startupHistory: string,
-    departmentInCharge: string,
-    content: string
 }
