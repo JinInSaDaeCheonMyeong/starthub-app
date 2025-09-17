@@ -69,7 +69,7 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
         try {
             const preScheduleList = await getScheduleList()
             if(!(await isScheduleExist(notice.id))){
-                await saveScheduleList([...preScheduleList, notice])
+                await saveScheduleList([...preScheduleList, notice.id])
                 ShowToast("추가 성공", "일정을 추가하였습니다", ToastType.SUCCESS)
             } else {
                 await removeScheduleById(notice.id)
