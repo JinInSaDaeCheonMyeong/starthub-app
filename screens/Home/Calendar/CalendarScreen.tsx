@@ -108,6 +108,7 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                     const dotIds = marking?.dots?.map((dot : any) => dot.id) ?? [];
                     return (
                         <TouchableOpacity
+                            key={date?.dateString ?? 'undefind'}
                             style={[
                                 styles.dayContainer,
                                 { backgroundColor: state !== 'disabled' ? Colors.white1 : Colors.white2 },
