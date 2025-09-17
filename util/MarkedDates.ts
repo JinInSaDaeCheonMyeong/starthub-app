@@ -1,5 +1,6 @@
 import { eachDayOfInterval, subDays, format, parse } from "date-fns";
 import { Colors } from "../constants/Color";
+import { NoticeType } from "../type/notice/notice.type";
 
 type DotColor =
     | typeof Colors.info
@@ -26,13 +27,13 @@ export type MarkedDates = Record<
     }
 >;
 
-export function buildDeadlineMarks(items: ScheduleItem[]): MarkedDates {
+export function buildDeadlineMarks(items: NoticeType[]): MarkedDates {
     const marked: MarkedDates = {};
 
     items.forEach((event) => {
         // 날짜를 로컬 기준으로 파싱
-        const start = parse(event.startTime, "yyyy-MM-dd", new Date());
-        const end = parse(event.endTime, "yyyy-MM-dd", new Date());
+        const start = event.startDate;
+        const end = event.endDate;
         const yellowStart = subDays(end, 14);
         const redStart = subDays(end, 7);
         const allDates = eachDayOfInterval({ start, end });

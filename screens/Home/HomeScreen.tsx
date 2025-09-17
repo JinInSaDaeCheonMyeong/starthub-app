@@ -2,7 +2,6 @@ import { FlatList, Image, ScrollView,  StyleSheet, Text, TouchableOpacity, View 
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import NoticeItem from "../../component/notice/NoticeItem";
-import { NoticeItemList } from "../../constants/NoticeItemList";
 import { CompositeScreenProps } from "@react-navigation/core";
 import { HomeStackParamList } from "../../navigation/HomeStack";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";

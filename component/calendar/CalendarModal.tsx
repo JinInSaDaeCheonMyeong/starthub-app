@@ -72,7 +72,7 @@ export default function CalendarModal({
                         data={scheduleList}
                         renderItem={({item}) => (
                             <NoticeItem
-                                item={{...item}}
+                                item={item}
                                 isHome={false}
                                 onPress={() => {}}
                             />

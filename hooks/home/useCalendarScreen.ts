@@ -2,10 +2,10 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Colors } from "../../constants/Color";
 import { useCallback, useRef, useState } from "react";
 import { NoticeType } from "../../type/notice/notice.type";
-import { NoticeItemList } from "../../constants/NoticeItemList";
 import { buildDeadlineMarks, MarkedDates } from "../../util/MarkedDates";
 import { useFocusEffect } from "@react-navigation/native"
 import { getScheduleList } from "../../util/Schedule";
+import { ShowToast, ToastType } from "../../util/ShowToast";
 
 const useCalendarScreen = () => {
     const [day, setDay] = useState("");
@@ -30,17 +30,26 @@ const useCalendarScreen = () => {
         bottomSheetModalRef.current?.present();
     }, []);
 
-    const getNoticeItem = (ids: number[]) => {
-        const noticeItemList = ids
-            .map((id) => NoticeItemList.find((item) => item.id === id))
-            .filter((item): item is NoticeType => item !== undefined);
-        setNoticeItemList(noticeItemList);
+    const getNoticeItem = async (ids : number[]) => {
+        try {
+            const storageList = await getScheduleList();
+            const noticeItemList = ids
+                .map((id) => storageList.find((item) => item.id === id))
+                .filter((item): item is NoticeType => item !== undefined);
+            setNoticeItemList(noticeItemList);
+        } catch (error) {
+            ShowToast("오류 발생", "일정을 불러올 수 없습니다", ToastType.ERROR)
+        }
     };
 
     const initMarkedDates = async () => {
-        const list = await getScheduleList();
-        const dates = buildDeadlineMarks(list);
-        setMarkedDates(dates);
+        try {
+            const list = await getScheduleList();
+            const dates = buildDeadlineMarks(list);
+            setMarkedDates(dates);
+        } catch (error) {
+            ShowToast("오류 발생", "일정을 불러올 수 없습니다", ToastType.ERROR)
+        }
     }
 
     useFocusEffect(

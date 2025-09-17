@@ -1,11 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { ScheduleItem } from "./MarkedDates"
+import { NoticeType } from "../type/notice/notice.type"
 
 const ScheduleStorage = {
     SCHEDULE_LIST : "scheduleList",
 } as const
 
-export const saveScheduleList = async (scheduleList : ScheduleItem[]) => {
+export const saveScheduleList = async (scheduleList : NoticeType[]) => {
     try {
         await AsyncStorage.setItem(ScheduleStorage.SCHEDULE_LIST, JSON.stringify(scheduleList))
     } catch (error) {
@@ -14,7 +15,7 @@ export const saveScheduleList = async (scheduleList : ScheduleItem[]) => {
     }
 }
 
-export const getScheduleList = async () : Promise<ScheduleItem[]> => {
+export const getScheduleList = async () : Promise<NoticeType[]> => {
     try {
         const data = await AsyncStorage.getItem(ScheduleStorage.SCHEDULE_LIST)
         if(data !== null)
