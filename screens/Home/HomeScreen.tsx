@@ -133,22 +133,12 @@ export default function HomeScreen(props : HomeScreenProps) {
                         horizontal={true}
                         onEndReached={() => {}}
                         style={{ overflow: "visible" }}
-                        data={noticeItems.length > 0 ? noticeItems : NoticeItemList}
+                        data={noticeItems}
                         renderItem={({ item }) => (
                         <NoticeItem
-                            webLink={item.webLink}
-                            id={item.id}
-                            category={item.category}
-                            title={item.title}
-                            startTime={item.startTime}
-                            endTime={item.endTime}
-                            location={item.location}
-                            years={item.years}
-                            target={item.target}
-                            entre={item.entre}
+                            item={item}
                             isHome={true}
                             onPress={() => {
-                                goWeb(item.webLink)
                             }}
                         />
                         )}
@@ -165,22 +155,12 @@ export default function HomeScreen(props : HomeScreenProps) {
                         horizontal={true}
                         onEndReached={() => {}}
                         style={{ overflow: "visible" }}
-                        data={noticeItems.length > 0 ? noticeItems : NoticeItemList}
+                        data={noticeItems}
                         renderItem={({ item }) => (
                         <NoticeItem
-                            webLink={item.webLink}
-                            id={item.id}
-                            category={item.category}
-                            title={item.title}
-                            startTime={item.startTime}
-                            endTime={item.endTime}
-                            location={item.location}
-                            years={item.years}
-                            target={item.target}
-                            entre={item.entre}
+                        item={item}
                             isHome={true}
                             onPress={() => {
-                                goWeb(item.webLink)
                             }}
                         />
                         )}
