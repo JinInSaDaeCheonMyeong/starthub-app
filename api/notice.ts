@@ -1,5 +1,5 @@
 import StartHubAxios from "../lib/StartHubAxios";
-import {GetNoticesResponse} from "../type/notice/notice.type";
+import {GetNoticeResponse, GetNoticesResponse} from "../type/notice/notice.type";
 
 export const getNotices = async (
     title : string,
@@ -21,3 +21,12 @@ export const getNotices = async (
             size : 15
         }
     })).data
+
+export const getNotice = async (
+    announcementId : number
+) : Promise<GetNoticeResponse> => 
+    (await StartHubAxios.get(`announcements/${announcementId}`, {
+        params : {
+            includeLikeStatus : true
+        }
+    })).data;
