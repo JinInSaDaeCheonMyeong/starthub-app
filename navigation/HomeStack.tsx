@@ -14,7 +14,9 @@ const Tab = createBottomTabNavigator();
 
 export type HomeStackParamList = {
     Home : undefined,
-    Notice : undefined,
+    Notice : {
+        supportField ?: string
+    },
     Match : undefined,
     Chat : undefined,
     BMC : undefined
