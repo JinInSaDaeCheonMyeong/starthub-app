@@ -121,7 +121,6 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                                     setDay(
                                         `${date ? `${date.month}월 ${date.day}일 공고 일정` : "날짜를 찾을 수 없습니다"}`
                                     );
-                                    console.log(JSON.stringify(noticeItemList));
                                     setLoading(false);
                                     handleModalOpen();
                                 } catch (error) {
