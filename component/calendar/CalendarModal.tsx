@@ -1,12 +1,13 @@
 import { BottomSheetBackdrop, BottomSheetFlashList, BottomSheetFlatList, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
 import React, { useCallback, useMemo, useState } from "react";
-import { FlatList, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native"
+import { Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import XIcon from "../../assets/icons/xmark.svg"
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import { NoticeItemType } from "../../type/notice/notice.type";
 import NoticeItem from "../notice/NoticeItem";
+import { FlatList } from "react-native-gesture-handler";
 
 export type CalendarModalProps = {
     day : string
@@ -27,7 +28,7 @@ export default function CalendarModal({
     const [headerHeight, setHeaderHeight] = useState(0);
     const [currentSnapIndex, setCurrentSnapIndex] = useState(0);
     const currentSnapHeight = currentSnapIndex === 0 ? windowHeight * 0.5 : windowHeight;
-    const listMaxHeight = currentSnapHeight - headerHeight - 32 - insets.top - insets.bottom;
+    const listMaxHeight = currentSnapHeight - headerHeight - insets.top - insets.bottom;
     return(            
         <BottomSheetModal
             handleStyle={styles.handleStyle}
@@ -48,48 +49,54 @@ export default function CalendarModal({
             onChange={(index) => setCurrentSnapIndex(index)}
         >
             <BottomSheetView style={[
-                    styles.bottomSheetView, 
-                    {
-                        paddingTop : insets.top,
-                        paddingBottom : insets.bottom,
-                    }
-                ]}>
-                    { scheduleList.length !== 0 ? (
-                        <FlatList
-                            showsVerticalScrollIndicator={false}
-                            contentContainerStyle={styles.contentContainer}
-                            style={[styles.flatList, { 
-                                maxHeight: listMaxHeight,
-                            }]}
-                            keyExtractor={(item : NoticeItemType) => item.id.toString()}
-                            keyboardShouldPersistTaps="handled"
-                            data={scheduleList}
-                            renderItem={({item}) => (
-                                <NoticeItem
-                                    {...item}
-                                    isHome={false}
-                                    onPress={() => {console.log(item.webLink)}}
-                                />
-                            )}
-                        />
-                    ) : (
-                        <View style={styles.errorMsgBox}>
-                            <Text style={styles.errorText}>
-                                {`해당 날짜에 일정이 없습니다`}
-                            </Text>
-                        </View>
-                    )}
-                    <View style={styles.headerContainer}
-                        onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
-                    >
-                        <View style={styles.blankBox}/>
-                        <Text style={styles.bottomSheetTitleText}>
-                            {day}
+                styles.bottomSheetView, 
+                {
+                    // paddingTop : insets.top,
+                    paddingBottom : insets.bottom,
+                    overflow : 'visible'
+                }
+            ]}>
+                { scheduleList.length !== 0 ? (
+                    <FlatList
+                        bounces={false}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={styles.contentContainer}
+                        style={[styles.flatList, { 
+                            marginTop : headerHeight + 16,
+                            maxHeight: Platform.select({ 
+                                ios : listMaxHeight - 48,
+                                android : listMaxHeight
+                            }) ,
+                        }]}
+                        keyExtractor={(item : NoticeItemType) => item.id.toString()}
+                        keyboardShouldPersistTaps="handled"
+                        data={scheduleList}
+                        renderItem={({item}) => (
+                            <NoticeItem
+                                {...item}
+                                isHome={false}
+                                onPress={() => {console.log(item.webLink)}}
+                            />
+                        )}
+                    />
+                ) : (
+                    <View style={styles.errorMsgBox}>
+                        <Text style={styles.errorText}>
+                            {`해당 날짜에 일정이 없습니다`}
                         </Text>
-                        <TouchableOpacity onPress={handleModalClose} hitSlop={16}>
-                            <XIcon width={16} height={16} color={Colors.black1}/>
-                        </TouchableOpacity>
                     </View>
+                )}
+                <View style={styles.headerContainer}
+                    onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+                >
+                    <View style={styles.blankBox}/>
+                    <Text style={styles.bottomSheetTitleText}>
+                        {day}
+                    </Text>
+                    <TouchableOpacity onPress={handleModalClose} hitSlop={16}>
+                        <XIcon width={16} height={16} color={Colors.black1}/>
+                    </TouchableOpacity>
+                </View>
             </BottomSheetView>
         </BottomSheetModal>
     )
@@ -113,7 +120,7 @@ const styles = StyleSheet.create({
     },
     contentContainer : {
         gap : 16,
-        padding : 16,
+        paddingHorizontal : 16,
     },
     flatList : { 
         overflow : 'visible'

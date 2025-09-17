@@ -100,7 +100,6 @@ export default function CalendarScreen() {
                                 { backgroundColor: state !== 'disabled' ? Colors.white1 : Colors.white2 },
                             ]}
                             onPress={async () => {
-                                console.log('Dot IDs:', dotIds);
                                 setLoading(true)
                                 onPress?.(date)
                                 getNoticeItem(dotIds)
@@ -108,14 +107,16 @@ export default function CalendarScreen() {
                                     `${date ? `${date.month}월 ${date.day}일 공고 일정` : "날짜를 찾을 수 없습니다"}`
                                 );
                                 setLoading(false);
-                                console.log(loading);
                                 handleModalOpen();
                             }}
                         >
                             <View
                                 style={[
                                     styles.dayCircle,
-                                    { backgroundColor: state === 'today' ? Colors.primary : undefined },
+                                    { 
+                                        borderRadius: 16,
+                                        backgroundColor: state === 'today' ? Colors.primary : undefined 
+                                    },
                                 ]}
                             >
                                 <Text
@@ -234,10 +235,9 @@ const styles = StyleSheet.create({
         height: 90,
     },
     dayCircle: {
-        padding: 6,
-        width: 30,
-        height: 30,
-        borderRadius: 15,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
     },
