@@ -8,6 +8,13 @@ import RightIcon from "../../../assets/icons/right-arrow-back.svg";
 import CalendarModal from "../../../component/calendar/CalendarModal";
 import * as Progress from "react-native-progress";
 import useCalendarScreen from "../../../hooks/home/useCalendarScreen";
+import { ShowToast, ToastType } from "../../../util/ShowToast";
+import { Item } from "react-native-paper/lib/typescript/components/Drawer/Drawer";
+import { CompositeScreenProps } from "@react-navigation/core";
+import { HomeStackParamList } from "../../../navigation/HomeStack";
+import { RootStackParamList } from "../../../navigation/RootStack";
+import { StackScreenProps } from "@react-navigation/stack";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 
 LocaleConfig.locales['ko'] = {
     monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
@@ -18,7 +25,12 @@ LocaleConfig.locales['ko'] = {
 };
 LocaleConfig.defaultLocale = 'ko';
 
-export default function CalendarScreen() {
+export type CalendarScreenProps = CompositeScreenProps<
+    BottomTabScreenProps<HomeStackParamList, "Calendar">,
+    StackScreenProps<RootStackParamList>
+>
+
+export default function CalendarScreen({navigation} : CalendarScreenProps) {
     const {
         form : {
             day,
@@ -100,14 +112,18 @@ export default function CalendarScreen() {
                                 { backgroundColor: state !== 'disabled' ? Colors.white1 : Colors.white2 },
                             ]}
                             onPress={async () => {
-                                setLoading(true)
-                                onPress?.(date)
-                                getNoticeItem(dotIds)
-                                setDay(
-                                    `${date ? `${date.month}월 ${date.day}일 공고 일정` : "날짜를 찾을 수 없습니다"}`
-                                );
-                                setLoading(false);
-                                handleModalOpen();
+                                try {
+                                    onPress?.(date);
+                                    setLoading(true);
+                                    await getNoticeItem(dotIds); // noticeItemList가 업데이트된 후
+                                    handleModalOpen();           // 모달을 띄움
+                                    setDay(
+                                        `${date ? `${date.month}월 ${date.day}일 공고 일정` : "날짜를 찾을 수 없습니다"}`
+                                    );
+                                    setLoading(false);
+                                } catch (error) {
+                                    ShowToast("오류 발생", "일정 리스트를 불러 올 수 없습니다", ToastType.ERROR)
+                                }
                             }}
                         >
                             <View
@@ -151,6 +167,10 @@ export default function CalendarScreen() {
                 day={day}
                 bottomSheetModalRef={bottomSheetModalRef}
                 handleModalClose={() => {handleModalClose()}}
+                onNoticeItemPress={(Notice) => {
+                    handleModalClose();
+                    navigation.navigate('InNotice', {Notice})
+                }}
             />
         </ScrollView>
         {loading && (

@@ -14,13 +14,15 @@ export type CalendarModalProps = {
     scheduleList: NoticeType[];
     bottomSheetModalRef: React.RefObject<BottomSheetModal | null>;
     handleModalClose: () => void;
+    onNoticeItemPress : (item : NoticeType) => void
 };
 
 export default function CalendarModal({
     day,
     scheduleList,
     bottomSheetModalRef,
-    handleModalClose
+    handleModalClose,
+    onNoticeItemPress
 } : CalendarModalProps){
     const insets = useSafeAreaInsets()
     const {height : windowHeight} = useWindowDimensions()
@@ -34,6 +36,7 @@ export default function CalendarModal({
             handleStyle={styles.handleStyle}
             handleIndicatorStyle={styles.handleIndicator}
             ref={bottomSheetModalRef}
+            index={0}
             snapPoints={snapPoints}
             topInset={insets.top}
             enablePanDownToClose={true}
@@ -55,36 +58,36 @@ export default function CalendarModal({
                     overflow : 'visible'
                 }
             ]}>
-                { scheduleList.length !== 0 ? (
-                    <FlatList
-                        bounces={false}
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={styles.contentContainer}
-                        style={[styles.flatList, { 
-                            marginTop : headerHeight + 16,
-                            maxHeight: Platform.select({ 
-                                ios : listMaxHeight - 48,
-                                android : listMaxHeight
-                            }) ,
-                        }]}
-                        keyExtractor={(item : NoticeType) => item.id.toString()}
-                        keyboardShouldPersistTaps="handled"
-                        data={scheduleList}
-                        renderItem={({item}) => (
-                            <NoticeItem
-                                item={item}
-                                isHome={false}
-                                onPress={() => {}}
-                            />
-                        )}
-                    />
-                ) : (
-                    <View style={styles.errorMsgBox}>
-                        <Text style={styles.errorText}>
-                            {`해당 날짜에 일정이 없습니다`}
-                        </Text>
-                    </View>
-                )}
+                <FlatList
+                    bounces={false}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.contentContainer}
+                    style={[styles.flatList, { 
+                        marginTop : headerHeight + 16,
+                        maxHeight: Platform.select({ 
+                            ios : listMaxHeight - 48,
+                            android : listMaxHeight
+                        }) ,
+                    }]}
+                    keyExtractor={(item : NoticeType) => item.id.toString()}
+                    keyboardShouldPersistTaps="handled"
+                    data={scheduleList}
+                    renderItem={({item}) => (
+                        <NoticeItem
+                            item={item}
+                            isHome={false}
+                            onPress={() => {onNoticeItemPress(item)}}
+                        />
+                    )}
+                    ListEmptyComponent={() => (
+                        <View style={styles.errorMsgBox}>
+                            <XIcon color={Colors.error} width={32} height={32}/>
+                            <Text style={styles.errorText}>
+                                {`해당 날짜에 일정이 없습니다`}
+                            </Text>
+                        </View>
+                    )}
+                />
                 <View style={styles.headerContainer}
                     onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
                 >
@@ -149,7 +152,9 @@ const styles = StyleSheet.create({
     errorMsgBox : {
         justifyContent : 'center',
         alignItems : 'center',
-        margin : 32
+        marginTop : 32,
+        marginBottom : 48,
+        gap : 24
     },
     errorText : {
         fontSize : 16,
