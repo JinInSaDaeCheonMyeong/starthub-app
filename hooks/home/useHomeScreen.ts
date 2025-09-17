@@ -13,20 +13,7 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
     const [noticeItems, setNoticeItems] = useState<NoticeType[]>([]);
     const {width} = useWindowDimensions()
     const carouselHeight = 160
-    const carouselList = [
-        {
-            title : "AI 디지털 전환 혁신 기업 해외실증 지원 사업 모집",
-            peroid : "2025.04.02~2025.04.06",
-        },
-        {
-            title : "AI 디지털 전환 혁신 기업 해외실증 지원 사업 모집",
-            peroid : "2025.04.02~2025.04.06",
-        },
-        {
-            title : "AI 디지털 전환 혁신 기업 해외실증 지원 사업 모집",
-            peroid : "2025.04.02~2025.04.06",
-        }
-    ];
+    const [carouselList, setCarouselList] = useState<NoticeType[]>([])
     const carouselMaxIndex = carouselList.length 
 
     const navList = [
@@ -196,6 +183,7 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
                 };
             });
             setNoticeItems(mapped);
+            setCarouselList(mapped.splice(0, 3))
 
         } catch (error: unknown) {
         if (isAxiosError(error)) {
@@ -214,6 +202,10 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
 
     function goNotice(supportField : string) {
         navigation.navigate("Notice", { supportField });
+    }
+
+    function goInNotice(index : number) {
+        navigation.navigate("InNotice", { Notice : carouselList[index]});
     }
 
     useFocusEffect(
@@ -235,7 +227,8 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
             carouselHeight
         },
         actions : {
-            goNotice
+            goNotice,
+            goInNotice
         }
     }
 }

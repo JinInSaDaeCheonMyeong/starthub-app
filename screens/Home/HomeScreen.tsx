@@ -51,7 +51,8 @@ export default function HomeScreen(props : HomeScreenProps) {
             carouselHeight,
         },
         actions : {
-            goNotice
+            goNotice,
+            goInNotice
         }
     } = useHomeScreen(props)
 
@@ -67,13 +68,13 @@ export default function HomeScreen(props : HomeScreenProps) {
                         data={carouselList}
                         autoPlayInterval={5000}
                         scrollAnimationDuration={1300}
-                        renderItem={({index, item : props}) => (
+                        renderItem={({index, item}) => (
                             <Banner
-                                {...props}
+                                item={item}
                                 index={index + 1}
                                 maxIndex={carouselMaxIndex}
                                 height={carouselHeight}
-                                onPress={() => {console.log('안녕')}}
+                                onPress={() => {goInNotice(index)}}
                             />
                         )}
                     />
