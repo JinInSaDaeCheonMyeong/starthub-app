@@ -1,4 +1,4 @@
-import StartupType from "../../constants/StartupType"
+import StartupStatus from "../../constants/StartupStatus"
 
 export interface UserInfo {
     name : string,
@@ -9,7 +9,7 @@ export interface UserInfo {
 
 export interface TypeInfo {
     gender : string,
-    startupType : StartupType
+    startupType : StartupStatus
 }
 
 export interface SignupInputRequest{

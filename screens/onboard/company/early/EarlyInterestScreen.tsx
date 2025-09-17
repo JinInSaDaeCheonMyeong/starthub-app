@@ -5,9 +5,9 @@ import { InterestTypeList } from "../../../../constants/InterestTypeList";
 import { Fonts } from "../../../../constants/Fonts";
 
 type EarlyInterestScreenProps = {
-    earlyInterestList : string[]
-    setEarlyInterestList : (list : string[]) => void
-}
+    startupFields: string[];
+    setStartupFields: (list: string[]) => void;
+};
 
 export default function EarlyInterestScreen(props : EarlyInterestScreenProps){
 
@@ -30,15 +30,15 @@ export default function EarlyInterestScreen(props : EarlyInterestScreenProps){
                     text={text}
                     icons={icon}
                     onClick={(id) => {
-                        if (props.earlyInterestList.includes(id)) {
-                            props.setEarlyInterestList(props.earlyInterestList.filter(key => key !== id))
+                        if (props.startupFields.includes(id)) {
+                            props.setStartupFields(props.startupFields.filter(key => key !== id))
                         } else {
-                            const interestList = [...props.earlyInterestList]
+                            const interestList = [...props.startupFields];
                             interestList.push(id)
-                            props.setEarlyInterestList(interestList)
+                            props.setStartupFields(interestList);
                         }
                     }}
-                    selected = {props.earlyInterestList.includes(id)}
+                    selected = {props.startupFields.includes(id)}
                 />
             )}
             />

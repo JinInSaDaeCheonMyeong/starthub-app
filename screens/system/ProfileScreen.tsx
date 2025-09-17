@@ -1,6 +1,6 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { SystemStackParamList } from "../../navigation/SystemStack";
-import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import BackButton from "../../component/BackButton";
 import EditIcon from "../../assets/icons/header/edit.svg"
 import { Colors } from "../../constants/Color";
@@ -12,102 +12,28 @@ import { getMe } from "../../api/user";
 import { isAxiosError } from "axios";
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import { ErrorResponse } from "../../type/util/response.type"
-import StartupType from "../../constants/StartupType";
+import StartupStatus from "../../constants/StartupStatus";
+import useProfileScreen from "../../hooks/system/useProfileScreen";
 
-type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'Profile'>
+export type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'Profile'>
 
-export default function ProfileScreen({navigation} : ProfileScreenProps){
-    const DEFAULT_DATA = "내용을 불러올 수 없습니다";
-    const genderMap = new Map<string, string>([['MALE', "남"], ["FEMALE", "여"]])
-    const startupTypeMap = new Map<StartupType, string>([
-        [StartupType.EARLY_STARTUP, "초기 창업"],
-        [StartupType.PRE_STARTUP, "예비 창업"]
-    ]);
-    const [loading, setLoading] = useState(true);
-    const [profileData, setProfileData] = useState<GetMeResponse["data"]>({
-        id : -1, 
-        username : DEFAULT_DATA,
-        birth : DEFAULT_DATA,
-        gender : DEFAULT_DATA,
-        startupType : StartupType.PRE_STARTUP,
-        preStartup : {}
-    })
-    
-    const profileList = [
-        {label : '이름', data : profileData.username},
-        {label : '성별', data : genderMap.get(profileData.gender) ?? DEFAULT_DATA},
-        {label : '생년월일', data : 
-            profileData.birth && !isNaN(Date.parse(profileData.birth)) 
-                ? new Date(profileData.birth).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) 
-                : DEFAULT_DATA
+export default function ProfileScreen(props : ProfileScreenProps){
+    const {
+        form : {
+            profileData
         },
-        { label: "창업 형태", data: startupTypeMap.get(profileData.startupType) ?? DEFAULT_DATA }
-    ]    
-
-    // 창업형태가 초기 창업이라면
-    const earlyStarupList = [
-        {label : '기업명', data : profileData.earlyStartup?.companyName ?? DEFAULT_DATA},
-        {label : '기업 소개', data : profileData.earlyStartup?.companyIntro ?? DEFAULT_DATA},
-        {label : '기업 인원', data : `${profileData.earlyStartup?.personNumber ?? 0}명`},
-        {label : '기업 사이트', data : profileData.earlyStartup?.companySite ?? DEFAULT_DATA},
-        {label : '연매출액', data : `${profileData.earlyStartup?.getMoneyYear ?? 0}원`},
-        {label : '창업위치', data : profileData.earlyStartup?.companyLocation ?? DEFAULT_DATA},
-    ]
-
-    // 창업형태가 예비 창업이라면
-    const preStarupList = [
-        {label : '창업위치', data : profileData.preStartup?.companyLocation ?? DEFAULT_DATA},
-    ]
-
-    const getProfileData = async () => {
-        try {
-            const profileData = (await getMe()).data;
-            switch(profileData.startupType){
-                case StartupType.EARLY_STARTUP: 
-                    profileData.earlyStartup = {
-                        companyName : '더미데이터',
-                        personNumber : 0,
-                        getMoneyYear : 0,
-                    }
-                    profileData.preStartup = undefined
-                    break;
-                case StartupType.PRE_STARTUP:
-                    profileData.preStartup = {
-                        companyLocation : ''
-                    }
-                    
-                    break;
-            }
-            setProfileData(profileData)
-        } catch (error: unknown) {
-            if (isAxiosError(error)) {
-                const response = error.response;
-                if (!response) {
-                    ShowToast("오류 발생", "네트워크 오류가 발생했습니다", ToastType.ERROR);
-                    navigation.goBack()
-                    return; 
-                }
-                const errorData = response.data as ErrorResponse;
-                ShowToast("오류 발생", errorData.message, ToastType.ERROR);
-                navigation.goBack();
-                return;
-            }
-            ShowToast("오류 발생", "알 수 없는 오류가 발생했습니다", ToastType.ERROR);
-            navigation.goBack();
+        ui : {
+            profileList,
+            earlyStarupList,
+            preStarupList,
+            isWebLink
+        },
+        action : {
+            goBack,
+            goEditProfile,
+            goWeb
         }
-    }
-
-    useFocusEffect(
-        useCallback(() => {
-            const fetchData = async () => {
-                setLoading(true);
-                await getProfileData();
-                setLoading(false);
-            };
-            fetchData();
-        }, [])
-    );
-
+    } = useProfileScreen(props)
     return (
         <View style={styles.mainContainer}>
             <View style={styles.header}>
@@ -115,7 +41,7 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                     width={24}
                     height={24}
                     color={Colors.black2}
-                    onClick={() => {navigation.goBack()}}
+                    onClick={() => {goBack()}}
                 />
                 <Text style={styles.headerTitle}>프로필</Text>
                 <EditIcon 
@@ -123,12 +49,16 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                     width={24}
                     height={24}
                     hitSlop={16}
-                    onTouchEnd={()=>{navigation.navigate('EditProfile', profileData)}}
+                    onTouchEnd={()=>{goEditProfile()}}
                 />
             </View>
             <ScrollView 
                 style={styles.scorllContainer}
-                contentContainerStyle={{gap : 24, paddingBottom : 16}}
+                contentContainerStyle={{
+                    gap : 24, 
+                    paddingBottom : Platform.select({ios : 16, android : 32})
+                }}
+                showsVerticalScrollIndicator={false}
             >
                 {profileList.map(({label, data}, index) => (
                     <View style={styles.labelContainer} key={index}>
@@ -139,12 +69,23 @@ export default function ProfileScreen({navigation} : ProfileScreenProps){
                     </View>
                 ))}
                 <View style={styles.line}/>
-                {profileData.startupType === StartupType.EARLY_STARTUP ?
+                {profileData.startupStatus === StartupStatus.EARLY_STAGE ?
                     earlyStarupList.map(({label, data}, index) => (
                         <View style={styles.labelContainer} key={index}>
                             <Text style={styles.labelText}>{label}</Text>
                             <View style={styles.dataContainer}>
-                                <Text onPress={() => {index === 3 && Linking.openURL(data)}} style={[styles.dataText, index === 3 && {color : Colors.info, textDecorationLine : "underline"}]}>{data}</Text>
+                            {
+                                isWebLink(index) ? (
+                                    <Text 
+                                    onPress={() => {goWeb(data)}} 
+                                    style={[styles.dataText, { color : Colors.info, textDecorationLine : "underline" }]}
+                                    >
+                                    {data}
+                                    </Text>
+                                ) : (
+                                    <Text style={styles.dataText}>{data}</Text>
+                                )
+                            }
                             </View>
                         </View>
                     )) : 
@@ -180,7 +121,7 @@ const styles = StyleSheet.create({
         color : Colors.black2
     },
     mainContainer : {
-        flex : 1
+        flex : 1,
     },
     scorllContainer : {
         paddingHorizontal : 16,

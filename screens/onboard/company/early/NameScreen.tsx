@@ -1,14 +1,12 @@
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { Colors } from "../../../../constants/Color";
-import DateInputText from "../../../../component/auth/DateInputText";
-import { DayList, MonthList, YearList } from "../.../../../../../constants/DateNumber";
 import { Fonts } from "../../../../constants/Fonts";
 
 type NameScreenProps = {
     companyName : string,
-    companyIntro : string
+    companyDescription : string
     setCompanyName : (companyName : string) => void,
-    setCompanyIntro : (companyIntro : string) => void,
+    setCompanyDescription : (companyDescription : string) => void,
 }
 
 export default function NameScreen(props : NameScreenProps) {
@@ -37,8 +35,8 @@ export default function NameScreen(props : NameScreenProps) {
                     style={styles.inputText}
                     placeholder="기업 설명을 입력해주세요..."
                     placeholderTextColor={Colors.gray3}
-                    value={props.companyIntro}
-                    onChangeText={(s) => {props.setCompanyIntro(s)}}
+                    value={props.companyDescription}
+                    onChangeText={(s) => {props.setCompanyDescription(s)}}
                 />
             </View>
         </View>

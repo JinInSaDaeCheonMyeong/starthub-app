@@ -1,4 +1,4 @@
-export const EntreItems = [
+export const BusinessExperienceItems = [
     { label: "예비창업자", value: "예비창업자" },
     { label: "1년미만", value: "1년미만" },
     { label: "2년미만", value: "2년미만" },

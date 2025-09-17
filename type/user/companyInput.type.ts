@@ -1,16 +1,10 @@
-export interface EarlyStartupInfo {
+
+export interface CompanyInputFormData {
+    startupFields : string[];
     companyName : string;
-    companyIntro : string;
-    personNumber : string;
-    companySite : string;
-    getMoneyYear : string;
-    earlyCompanyLocation : string;
-    earlyInterestList : string[];
+    companyDescription : string;
+    numberOfEmployees : string;
+    companyWebsite : string;
+    startupLocation : string;
+    annualRevenue : string;
 }
-
-export interface PreStartupInfo {
-    preCompanyLocation : string;
-    preInterestList : string[];
-}
-
-export interface CompanyInputFormData extends EarlyStartupInfo, PreStartupInfo {}

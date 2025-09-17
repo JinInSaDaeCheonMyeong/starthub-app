@@ -11,7 +11,7 @@ type SearchBarProps = {
 export default function SearchBar({onPress} : SearchBarProps) {
     const [text, setText] = useState('')
     return (
-    <View style={styles.mainContainer}>
+    <View style={[styles.mainContainer,{zIndex:10000}]}>
         <TextInput
             style={styles.textInput}
             placeholder={"검색어를 입력해주세요..."}

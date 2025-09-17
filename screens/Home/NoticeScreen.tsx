@@ -3,60 +3,150 @@ import SearchBar from "../../component/home/SearchBar";
 import DropDown from "../../component/DropDown";
 import { Colors } from "../../constants/Color";
 import {useEffect, useState, useRef} from "react";
-import {LocationItems} from "../../constants/LocationItems";
-import {CategoryItems} from "../../constants/CategoryItems";
 import {TargetItems} from "../../constants/TargetItems";
-import {YearsItems} from "../../constants/YearsItems";
-import {EntreItems} from "../../constants/EntreItems";
-import {notice} from "../../api/notice";
-import {NoticeItemType} from "../../type/notice/notice.type";
+import {BusinessExperienceItems} from "../../constants/BusinessExperienceItems";
 import {ShowToast, ToastType} from "../../util/ShowToast";
 import NoticeItem from "../../component/notice/NoticeItem";
 import  *  as  Progress  from  'react-native-progress' ;
 import { Fonts } from "../../constants/Fonts";
+import {BeforeNoticeType, GetNoticesResponse, NoticeType, NoticeTypeTrailer} from "../../type/notice/notice.type";
+import {getNotices} from "../../api/notice";
+import {CompositeScreenProps} from "@react-navigation/core";
+import {BottomTabScreenProps} from "@react-navigation/bottom-tabs";
+import {HomeStackParamList} from "../../navigation/HomeStack";
+import {StackScreenProps} from "@react-navigation/stack";
+import {RootStackParamList} from "../../navigation/RootStack";
+import {SupportFieldItems} from "../../constants/SupportFieldItems";
+import {RegionItems} from "../../constants/RegionItems";
+import {TargetAgeItems} from "../../constants/TargetAgeItems";
 
 
 const {height} = Dimensions.get('window');
 
+export type NoticeScreenProps = CompositeScreenProps<
+    BottomTabScreenProps<HomeStackParamList, 'BMC'>,
+    StackScreenProps<RootStackParamList>
+>
 
-export default function NoticeScreen() {
-    const [location, setLocation] = useState("");
-    const [locationOpen, setLocationOpen] = useState(false);
-    const [category, setCategory] = useState("");
-    const [categoryOpen, setCategoryOpen] = useState(false);
-    const [target, setTarget] = useState("");
-    const [targetOpen, setTargetOpen] = useState(false);
-    const [years, setYears] = useState("");
-    const [yearsOpen, setYearsOpen] = useState(false);
-    const [entre, setEntre] = useState("");
-    const [entreOpen, setEntreOpen] = useState(false);
-    const [items, setItems] = useState<NoticeItemType[]>([]);
-    const [search, setSearch] = useState("");
-    const [page, setPage] = useState(1);
-    const [isLoading, setIsLoading] = useState(false);
+
+export default function NoticeScreen(navigation: NoticeScreenProps) {
+    const parseReceptionPeriod = (period: string) => {
+        try {
+            if (!period || typeof period !== 'string') {
+                console.warn('Invalid reception period:', period);
+                return {
+                    startDate: new Date(),
+                    endDate: new Date()
+                };
+            }
+
+            // "2025-09-01 ~ 2025-09-30 18:00" 형식에서 시간 제거하고 날짜만 추출
+            const parts = period.split("~").map(str => str.trim());
+
+            if (parts.length !== 2) {
+                console.warn('Invalid period format - no ~ separator:', period);
+                return {
+                    startDate: new Date(),
+                    endDate: new Date()
+                };
+            }
+
+            const [startPart, endPart] = parts;
+
+            // 시간 부분 완전히 제거하고 날짜만 추출
+            // "2025-09-01" 또는 "2025-09-01 10:00" → "2025-09-01"
+            const startDateStr = startPart.split(" ")[0];
+
+            // "2025-09-30 18:00" 또는 "2025-09-30" → "2025-09-30"
+            const endDateStr = endPart.split(" ")[0];
+
+            // YYYY-MM-DD 형식인지 검증
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateRegex.test(startDateStr) || !dateRegex.test(endDateStr)) {
+                console.warn('Invalid date format:', { startDateStr, endDateStr, originalPeriod: period });
+                return {
+                    startDate: new Date(),
+                    endDate: new Date()
+                };
+            }
+
+            // Date 객체 생성 시 시간을 00:00:00으로 설정하여 날짜만 사용
+            const startDate = new Date(startDateStr + 'T00:00:00');
+            const endDate = new Date(endDateStr + 'T00:00:00');
+
+            // 유효한 날짜인지 확인
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                console.warn('Invalid date created from:', {
+                    startDateStr,
+                    endDateStr,
+                    originalPeriod: period
+                });
+                return {
+                    startDate: new Date(),
+                    endDate: new Date()
+                };
+            }
+
+            return {
+                startDate,
+                endDate
+            };
+        } catch (error) {
+            console.error('Error parsing reception period:', error, 'Period:', period);
+            return {
+                startDate: new Date(),
+                endDate: new Date()
+            };
+        }
+    };
+    const [title, setTitle] = useState("");
+    const [supportField, setSupportField] = useState("");
+    const [supportFieldOpen, setSupportFieldOpen] = useState(false);
+    const [region, setRegion] = useState("");
+    const [regionOpen, setRegionOpen] = useState(false);
+    const [targetAge, setTargetAge] = useState("");
+    const [targetAgeOpen, setTargetAgeOpen] = useState(false);
+    const [businessExperience, setBusinessExperience] = useState("");
+    const [businessExperienceOpen, setBusinessExperienceOpen] = useState(false);
+
+    const [page, setPage] = useState(0);
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
     const lastRequestTime = useRef<number>(0);
-    const dropDownMargin = [locationOpen,categoryOpen,targetOpen,yearsOpen,entreOpen].some(item => item) ? 200 : 16;
+    const dropDownMargin = [regionOpen,supportFieldOpen,targetAgeOpen,businessExperienceOpen].some(item => item) ? 200 : 16;
+
+    const [allNotices, setAllNotices] = useState<NoticeType[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchNotices = async () => {
             try {
-                setIsLoading(true);  // 로딩 시작
-                setPage(1);
-                const data = await notice(1, category, location, target, years, entre, search);
-                setItems(data);
+                const response: GetNoticesResponse = await getNotices(title, supportField, region, targetAge, businessExperience, 0);
+                console.log(supportField)
+                console.log(response);
+
+                const mapped = response.data.content.map((notice: BeforeNoticeType) => {
+                    const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
+                    return {
+                        ...notice,
+                        startDate,
+                        endDate,
+                    };
+                });
+
+                setAllNotices(mapped);
             } catch (error) {
-                ShowToast(
-                    "문제가 발생하였습니다",
-                    "데이터를 불러오지 못하였습니다.",
-                    ToastType.ERROR
-                )
+                console.error('공고 데이터 로딩 실패:', error);
             } finally {
-                setIsLoading(false);  // 로딩 종료
+                setLoading(false);
             }
         };
-        fetchData();
-    }, [category, location, target, search, years, entre]);
+
+        fetchNotices();
+    },[title, supportField, region, targetAge, businessExperience]);
+
+
+
+
     const loadNextPage = async () => {
         const now = Date.now();
         
@@ -65,7 +155,7 @@ export default function NoticeScreen() {
             return;
         }
         
-        if (isFetchingNextPage || isLoading) return;
+        if (isFetchingNextPage || loading) return;
         
         lastRequestTime.current = now; // 요청 시간 기록
         const nextPage = page + 1;
@@ -73,9 +163,18 @@ export default function NoticeScreen() {
         setIsFetchingNextPage(true);
         
         try {
-            const data = await notice(nextPage, category, location, target, years, entre, search);
+            const response = await getNotices(title, supportField, region, targetAge, businessExperience, nextPage);
+            const data = response.data.content.map((notice: BeforeNoticeType) => {
+                const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
+                return {
+                    ...notice,
+                    startDate,
+                    endDate,
+                };
+            });;
             if (data.length > 0) {
-                setItems(prev => [...prev, ...data]);
+
+                setAllNotices(prev => [...prev, ...data]);
             }
         } catch (error) {
             setPage(page);  // 실패 시 페이지 롤백
@@ -90,14 +189,14 @@ export default function NoticeScreen() {
     };
 
     const onViewableItemsChanged = ({ viewableItems }: any) => {
-        if (!viewableItems || viewableItems.length === 0 || items.length === 0) return;
+        if (!viewableItems || viewableItems.length === 0 || allNotices.length === 0) return;
         
         const lastVisibleItem = viewableItems[viewableItems.length - 1];
         if (!lastVisibleItem) return;
         
         const lastIndex = lastVisibleItem.index;
         
-        if (lastIndex >= items.length - 5) {
+        if (lastIndex >= allNotices.length - 5) {
             loadNextPage();
         }
     };
@@ -113,7 +212,8 @@ export default function NoticeScreen() {
             <View>
                 <View style={styles.searchBar}>
                     <SearchBar
-                        onPress={(text)=> setSearch(text)}
+
+                        onPress={(text)=> setTitle(text)}
                     />
                 </View>
                 <View style={
@@ -142,19 +242,19 @@ export default function NoticeScreen() {
                                     fontFamily : Fonts.medium
                                 }
                             }
-                            open={categoryOpen}
-                            value={category}
-                            items={CategoryItems}
+                            open={supportFieldOpen}
+                            value={supportField}
+                            items={SupportFieldItems}
                             placeholder={"지원분야"}
-                            setOpen={setCategoryOpen}
+                            setOpen={setSupportFieldOpen}
                             minWidth={90}
                             maxWidth={150}
                             setValue={(s) => {
-                                if (s === category) {
-                                    setCategory("");
+                                if (s === supportField) {
+                                    setSupportField("");
                                 }
                                 else {
-                                    setCategory(s);
+                                    setSupportField(s);
                                 }
                             }}
                         />
@@ -168,45 +268,19 @@ export default function NoticeScreen() {
                                     fontFamily : Fonts.medium
                                 }
                             }
-                            open={locationOpen}
-                            value={location}
-                            items={LocationItems}
+                            open={regionOpen}
+                            value={region}
+                            items={RegionItems}
                             placeholder={"지역"}
-                            setOpen={setLocationOpen}
+                            setOpen={setRegionOpen}
                             minWidth={70}
                             maxWidth={120}
                             setValue={(s) => {
-                                if (s === location) {
-                                    setLocation("");
+                                if (s === region) {
+                                    setRegion("");
                                 }
                                 else {
-                                    setLocation(s);
-                                }
-                            }}
-                        />
-                    </View>
-                    <View style={{marginStart: 16}}>
-                        <DropDown
-                            placeholderStyle={
-                                {
-                                    color : Colors.gray2,
-                                    fontSize : 14,
-                                    fontFamily : Fonts.medium
-                                }
-                            }
-                            open={targetOpen}
-                            value={target}
-                            items={TargetItems}
-                            placeholder={"대상"}
-                            setOpen={setTargetOpen}
-                            minWidth={80}
-                            maxWidth={140}
-                            setValue={(s) => {
-                                if (s === target) {
-                                    setTarget("");
-                                }
-                                else {
-                                    setTarget(s);
+                                    setRegion(s);
                                 }
                             }}
                         />
@@ -220,19 +294,19 @@ export default function NoticeScreen() {
                                     fontFamily : Fonts.medium
                                 }
                             }
-                            open={yearsOpen}
-                            value={years}
-                            items={YearsItems}
+                            open={targetAgeOpen}
+                            value={targetAge}
+                            items={TargetAgeItems}
                             placeholder={"연령"}
-                            setOpen={setYearsOpen}
+                            setOpen={setTargetAgeOpen}
                             minWidth={120}
                             maxWidth={250}
                             setValue={(s) => {
-                                if (s === years) {
-                                    setYears("");
+                                if (s === targetAge) {
+                                    setTargetAge("");
                                 }
                                 else {
-                                    setYears(s);
+                                    setTargetAge(s);
                                 }
                             }}
                         />
@@ -246,19 +320,19 @@ export default function NoticeScreen() {
                                     fontFamily : Fonts.medium
                                 }
                             }
-                            open={entreOpen}
-                            value={entre}
-                            items={EntreItems}
+                            open={businessExperienceOpen}
+                            value={businessExperience}
+                            items={BusinessExperienceItems}
                             placeholder={"창업입력"}
-                            setOpen={setEntreOpen}
+                            setOpen={setBusinessExperienceOpen}
                             minWidth={90}
                             maxWidth={150}
                             setValue={(s) => {
-                                if (s === entre) {
-                                    setEntre("");
+                                if (s === businessExperience) {
+                                    setBusinessExperience("");
                                 }
                                 else {
-                                    setEntre(s);
+                                    setBusinessExperience(s);
                                 }
                             }}
                         />
@@ -267,7 +341,7 @@ export default function NoticeScreen() {
             </View>
             <FlatList
                 style={{paddingTop: 50}}
-                data={items}
+                data={allNotices}
                 viewabilityConfig={{
                     itemVisiblePercentThreshold: 50
                 }}
@@ -276,23 +350,16 @@ export default function NoticeScreen() {
                 renderItem={({item}) => (
                     <View style={styles.noticeItemContainer}>
                         <NoticeItem
-                            webLink={item.webLink}
+                            item={item}
                             isHome={false}
-                            onPress={() => {goWeb(item.webLink)}}
-                            id={item.id}
-                            category={item.category}
-                            title={item.title}
-                            location={item.location}
-                            years={item.years}
-                            startTime={item.startTime}
-                            endTime={item.endTime}
-                            target={item.target}
-                            entre={item.entre}
+                            onPress={()=>{navigation.navigation.navigate('InNotice', {
+                                Notice:item
+                            })}}
                         />
                     </View>
                 )}
                 ListFooterComponent={
-                isLoading || isFetchingNextPage?
+                loading || isFetchingNextPage?
                     <View style={[styles.indicatorContainer, {marginTop:height*0.25}]}>
                         <Progress.Circle
                             color={Colors.primary}
@@ -302,7 +369,7 @@ export default function NoticeScreen() {
                     </View>: <View style={{height:16}}/>
                 }
                 ListEmptyComponent={
-                !isLoading || isFetchingNextPage?
+                !loading || isFetchingNextPage?
                     <View style={[styles.emptyContainer,{marginTop:height*0.25}]}>
                         <Text style={styles.emptyContainerText}>존재하는 공고가 없습니다.</Text>
                     </View>: <View/>
