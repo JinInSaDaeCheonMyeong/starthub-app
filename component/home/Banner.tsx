@@ -9,6 +9,9 @@ export default function Banner({
     maxIndex,
     onPress
 } : BannerType & {onPress : () => void}) {
+    const formatDate = (date : Date) => `${date.getFullYear()}.${date.getMonth()}.${date.getDate()}`
+    const peroid = `모집 : ${formatDate(item.startDate)} ~ ${formatDate(item.endDate)}`;
+
     return (
         <Pressable
             onPress={() => {onPress()}}
@@ -32,7 +35,9 @@ export default function Banner({
                 >
                     {item.title}
                 </Text>
-                <Text style={styles.peroidText}>{`모집 : ${item.startDate}`}</Text>
+                <Text style={styles.peroidText}>
+                    {peroid}
+                </Text>
                 <Text style={styles.indexText}>
                     {index}/
                     <Text style={{color : Colors.white2}}>
