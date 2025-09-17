@@ -15,7 +15,7 @@ export const Colors = {
 
     info : '#2F80ED',
     success : '#27AE60',
-    warnig : '#E2B93B',
+    warning : '#E2B93B',
     error : '#EB5757',
 
     // 카테고리 컬러

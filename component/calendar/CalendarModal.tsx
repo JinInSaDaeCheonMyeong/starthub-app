@@ -1,0 +1,164 @@
+import { BottomSheetBackdrop, BottomSheetFlashList, BottomSheetFlatList, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
+import React, { useCallback, useMemo, useState } from "react";
+import { Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native"
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import XIcon from "../../assets/icons/xmark.svg"
+import { Colors } from "../../constants/Color";
+import { Fonts } from "../../constants/Fonts";
+import { NoticeType } from "../../type/notice/notice.type";
+import NoticeItem from "../notice/NoticeItem";
+import { FlatList } from "react-native-gesture-handler";
+
+export type CalendarModalProps = {
+    day: string;
+    scheduleList: NoticeType[];
+    bottomSheetModalRef: React.RefObject<BottomSheetModal | null>;
+    handleModalClose: () => void;
+    onNoticeItemPress : (item : NoticeType) => void
+};
+
+export default function CalendarModal({
+    day,
+    scheduleList,
+    bottomSheetModalRef,
+    handleModalClose,
+    onNoticeItemPress
+} : CalendarModalProps){
+    const insets = useSafeAreaInsets()
+    const {height : windowHeight} = useWindowDimensions()
+    const snapPoints = useMemo(() => ['50%','100%'], []);
+    const [headerHeight, setHeaderHeight] = useState(0);
+    const [currentSnapIndex, setCurrentSnapIndex] = useState(0);
+    const currentSnapHeight = currentSnapIndex === 0 ? windowHeight * 0.5 : windowHeight;
+    const listMaxHeight = currentSnapHeight - headerHeight - insets.top - insets.bottom;
+    return(            
+        <BottomSheetModal
+            handleStyle={styles.handleStyle}
+            handleIndicatorStyle={styles.handleIndicator}
+            ref={bottomSheetModalRef}
+            index={0}
+            snapPoints={snapPoints}
+            topInset={insets.top}
+            enablePanDownToClose={true}
+            backdropComponent={(props) => (
+                <BottomSheetBackdrop
+                    {...props}
+                    appearsOnIndex={0}
+                    disappearsOnIndex={-1}
+                    opacity={0.5}
+                    onPress={() => {handleModalClose()}}
+                />
+            )}
+            onChange={(index) => setCurrentSnapIndex(index)}
+        >
+            <BottomSheetView style={[
+                styles.bottomSheetView, 
+                {
+                    paddingBottom : insets.bottom,
+                    overflow : 'visible'
+                }
+            ]}>
+                <FlatList
+                    bounces={false}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.contentContainer}
+                    style={[styles.flatList, { 
+                        marginTop : headerHeight + 16,
+                        maxHeight: Platform.select({ 
+                            ios : listMaxHeight - 48,
+                            android : listMaxHeight
+                        }) ,
+                    }]}
+                    keyExtractor={(item : NoticeType) => item.id.toString()}
+                    keyboardShouldPersistTaps="handled"
+                    data={scheduleList}
+                    renderItem={({item}) => (
+                        <NoticeItem
+                            item={item}
+                            isHome={false}
+                            onPress={() => {onNoticeItemPress(item)}}
+                        />
+                    )}
+                    ListEmptyComponent={() => (
+                        <View style={styles.errorMsgBox}>
+                            <XIcon color={Colors.error} width={32} height={32}/>
+                            <Text style={styles.errorText}>
+                                {`해당 날짜에 일정이 없습니다`}
+                            </Text>
+                        </View>
+                    )}
+                />
+                <View style={styles.headerContainer}
+                    onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+                >
+                    <View style={styles.blankBox}/>
+                    <Text style={styles.bottomSheetTitleText}>
+                        {day}
+                    </Text>
+                    <TouchableOpacity onPress={handleModalClose} hitSlop={16}>
+                        <XIcon width={16} height={16} color={Colors.black1}/>
+                    </TouchableOpacity>
+                </View>
+            </BottomSheetView>
+        </BottomSheetModal>
+    )
+}
+
+const styles = StyleSheet.create({
+    handleStyle : {
+        borderRadius : 16,
+        backgroundColor : Colors.white1,
+        paddingVertical : 16
+    },
+    handleIndicator : {
+        width : 60,
+        height : 4,
+        backgroundColor : Colors.gray3,
+    },
+    bottomSheetView : {
+        flex : 1,
+        position: 'relative',
+        borderRadius : 16
+    },
+    contentContainer : {
+        gap : 16,
+        paddingHorizontal : 16,
+    },
+    flatList : { 
+        overflow : 'visible'
+    },
+    headerContainer : {
+        position : 'absolute',
+        flexDirection : 'row', 
+        alignItems : 'center', 
+        justifyContent : 'space-between',
+        width : "100%",
+        paddingHorizontal : 16,
+        paddingTop : 8,
+        paddingBottom : 24,
+        borderBottomWidth : 2,
+        borderColor : Colors.white2,
+        backgroundColor : Colors.white1
+    },
+    blankBox : {
+        width : 16, 
+        height : 16
+    },
+    bottomSheetTitleText : {
+        color : Colors.black1,
+        fontFamily : Fonts.medium,
+        fontSize : 14
+    },
+    errorMsgBox : {
+        justifyContent : 'center',
+        alignItems : 'center',
+        marginTop : 32,
+        marginBottom : 48,
+        gap : 24
+    },
+    errorText : {
+        fontSize : 16,
+        fontFamily : Fonts.semiBold,
+        color : Colors.error
+    }
+})

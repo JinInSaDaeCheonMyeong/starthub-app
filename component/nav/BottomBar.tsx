@@ -5,8 +5,7 @@ import {Shadow} from "react-native-shadow-2";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import HomeIcon from "../../assets/icons/bottom/home.svg"
 import NoticeIcon from "../../assets/icons/bottom/notice.svg"
-import MatchIcon from "../../assets/icons/bottom/match.svg"
-import ChatIcon from "../../assets/icons/bottom/chat.svg"
+import CalendarIcon from "../../assets/icons/bottom/calendar.svg"
 import BMCIcon from "../../assets/icons/bottom/BMC.svg"
 
 
@@ -16,8 +15,7 @@ export const BottomBar: React.FC<BottomTabBarProps> = ({state, descriptors, navi
     const labelMap = new Map<string, string>([
         ['Home', '홈'],
         ['Notice', '공고'],
-        ['Match','매칭'],
-        ['Chat','채팅'],
+        ['Calendar', '달력'],
         ['BMC', 'BMC']
     ]);
     const getTabIcon = (routeName: string, color: string) => {
@@ -26,10 +24,8 @@ export const BottomBar: React.FC<BottomTabBarProps> = ({state, descriptors, navi
                 return <HomeIcon width={24} height={24} color={color} />;
             case 'Notice':
                 return <NoticeIcon width={24} height={24} color={color} />;
-            case 'Match':
-                return <MatchIcon width={24} height={24} color={color} />;
-            case 'Chat':
-                return <ChatIcon width={24} height={24} color={color} />;
+            case 'Calendar':
+                return <CalendarIcon width={24} height={24} color={color} />;
             case 'BMC':
                 return <BMCIcon width={24} height={24} color={color} />;
             default:

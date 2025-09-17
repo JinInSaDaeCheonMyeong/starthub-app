@@ -35,3 +35,7 @@ export interface NoticeType extends BeforeNoticeType {
     startDate: Date;
     endDate: Date;
 }
+
+export interface GetNoticeResponse extends Response{
+    data : NoticeType;
+}

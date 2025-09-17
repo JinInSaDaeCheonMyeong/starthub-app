@@ -9,7 +9,7 @@ export default function Banner({
     maxIndex,
     onPress
 } : BannerType & {onPress : () => void}) {
-    const formatDate = (date : Date) => `${date.getFullYear()}.${date.getMonth()}.${date.getDate()}`
+    const formatDate = (date : Date) => `${date.getFullYear()}.${date.getMonth()+1}.${date.getDate()}`
     const peroid = `모집 : ${formatDate(item.startDate)} ~ ${formatDate(item.endDate)}`;
 
     return (

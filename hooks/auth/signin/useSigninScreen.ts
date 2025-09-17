@@ -68,8 +68,7 @@ export const useSigninScreen = ({navigation} : SigninScreenProps) => {
             await saveRefToken(data.refresh)
             ShowToast("성공", "로그인에 성공하셨습니다", ToastType.SUCCESS)
             const userData = await (await getMe()).data
-            console.log(JSON.stringify(userData))
-            if(!data.isFirstLogin && userData.username !== null){
+            if(!data.isFirstLogin && !!userData.username){
                 successLogin()
             } else {
                 navigation.navigate("SignupInput")

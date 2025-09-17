@@ -14,6 +14,7 @@ import { ShowToast, ToastType } from "../../util/ShowToast";
 import { SystemStackParamList } from "../../navigation/SystemStack";
 import { removeTokens } from "../../util/token";
 import { JSX } from "react";
+import { resetScheduleList } from "../../util/Schedule";
 
 type SystemScreenProps = StackScreenProps<SystemStackParamList, 'System'>
 
@@ -153,6 +154,7 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                     onPress={ async() => {
                         try {
                             await removeTokens()
+                            await resetScheduleList()
                             ShowToast("로그아웃", "로그아웃에 성공하셨습니다", ToastType.SUCCESS)
                             navigation.popToTop()
                             
