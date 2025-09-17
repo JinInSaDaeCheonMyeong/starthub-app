@@ -5,16 +5,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import XIcon from "../../assets/icons/xmark.svg"
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
-import { NoticeItemType } from "../../type/notice/notice.type";
+import { NoticeType } from "../../type/notice/notice.type";
 import NoticeItem from "../notice/NoticeItem";
 import { FlatList } from "react-native-gesture-handler";
 
 export type CalendarModalProps = {
-    day : string
-    scheduleList : NoticeItemType[]
-    bottomSheetModalRef : React.RefObject<BottomSheetModal | null>,
-    handleModalClose : () => void
-}
+    day: string;
+    scheduleList: NoticeType[];
+    bottomSheetModalRef: React.RefObject<BottomSheetModal | null>;
+    handleModalClose: () => void;
+};
 
 export default function CalendarModal({
     day,
@@ -51,7 +51,6 @@ export default function CalendarModal({
             <BottomSheetView style={[
                 styles.bottomSheetView, 
                 {
-                    // paddingTop : insets.top,
                     paddingBottom : insets.bottom,
                     overflow : 'visible'
                 }
@@ -68,14 +67,14 @@ export default function CalendarModal({
                                 android : listMaxHeight
                             }) ,
                         }]}
-                        keyExtractor={(item : NoticeItemType) => item.id.toString()}
+                        keyExtractor={(item : NoticeType) => item.id.toString()}
                         keyboardShouldPersistTaps="handled"
                         data={scheduleList}
                         renderItem={({item}) => (
                             <NoticeItem
-                                {...item}
+                                item={{...item}}
                                 isHome={false}
-                                onPress={() => {console.log(item.webLink)}}
+                                onPress={() => {}}
                             />
                         )}
                     />
