@@ -12,12 +12,6 @@ export type Dot = {
     color : DotColor
 }
 
-export type ScheduleItem = {
-    id: number;
-    startTime: string;
-    endTime: string;
-};
-
 export type MarkedDates = Record<
     string,
     {
