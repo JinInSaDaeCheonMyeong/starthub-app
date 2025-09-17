@@ -107,7 +107,7 @@ export default function NoticeItem({
         onPress={() => {onPress()}}
         key={item.id}
         style={{
-            width : isHome ? width/2 : "100%"
+            width : isHome ? width * 0.52 : "100%"
             }}
         >
             <View

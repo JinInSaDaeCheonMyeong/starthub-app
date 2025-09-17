@@ -40,6 +40,7 @@ export default function HomeScreen(props : HomeScreenProps) {
     const {
         form : {
             noticeItems,
+            bookmarkItems,
             carouselList,
             carouselMaxIndex,
             noticeCategoryList,
@@ -140,33 +141,39 @@ export default function HomeScreen(props : HomeScreenProps) {
                             item={item}
                             isHome={true}
                             onPress={() => {
+                                props.navigation.navigate('InNotice', {Notice : item})
                             }}
                         />
                         )}
                     />
                 </View>
-                <View style={styles.flatListWrapper}>
-                    <View style={styles.textWrapper}>
-                        <Text style={styles.titleText}>내 일정 공고</Text>
-                        <Text style={styles.captionText}>사용자님의 일정 중 마감 기한이 임박한 순으로 제공해 드려요</Text>
-                    </View>
-                    <FlatList
-                        contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
-                        showsHorizontalScrollIndicator={false}
-                        horizontal={true}
-                        onEndReached={() => {}}
-                        style={{ overflow: "visible" }}
-                        data={noticeItems}
-                        renderItem={({ item }) => (
-                        <NoticeItem
-                        item={item}
-                            isHome={true}
-                            onPress={() => {
-                            }}
-                        />
-                        )}
-                    />
-                </View>
+                {
+                    bookmarkItems.length !== 0 && (
+                        <View style={styles.flatListWrapper}>
+                            <View style={styles.textWrapper}>
+                                <Text style={styles.titleText}>내 일정 공고</Text>
+                                <Text style={styles.captionText}>사용자님의 일정 중 마감 기한이 임박한 순으로 제공해 드려요</Text>
+                            </View>
+                            <FlatList
+                                contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
+                                showsHorizontalScrollIndicator={false}
+                                horizontal={true}
+                                onEndReached={() => {}}
+                                style={{ overflow: "visible" }}
+                                data={bookmarkItems}
+                                renderItem={({ item }) => (
+                                <NoticeItem
+                                item={item}
+                                    isHome={true}
+                                    onPress={() => {
+                                        props.navigation.navigate('InNotice', {Notice : item})
+                                    }}
+                                />
+                                )}
+                            />
+                        </View>
+                    )
+                }
             </View>
         </ScrollView>
     );

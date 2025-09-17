@@ -1,6 +1,6 @@
 import { isAxiosError } from "axios";
 import { ShowToast, ToastType } from "../../util/ShowToast";
-import { getNotices } from "../../api/notice";
+import { getNotice, getNotices } from "../../api/notice";
 import { useCallback, useState } from "react";
 import { BeforeNoticeType, GetNoticesResponse, NoticeType } from "../../type/notice/notice.type";
 import { ErrorResponse } from "../../type/util/response.type";
@@ -8,10 +8,11 @@ import { Linking, useWindowDimensions } from "react-native";
 import { useFocusEffect } from "@react-navigation/native"
 import type { HomeScreenProps } from "../../screens/Home/HomeScreen";
 import { NoticeCategory } from "../../constants/NoticeCategory";
-import { saveScheduleList } from "../../util/Schedule";
+import { getScheduleList, saveScheduleList } from "../../util/Schedule";
 
 const useHomeScreen = ({navigation} : HomeScreenProps) => {
     const [noticeItems, setNoticeItems] = useState<NoticeType[]>([]);
+    const [bookmarkItems, setBookmarkItems] = useState<NoticeType[]>([]);
     const {width} = useWindowDimensions()
     const carouselHeight = 160
     const [carouselList, setCarouselList] = useState<NoticeType[]>([])
@@ -110,10 +111,7 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
                     endDate: new Date()
                 };
             }
-
-            // "2025-09-01 ~ 2025-09-30 18:00" 형식에서 시간 제거하고 날짜만 추출
             const parts = period.split("~").map(str => str.trim());
-
             if (parts.length !== 2) {
                 console.warn('Invalid period format - no ~ separator:', period);
                 return {
@@ -121,17 +119,9 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
                     endDate: new Date()
                 };
             }
-
             const [startPart, endPart] = parts;
-
-            // 시간 부분 완전히 제거하고 날짜만 추출
-            // "2025-09-01" 또는 "2025-09-01 10:00" → "2025-09-01"
             const startDateStr = startPart.split(" ")[0];
-
-            // "2025-09-30 18:00" 또는 "2025-09-30" → "2025-09-30"
             const endDateStr = endPart.split(" ")[0];
-
-            // YYYY-MM-DD 형식인지 검증
             const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
             if (!dateRegex.test(startDateStr) || !dateRegex.test(endDateStr)) {
                 console.warn('Invalid date format:', { startDateStr, endDateStr, originalPeriod: period });
@@ -173,9 +163,9 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
 
     const fetchNoticeItems = async () => {
         try {
-            const response: GetNoticesResponse = await getNotices("", "", "", "", "", 0);
+            const noticeList : GetNoticesResponse = await getNotices("", "", "", "", "", 0);
             
-            const mapped = response.data.content.map((notice: BeforeNoticeType) => {
+            const mapped = noticeList.data.content.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return {
                     ...notice,
@@ -183,7 +173,20 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
                     endDate,
                 };
             });
+
+            const bookmarkList = await getScheduleList()
+            const resultBookmarkList = await Promise.all(bookmarkList.map(async value => {
+                const result = (await getNotice(value)).data
+                const {startDate, endDate} = parseReceptionPeriod(result.receptionPeriod)
+                return {
+                    ...result,
+                    startDate,
+                    endDate
+                }
+            }))
+
             setNoticeItems(mapped);
+            setBookmarkItems(resultBookmarkList);
             setCarouselList(mapped.splice(0, 3))
 
         } catch (error: unknown) {
@@ -218,6 +221,7 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
     return {
         form : {
             noticeItems,
+            bookmarkItems,
             carouselList,
             carouselMaxIndex,
             noticeCategoryList,
