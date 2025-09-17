@@ -12,40 +12,30 @@ import TalentIcon from "../../assets/icons/category/notice/talent.svg"
 import { useState } from "react"
 import BookMarkFill from "../../assets/icons/bookMark/bookmark.fill.svg"
 import BookMark from "../../assets/icons/bookMark/bookmark.svg"
+import {NoticeType} from "../../type/notice/notice.type";
+import {deleteLikes, postLikes} from "../../api/likes";
 
 interface NoticeItemProps {
-    id: number
-    supportField: string
-    title: string
-    startDate: Date
-    endDate: Date
-    region: string
-    startupHistory: string
+    item : NoticeType
     isHome : boolean,
     onPress : () => void
-    targetAge: string
 }
-
 export default function NoticeItem({
-    id, 
-    supportField,
-    title,
-    startDate,
-    endDate,
-    region,
+    item,
     isHome,
     onPress,
-    targetAge,
 } : NoticeItemProps ){
     const {width} = useWindowDimensions()
-    const [isSelected, setIsSelected] = useState(false)
+    const [isSelected, setIsSelected] = useState(item.isLiked)
+    const [isBookmarkLoading, setIsBookmarkLoading] = useState(false)
+
     const transformDate = (date : Date) => {
         return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`
     }
     const getApplyTargetDisplay = () => {
-        if (!targetAge) return "";
+        if (!item.targetAge) return "";
 
-        const targets = targetAge
+        const targets = item.targetAge
             .split(",")
             .map((target) => target.trim())
             .filter((target) => target);
@@ -91,12 +81,31 @@ export default function NoticeItem({
         "정책자금" : {label : "자금", icon : <FundingIcon width={16} height={16} color={Colors.primary}/>},
         "글로벌" : {label : "글로벌", icon : <GlobalIcon width={16} height={16} color={Colors.primary}/>},
         "기술개발(R&D)" : {label : "R&D", icon : <RNDIcon width={16} height={16} color={Colors.primary}/>},
-        "인력" : {label : "인력", icon : <TalentIcon width={16} height={16} color={Colors.primary}/>}
+        "인력" : {label : "인력", icon : <TalentIcon width={16} height={16} color={Colors.primary}/>},
+        "판로ㆍ해외진출" : {label : "글로벌", icon : <GlobalIcon width={16} height={16} color={Colors.primary}/>},
+    }
+    const handleBookmarkToggle = async () => {
+        if (isBookmarkLoading) return
+
+        setIsBookmarkLoading(true)
+        try {
+            if (isSelected) {
+                await deleteLikes(item.id)
+            } else {
+                await postLikes(item.id)
+            }
+            setIsSelected((prev) => !prev)
+        } catch (error) {
+            console.error('북마크 토글 중 오류:', error)
+            // 에러 발생 시 사용자에게 알림을 표시할 수도 있습니다
+        } finally {
+            setIsBookmarkLoading(false)
+        }
     }
     return (
         <TouchableOpacity 
         onPress={() => {onPress()}}
-        key={id}
+        key={item.id}
         style={{
             width : isHome ? width/2 : "100%"
             }}
@@ -106,9 +115,9 @@ export default function NoticeItem({
             >
                 <View style={styles.mainContainer}>
                     <View style={styles.categoryContainer}>
-                        {categoryMap[supportField as keyof typeof categoryMap]?.icon}
+                        {categoryMap[item.supportField as keyof typeof categoryMap]?.icon}
                         <Text style={styles.categoryText}>
-                            {categoryMap[supportField as keyof typeof categoryMap]?.label}
+                            {categoryMap[item.supportField as keyof typeof categoryMap]?.label}
                         </Text>
                     </View>
                     <View style={styles.titleContainer}>
@@ -119,35 +128,39 @@ export default function NoticeItem({
                             numberOfLines={2}
                             ellipsizeMode="tail"
                         >
-                            {title}
+                            {item.title}
                         </Text>
                         <Text style={styles.dateText}>
-                            {`모집 : ${transformDate(startDate)}~${transformDate(endDate)}`}
+                            {`모집 : ${transformDate(item.startDate)}~${transformDate(item.endDate)}`}
                         </Text>
                     </View>
                     <View style={styles.bookMarkCotainer}>
                         <View style={[styles.hashTagContainer, {height : isHome ? 34 : 'auto'}]}>
-                            {[region, applyTargetDisplay].map((value, index) => (
+                            {[item.region, applyTargetDisplay].map((value, index) => (
                                 <Text key={index} style={styles.hashTagText}>{`#${value}`}</Text>
                             ))}
                         </View>
                         {!isHome && (
-                                <TouchableOpacity onPress={() => {setIsSelected((value) => !value)}}>
-                                    {isSelected ? 
-                                    <BookMarkFill 
+                            <TouchableOpacity
+                                onPress={handleBookmarkToggle}
+                                disabled={isBookmarkLoading}
+                                activeOpacity={0.7}
+                            >
+                                {isSelected ? (
+                                    <BookMarkFill
                                         width={24}
                                         height={24}
                                         fill={Colors.primary}
                                         color={Colors.primary}
                                     />
-                                    :
+                                ) : (
                                     <BookMark
                                         width={24}
                                         height={24}
-                                        color={Colors.black2}
+                                        color={Colors.primary}
                                     />
-                                    }
-                                </TouchableOpacity>
+                                )}
+                            </TouchableOpacity>
                             )
                         }   
                     </View>
