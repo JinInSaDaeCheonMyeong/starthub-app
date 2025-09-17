@@ -51,7 +51,8 @@ export default function HomeScreen(props : HomeScreenProps) {
             carouselHeight,
         },
         actions : {
-            goWeb
+            goNotice,
+            goInNotice
         }
     } = useHomeScreen(props)
 
@@ -67,13 +68,13 @@ export default function HomeScreen(props : HomeScreenProps) {
                         data={carouselList}
                         autoPlayInterval={5000}
                         scrollAnimationDuration={1300}
-                        renderItem={({index, item : props}) => (
+                        renderItem={({index, item}) => (
                             <Banner
-                                {...props}
+                                item={item}
                                 index={index + 1}
                                 maxIndex={carouselMaxIndex}
                                 height={carouselHeight}
-                                onPress={() => {console.log('안녕')}}
+                                onPress={() => {goInNotice(index)}}
                             />
                         )}
                     />
@@ -100,6 +101,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                     <View style={styles.noticeItemListWrapper}>
                         {noticeCategoryList.map(({
                             label, 
+                            value,
                             noticeType, 
                             backgroundColor, 
                             iconColor
@@ -107,7 +109,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                             const IconComponent = categoryMap[noticeType];
                             return (
                                 <TouchableOpacity 
-                                    onPress={() => {console.log(label)}} 
+                                    onPress={() => {goNotice(value)}}
                                     key={index} 
                                     style={styles.iconWrapper}
                                 >
@@ -133,22 +135,12 @@ export default function HomeScreen(props : HomeScreenProps) {
                         horizontal={true}
                         onEndReached={() => {}}
                         style={{ overflow: "visible" }}
-                        data={noticeItems.length > 0 ? noticeItems : NoticeItemList}
+                        data={noticeItems}
                         renderItem={({ item }) => (
                         <NoticeItem
-                            webLink={item.webLink}
-                            id={item.id}
-                            category={item.category}
-                            title={item.title}
-                            startTime={item.startTime}
-                            endTime={item.endTime}
-                            location={item.location}
-                            years={item.years}
-                            target={item.target}
-                            entre={item.entre}
+                            item={item}
                             isHome={true}
                             onPress={() => {
-                                goWeb(item.webLink)
                             }}
                         />
                         )}
@@ -165,22 +157,12 @@ export default function HomeScreen(props : HomeScreenProps) {
                         horizontal={true}
                         onEndReached={() => {}}
                         style={{ overflow: "visible" }}
-                        data={noticeItems.length > 0 ? noticeItems : NoticeItemList}
+                        data={noticeItems}
                         renderItem={({ item }) => (
                         <NoticeItem
-                            webLink={item.webLink}
-                            id={item.id}
-                            category={item.category}
-                            title={item.title}
-                            startTime={item.startTime}
-                            endTime={item.endTime}
-                            location={item.location}
-                            years={item.years}
-                            target={item.target}
-                            entre={item.entre}
+                        item={item}
                             isHome={true}
                             onPress={() => {
-                                goWeb(item.webLink)
                             }}
                         />
                         )}
