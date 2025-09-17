@@ -47,7 +47,7 @@ export default function HomeScreen(props : HomeScreenProps) {
             navList
         },
         ui : {
-            width,
+            width : windowWidth,
             carouselHeight,
         },
         actions : {
@@ -62,7 +62,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                 <View style={styles.bannerContainer}>
                     <Carousel
                         loop
-                        width={width}
+                        width={windowWidth}
                         height={carouselHeight}
                         autoPlay
                         data={carouselList}
@@ -113,7 +113,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                                     key={index} 
                                     style={styles.iconWrapper}
                                 >
-                                    <View style={[styles.iconBox, {backgroundColor}]}>
+                                    <View style={[styles.iconBox, {backgroundColor, width : 59.4 * windowWidth/393, height : 59.4 * windowWidth/393}]}>
                                         {IconComponent && <IconComponent width={30} height={30} color={iconColor} />}
                                     </View>
                                     <Text style={styles.iconLabel}>
@@ -222,8 +222,6 @@ const styles = StyleSheet.create({
         gap : 6,
     },
     iconBox : {
-        width: 59.4,
-        height: 59.4,
         borderRadius: 12,
         justifyContent: "center",
         alignItems: "center"
