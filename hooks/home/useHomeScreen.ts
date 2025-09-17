@@ -55,53 +55,63 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
     const noticeCategoryList = [
         {
             label : '사업화',
+            value : '사업화',
             noticeType : NoticeCategory.BUSINESS,
             backgroundColor : '#E5ECFF',
             iconColor : '#709DFF'
         },
         {
             label : 'R&D',
+            value : '기술개발',
             noticeType : NoticeCategory.RND,
             backgroundColor : '#EBE3FF',
             iconColor : '#D176FF'
         },
         {
             label : '시설',
+            value : '시설',
             noticeType : NoticeCategory.FACILITY,
             backgroundColor : '#FFEAEA',
             iconColor : '#FF7F7F'
         },
         {
             label : '교육',
+            value : '교육',
             noticeType : NoticeCategory.EDUCATION,
             backgroundColor : '#E3F5FF',
             iconColor : '#37B6FF'
         },
         {
             label : '글로벌',
+            value : '글로벌',
             noticeType : NoticeCategory.GLOBAL,
             backgroundColor : '#E7FFE1',
             iconColor : '#92E4A8'
         },
         {
             label : '인력',
+            value : '인력',
             noticeType : NoticeCategory.TALENT,
             backgroundColor : '#FFF2DF',
             iconColor : '#FFBE62'
         },
         {
             label : '행사',
+            value : '행사',
             noticeType : NoticeCategory.EVENT,
             backgroundColor : '#FFE6F3',
             iconColor : '#FF7FB8'
         },
         {
             label : '자금',
+            value : '자금',
             noticeType : NoticeCategory.FUNDING,
             backgroundColor : '#FFFED7',
             iconColor : '#D8D378'
         }
     ]
+
+    
 
     const parseReceptionPeriod = (period: string) => {
         try {
@@ -202,10 +212,8 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
         }
     };
 
-    function goWeb(link: string) {
-        const handlePress = () => {
-            Linking.openURL(link);
-        }; handlePress()
+    function goNotice(supportField : string) {
+        navigation.navigate("Notice", { supportField });
     }
 
     useFocusEffect(
@@ -227,7 +235,7 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
             carouselHeight
         },
         actions : {
-            goWeb
+            goNotice
         }
     }
 }

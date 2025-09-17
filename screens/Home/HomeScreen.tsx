@@ -51,7 +51,7 @@ export default function HomeScreen(props : HomeScreenProps) {
             carouselHeight,
         },
         actions : {
-            goWeb
+            goNotice
         }
     } = useHomeScreen(props)
 
@@ -100,6 +100,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                     <View style={styles.noticeItemListWrapper}>
                         {noticeCategoryList.map(({
                             label, 
+                            value,
                             noticeType, 
                             backgroundColor, 
                             iconColor
@@ -107,7 +108,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                             const IconComponent = categoryMap[noticeType];
                             return (
                                 <TouchableOpacity 
-                                    onPress={() => {console.log(label)}} 
+                                    onPress={() => {goNotice(value)}}
                                     key={index} 
                                     style={styles.iconWrapper}
                                 >
