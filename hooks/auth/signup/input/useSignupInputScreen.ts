@@ -1,9 +1,10 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useError } from "../../../util/useError"
 import { SignupInputScreenProps } from "../../../../screens/SignupInputScreen"
 import { TypeInfo, SignupInputFormData, UserInfo } from "../../../../type/user/signupInput.type"
 import { useDisabled } from "../../../util/useDisabled"
 import StartupStatus from "../../../../constants/StartupStatus"
+import { BackHandler } from "react-native"
 
 export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAXPROGRESS: number) => {
     const [formData, setFormData] = useState<SignupInputFormData>({
@@ -40,11 +41,17 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
     const setGender = makeSetter("gender")
     const setStartupType = makeSetter("startupType");
 
-    const goBack = () => {
-        hideError()
-        if (currentProgress <= 1) navigation.goBack()
-        else setCurrentProgress(prev => prev - 1)
-    }
+    const goBack = useCallback((): boolean => {
+        hideError();
+        if (currentProgress <= 1) {
+            console.log("크아악!2");
+            navigation.goBack();
+        } else {
+            console.log("크아악!1");
+            setCurrentProgress((prev) => prev - 1);
+        }
+        return true;
+    }, [currentProgress, hideError, navigation])
 
     /** 다음 단계 */
     const goNext = async () => {
@@ -76,6 +83,16 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
         hideError();
         enabledBtn();
     }
+
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            goBack
+        );
+        return () => {
+            backHandler.remove();
+        };
+    }, [goBack]);
 
     return {
         form: {
