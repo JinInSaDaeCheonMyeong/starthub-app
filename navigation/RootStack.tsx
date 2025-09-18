@@ -32,6 +32,7 @@ export type RootStackParamList = {
     },
     InNotice : {
         Notice : NoticeType
+        onGoBack?: (noticeId: number, isLiked: boolean) => void;
     }
 };
 
