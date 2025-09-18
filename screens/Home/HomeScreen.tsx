@@ -1,4 +1,4 @@
-import { FlatList, Image, ScrollView,  StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {Dimensions, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import NoticeItem from "../../component/notice/NoticeItem";
@@ -24,6 +24,9 @@ export type HomeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Home">,
     StackScreenProps<RootStackParamList>
 >;
+
+
+const {width} = Dimensions.get("window");
 
 export default function HomeScreen(props : HomeScreenProps) {
     const categoryMap = {
@@ -107,13 +110,14 @@ export default function HomeScreen(props : HomeScreenProps) {
                             iconColor
                         }, index) => {
                             const IconComponent = categoryMap[noticeType];
+                            const buttonSide = (width-96)/5
                             return (
                                 <TouchableOpacity 
                                     onPress={() => {goNotice(value)}}
                                     key={index} 
                                     style={styles.iconWrapper}
                                 >
-                                    <View style={[styles.iconBox, {backgroundColor, width : 59.4 * windowWidth/393, height : 59.4 * windowWidth/393}]}>
+                                    <View style={[styles.iconBox, {backgroundColor, width : buttonSide, height : buttonSide}]}>
                                         {IconComponent && <IconComponent width={30} height={30} color={iconColor} />}
                                     </View>
                                     <Text style={styles.iconLabel}>
