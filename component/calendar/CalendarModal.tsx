@@ -1,5 +1,5 @@
-import { BottomSheetBackdrop, BottomSheetFlashList, BottomSheetFlatList, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
-import React, { useCallback, useMemo, useState } from "react";
+import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
+import React, { useMemo, useState } from "react";
 import { Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import XIcon from "../../assets/icons/xmark.svg"
@@ -26,7 +26,7 @@ export default function CalendarModal({
 } : CalendarModalProps){
     const insets = useSafeAreaInsets()
     const {height : windowHeight} = useWindowDimensions()
-    const snapPoints = useMemo(() => ['50%','100%'], []);
+    const snapPoints = useMemo(() => ['50%', '100%'], []);
     const [headerHeight, setHeaderHeight] = useState(0);
     const [currentSnapIndex, setCurrentSnapIndex] = useState(0);
     const currentSnapHeight = currentSnapIndex === 0 ? windowHeight * 0.5 : windowHeight;
@@ -53,21 +53,23 @@ export default function CalendarModal({
         >
             <BottomSheetView style={[
                 styles.bottomSheetView, 
-                {
-                    paddingBottom : insets.bottom,
-                    overflow : 'visible'
-                }
             ]}>
                 <FlatList
                     bounces={false}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.contentContainer}
+                    contentContainerStyle={[
+                        styles.contentContainer,
+                        {
+                            paddingBottom : insets.bottom
+                        }
+                    ]}
                     style={[styles.flatList, { 
-                        marginTop : headerHeight + 16,
+                        marginTop : headerHeight,
                         maxHeight: Platform.select({ 
-                            ios : listMaxHeight - 48,
+                            ios : listMaxHeight,
                             android : listMaxHeight
-                        }) ,
+                        }),
+                        overflow : 'visible'
                     }]}
                     keyExtractor={(item : NoticeType) => item.id.toString()}
                     keyboardShouldPersistTaps="handled"
@@ -123,6 +125,7 @@ const styles = StyleSheet.create({
     contentContainer : {
         gap : 16,
         paddingHorizontal : 16,
+        paddingTop : 16,
     },
     flatList : { 
         overflow : 'visible'

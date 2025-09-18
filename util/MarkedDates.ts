@@ -29,7 +29,7 @@ export function buildDeadlineMarks(items: NoticeType[]): MarkedDates {
             const start = event.startDate;
             const end = event.endDate;
             const yellowStart = subDays(end, 14);
-            const redStart = subDays(end, 7);
+            const redStart = subDays(end, 1);
             const allDates = eachDayOfInterval({ start, end });
     
             allDates.forEach((date) => {
@@ -38,10 +38,10 @@ export function buildDeadlineMarks(items: NoticeType[]): MarkedDates {
                     ? [...marked[key].dots]
                     : [];
                 if (date >= start && date < yellowStart) dots.push({id : event.id, color: Colors.info }); // 기본 파랑
-                if (date >= yellowStart && date < redStart) dots.push({ id: event.id, color: Colors.warning }); // 2주 전부터 노랑
-                if (date >= redStart) dots.push({ id: event.id, color: Colors.error }); // 1주 전부터 빨강
+                if (date >= yellowStart && date < end) dots.push({ id: event.id, color: Colors.warning }); // 2주 전부터 노랑
+                if (date > redStart) dots.push({ id: event.id, color: Colors.error }); // 당일 날부터 빨강
                 dots.sort((a, b) => {
-                    const colorOrder = [Colors.error, Colors.warning, Colors.info];
+                    const colorOrder : DotColor[] = [Colors.error, Colors.warning, Colors.info];
                     return colorOrder.indexOf(a.color) - colorOrder.indexOf(b.color);
                 });
                 marked[key] = {
