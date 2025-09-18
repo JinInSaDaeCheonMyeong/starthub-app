@@ -9,7 +9,7 @@ import FundingIcon from "../../assets/icons/category/notice/funding.svg"
 import GlobalIcon from "../../assets/icons/category/notice/global.svg"
 import RNDIcon from "../../assets/icons/category/notice/rnd.svg"
 import TalentIcon from "../../assets/icons/category/notice/talent.svg"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import BookMarkFill from "../../assets/icons/bookMark/bookmark.fill.svg"
 import BookMark from "../../assets/icons/bookMark/bookmark.svg"
 import {NoticeType} from "../../type/notice/notice.type";
@@ -21,17 +21,23 @@ interface NoticeItemProps {
     onPress : () => void
 }
 export default function NoticeItem({
-    item,
-    isHome,
-    onPress,
-} : NoticeItemProps ){
+                                       item,
+                                       isHome,
+                                       onPress,
+                                   } : NoticeItemProps ){
     const {width} = useWindowDimensions()
     const [isSelected, setIsSelected] = useState(item.isLiked)
     const [isBookmarkLoading, setIsBookmarkLoading] = useState(false)
 
+    // item.isLiked가 변경될 때마다 내부 상태도 동기화
+    useEffect(() => {
+        setIsSelected(item.isLiked);
+    }, [item.isLiked]);
+
     const transformDate = (date : Date) => {
         return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`
     }
+
     const getApplyTargetDisplay = () => {
         if (!item.targetAge) return "";
 
@@ -66,7 +72,6 @@ export default function NoticeItem({
         };
 
         const display = getAgeGroup(firstTarget);
-
         return targets.length > 1 ? `${display} 등` : display;
     };
 
@@ -84,6 +89,7 @@ export default function NoticeItem({
         "인력" : {label : "인력", icon : <TalentIcon width={16} height={16} color={Colors.primary}/>},
         "판로ㆍ해외진출" : {label : "글로벌", icon : <GlobalIcon width={16} height={16} color={Colors.primary}/>},
     }
+
     const handleBookmarkToggle = async () => {
         if (isBookmarkLoading) return
 
@@ -94,20 +100,21 @@ export default function NoticeItem({
             } else {
                 await postLikes(item.id)
             }
+            item.isLiked = !item.isLiked
             setIsSelected((prev) => !prev)
         } catch (error) {
             console.error('북마크 토글 중 오류:', error)
-            // 에러 발생 시 사용자에게 알림을 표시할 수도 있습니다
         } finally {
             setIsBookmarkLoading(false)
         }
     }
+
     return (
-        <TouchableOpacity 
-        onPress={() => {onPress()}}
-        key={item.id}
-        style={{
-            width : isHome ? width * 0.52 : "100%"
+        <TouchableOpacity
+            onPress={() => {onPress()}}
+            key={item.id}
+            style={{
+                width : isHome ? width * 0.52 : "100%"
             }}
         >
             <View
@@ -124,9 +131,9 @@ export default function NoticeItem({
                         <Text style={[styles.titleText, isHome && {
                             lineHeight : 20,
                             height : 44
-                        }]} 
-                            numberOfLines={2}
-                            ellipsizeMode="tail"
+                        }]}
+                              numberOfLines={2}
+                              ellipsizeMode="tail"
                         >
                             {item.title}
                         </Text>
@@ -161,8 +168,7 @@ export default function NoticeItem({
                                     />
                                 )}
                             </TouchableOpacity>
-                            )
-                        }   
+                        )}
                     </View>
                 </View>
             </View>
