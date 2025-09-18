@@ -2,7 +2,8 @@ import {Dimensions, FlatList, ScrollView, StyleSheet, Text, View} from "react-na
 import SearchBar from "../../component/home/SearchBar";
 import DropDown from "../../component/DropDown";
 import { Colors } from "../../constants/Color";
-import {useEffect, useState, useRef} from "react";
+import {useEffect, useState, useRef, useCallback} from "react";
+import {useFocusEffect} from '@react-navigation/native'; // 추가
 import {BusinessExperienceItems} from "../../constants/BusinessExperienceItems";
 import {ShowToast, ToastType} from "../../util/ShowToast";
 import NoticeItem from "../../component/notice/NoticeItem";
@@ -19,7 +20,6 @@ import {SupportFieldItems} from "../../constants/SupportFieldItems";
 import {RegionItems} from "../../constants/RegionItems";
 import {TargetAgeItems} from "../../constants/TargetAgeItems";
 
-
 const {height} = Dimensions.get('window');
 
 export type NoticeScreenProps = CompositeScreenProps<
@@ -28,10 +28,10 @@ export type NoticeScreenProps = CompositeScreenProps<
 >
 
 export default function NoticeScreen({navigation, route : {params}}: NoticeScreenProps) {
+
     const parseReceptionPeriod = (period: string) => {
         try {
             if (!period || typeof period !== 'string') {
-                console.warn('Invalid reception period:', period);
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -41,7 +41,6 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
             const parts = period.split("~").map(str => str.trim());
 
             if (parts.length !== 2) {
-                console.warn('Invalid period format - no ~ separator:', period);
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -54,7 +53,6 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
 
             const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
             if (!dateRegex.test(startDateStr) || !dateRegex.test(endDateStr)) {
-                console.warn('Invalid date format:', { startDateStr, endDateStr, originalPeriod: period });
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -65,11 +63,6 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
             const endDate = new Date(endDateStr + 'T00:00:00');
 
             if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                console.warn('Invalid date created from:', {
-                    startDateStr,
-                    endDateStr,
-                    originalPeriod: period
-                });
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -81,7 +74,6 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                 endDate
             };
         } catch (error) {
-            console.error('Error parsing reception period:', error, 'Period:', period);
             return {
                 startDate: new Date(),
                 endDate: new Date()
@@ -107,48 +99,57 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
     const [allNotices, setAllNotices] = useState<NoticeType[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // params와 필터 변경 시 API 호출
-    useEffect(() => {
-        const fetchNotices = async () => {
-            try {
+    // 공고 데이터를 가져오는 함수를 별도로 분리
+    const fetchNotices = useCallback(async (isRefresh: boolean = false) => {
+        try {
+            if (!isRefresh) {
                 setLoading(true);
                 setPage(0);
+            }
 
-                // params에서 supportField 업데이트
-                let currentSupportField = supportField;
-                if (typeof params?.supportField === "string" && params.supportField !== supportField) {
-                    currentSupportField = params.supportField;
-                    setSupportField(params.supportField);
-                    console.log('Updated supportField from params:', params.supportField);
-                }
+            // params에서 supportField 업데이트
+            let currentSupportField = supportField;
+            if (typeof params?.supportField === "string" && params.supportField !== supportField) {
+                currentSupportField = params.supportField;
+                setSupportField(params.supportField);
+            }
 
-                console.log('Fetching notices with supportField:', currentSupportField);
 
-                const response: GetNoticesResponse = await getNotices(title, currentSupportField, region, targetAge, businessExperience, 0);
-                const mapped = response.data.content.map((notice: BeforeNoticeType) => {
-                    const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
-                    return {
-                        ...notice,
-                        startDate,
-                        endDate,
-                    };
-                });
+            const response: GetNoticesResponse = await getNotices(title, currentSupportField, region, targetAge, businessExperience, 0);
+            const mapped = response.data.content.map((notice: BeforeNoticeType) => {
+                const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
+                return {
+                    ...notice,
+                    startDate,
+                    endDate,
+                };
+            });
 
-                setAllNotices(mapped);
-            } catch (error) {
-                console.error('공고 데이터 로딩 실패:', error);
-                ShowToast(
-                    "문제가 발생하였습니다",
-                    "데이터를 불러오지 못하였습니다",
-                    ToastType.ERROR
-                );
-            } finally {
+            setAllNotices(mapped);
+        } catch (error) {
+            ShowToast(
+                "문제가 발생하였습니다",
+                "데이터를 불러오지 못하였습니다",
+                ToastType.ERROR
+            );
+        } finally {
+            if (!isRefresh) {
                 setLoading(false);
             }
-        };
-
-        fetchNotices();
+        }
     }, [title, supportField, region, targetAge, businessExperience, params?.supportField]);
+
+    // 필터 변경 시 API 호출 (기존과 동일)
+    useEffect(() => {
+        fetchNotices(false);
+    }, [fetchNotices]);
+
+    // 화면 포커스시 새로고침 (탭바로 들어올 때)
+    useFocusEffect(
+        useCallback(() => {
+            fetchNotices(true); // 새로고침 모드
+        }, [fetchNotices])
+    );
 
     const loadNextPage = async () => {
         const now = Date.now();
@@ -164,7 +165,6 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
         setIsFetchingNextPage(true);
 
         try {
-            console.log('Loading next page:', nextPage, 'with supportField:', supportField);
             const response = await getNotices(title, supportField, region, targetAge, businessExperience, nextPage);
             const data = response.data.content.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
@@ -176,11 +176,10 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
             });
 
             if (data.length > 0) {
-                setPage(nextPage); // 성공 시에만 페이지 증가
+                setPage(nextPage);
                 setAllNotices(prev => [...prev, ...data]);
             }
         } catch (error) {
-            console.error('Next page loading failed:', error);
             ShowToast(
                 "문제가 발생하였습니다",
                 "데이터를 불러오지 못하였습니다",
@@ -203,6 +202,16 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
             loadNextPage();
         }
     };
+
+    const updateNoticeInList = useCallback((noticeId: number, newIsLiked: boolean) => {
+        setAllNotices(prevNotices =>
+            prevNotices.map(notice =>
+                notice.id === noticeId
+                    ? { ...notice, isLiked: newIsLiked }
+                    : notice
+            )
+        );
+    }, []);
 
     return (
         <View style={styles.container}>
@@ -246,7 +255,6 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                             minWidth={90}
                             maxWidth={150}
                             setValue={(s) => {
-                                console.log('DropDown setValue called with:', s, 'current supportField:', supportField);
                                 if (s === supportField) {
                                     setSupportField("");
                                 }
@@ -349,9 +357,12 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                         <NoticeItem
                             item={item}
                             isHome={false}
-                            onPress={()=>{navigation.navigate('InNotice', {
-                                Notice:item
-                            })}}
+                            onPress={()=>{
+                                navigation.navigate('InNotice', {
+                                    Notice: item,
+                                    onGoBack: updateNoticeInList
+                                })
+                            }}
                         />
                     </View>
                 )}
