@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import StartupStatus from "../../../../constants/StartupStatus"
 import { CompanyInputScreenProps } from "../../../../screens/CompanyInputScreen"
 import { useError } from "../../../util/useError";
@@ -6,6 +6,8 @@ import { useDisabled } from "../../../util/useDisabled";
 import { CompanyInputFormData } from "../../../../type/user/companyInput.type";
 import { ShowToast, ToastType } from "../../../../util/ShowToast";
 import { setProfile } from "../../../../api/user";
+import { BackHandler } from "react-native";
+import {useFocusEffect} from "@react-navigation/native"
 
 export const useCompanyInputScreen = (
     {
@@ -63,11 +65,17 @@ export const useCompanyInputScreen = (
     const setStartupLocation = makeSetter("startupLocation");
     const setStartupFields = makeSetter("startupFields");
 
-    const goBack = () => {
+    const goBack = useCallback((): boolean => {
         hideError();
-        if (currentProgress <= 1) navigation.goBack();
-        else setCurrentProgress((prev) => prev - 1);
-    };
+        if (currentProgress <= 1) {
+            console.log("크아악!2");
+            navigation.goBack();
+        } else {
+            console.log("크아악!1");
+            setCurrentProgress((prev) => prev - 1);
+        }
+        return true;
+    }, [currentProgress, hideError, navigation])
 
     const goNext = async () => {
         disabledBtn()
@@ -79,7 +87,10 @@ export const useCompanyInputScreen = (
         const startupLocation = formData.startupLocation.trim()
         const startupFields = formData.startupFields
 
-        if(!companyName){
+        if(
+            !companyName && 
+            startupType === StartupStatus.EARLY_STAGE
+        ){
             showError('기업명을 입력해주세요')
             enabledBtn();
             return
@@ -124,6 +135,7 @@ export const useCompanyInputScreen = (
                     startupFields
                 })
                 ShowToast("프로필 수정", "프로필 수정에 성공하셨습니다", ToastType.SUCCESS)
+                navigation.navigate('HomeStack')
             } catch (error : any) {
                 if(error.isAxiosError){
                     ShowToast("프로필 수정", "프로필 수정에 실패하셨습니다", ToastType.ERROR)
@@ -138,6 +150,15 @@ export const useCompanyInputScreen = (
         hideError();
         enabledBtn();
     }
+
+    useFocusEffect(
+        useCallback(() => {
+            const backHandler = BackHandler.addEventListener('hardwareBackPress', goBack)
+            return () => {
+                backHandler.remove()
+            }
+        }, [goBack])
+    )
 
     return {
         form : {
