@@ -55,7 +55,7 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                 {
                     label : '내 북마크', 
                     icon : <BookmarkIcon width={20} height={20} color={Colors.black2}/>,
-                    stackName : 'Profile'
+                    stackName : 'MyLikes'
                 },
                 {
                     label : '내 작성글', 
@@ -108,6 +108,9 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                                     onPress={() => {
                                         switch(stackName){
                                             case "Profile":
+                                                navigation.navigate(stackName)
+                                                break
+                                            case "MyLikes":
                                                 navigation.navigate(stackName)
                                                 break
                                             default:
