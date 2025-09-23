@@ -37,6 +37,7 @@ export default function NoticeItem({
     const transformDate = (date : Date) => {
         return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`
     }
+    console.log(item.id)
 
     const getApplyTargetDisplay = () => {
         if (!item.targetAge) return "";

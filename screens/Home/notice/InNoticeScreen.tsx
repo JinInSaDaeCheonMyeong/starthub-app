@@ -57,14 +57,20 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
             } else {
                 await postLikes(notice.id)
             }
-            setIsSelected((prev) => !prev)
+
+            const newIsLiked = !isSelected;
+            setIsSelected(newIsLiked);
+            if (params?.onGoBack) {
+                params.onGoBack(notice.id, newIsLiked);
+            }
+
         } catch (error) {
             console.error('북마크 토글 중 오류:', error)
-            // 에러 발생 시 사용자에게 알림을 표시할 수도 있습니다
         } finally {
             setIsBookmarkLoading(false)
         }
     }
+
     const handleSaveScheduleList = async () => {
         try {
             const preScheduleList = await getScheduleList()
