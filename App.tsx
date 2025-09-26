@@ -3,6 +3,7 @@ import RootStack from "./navigation/RootStack";
 import {NavigationContainer} from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import toastConfig from "./lib/ToastConfig";
 
 export default function App() {
   return (
@@ -10,7 +11,7 @@ export default function App() {
       <BottomSheetModalProvider>
         <NavigationContainer>
           <RootStack />
-          <Toast />
+          <Toast config={toastConfig}/>
         </NavigationContainer>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
