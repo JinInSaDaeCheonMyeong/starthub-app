@@ -81,7 +81,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                             />
                         )}
                     />
-                    <View style={styles.navIconContainer}>
+                    {/* <View style={styles.navIconContainer}>
                         {navList.map(({icon, label, navItem}, index) => (
                             <TouchableOpacity 
                                 onPress={() => {console.log(navItem)}}
@@ -94,7 +94,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                                 </Text>
                             </TouchableOpacity>
                         ))}
-                    </View>
+                    </View> */}
                 </View>
                 <View style={styles.flatListWrapper}>
                     <View style={styles.textWrapper}>
