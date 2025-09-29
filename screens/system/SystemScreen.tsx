@@ -48,20 +48,10 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
             title : '나의 활동',
             sections : [
                 {
-                    label : '최근 본 게시물', 
-                    icon : <TimeIcon width={20} height={20} color={Colors.black2}/>,
-                    stackName : 'Profile'
-                },
-                {
                     label : '내 북마크', 
                     icon : <BookmarkIcon width={20} height={20} color={Colors.black2}/>,
                     stackName : 'MyLikes'
                 },
-                {
-                    label : '내 작성글', 
-                    icon : <WriteIcon width={20} height={20} color={Colors.black2}/>,
-                    stackName : 'Profile'
-                }
             ]
         },
     ]
@@ -73,11 +63,11 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                 icon : <InfoIcon width={20} height={20} color={Colors.black2}/>,
                 link : 'https://www.dominilbo.com/news/articleView.html?idxno=216474'
             },
-            {
-                label : '고객 센터', 
-                icon : <ServiceIcon width={20} height={20} color={Colors.black2}/>,
-                link : 'https://www.dominilbo.com/news/articleView.html?idxno=216474'
-            },
+            // {
+            //     label : '고객 센터', 
+            //     icon : <ServiceIcon width={20} height={20} color={Colors.black2}/>,
+            //     link : 'https://www.dominilbo.com/news/articleView.html?idxno=216474'
+            // },
         ]
     }
 
