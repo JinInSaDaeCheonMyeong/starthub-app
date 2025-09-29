@@ -15,10 +15,10 @@ export default function HeaderBar(props : HeaderBarProps){
             <View style={styles.headerContainer}>
                 <Image style={{width : 88, height : 36}} source={logo}/>
                 <View style={styles.iconContainer}>
-                    <TouchableOpacity onPress={() => {ShowToast("개발" ,"아직 개발 중인 기능입니다", ToastType.INFO)}}>
+                    {/* <TouchableOpacity onPress={() => {ShowToast("개발" ,"아직 개발 중인 기능입니다", ToastType.INFO)}}>
                         <BellIcon width={24} height={24} color={Colors.black2}/>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={props.onClickSystemIcon}>
+                    </TouchableOpacity> */}
+                    <TouchableOpacity hitSlop={16} onPress={props.onClickSystemIcon}>
                         <SystemIcon width={24} height={24} color={Colors.black2}/>
                     </TouchableOpacity>
                 </View>
