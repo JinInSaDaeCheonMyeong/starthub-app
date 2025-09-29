@@ -4,14 +4,12 @@ import {
     Text,
     StyleSheet, ScrollView, Dimensions, TouchableOpacity,
 } from 'react-native';
-import BackButton from '../../../component/BackButton';
 import { Colors } from '../../../constants/Color';
 import { Fonts } from '../../../constants/Fonts';
 import {StackScreenProps} from "@react-navigation/stack";
 import {RootStackParamList} from "../../../navigation/RootStack";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
-import {BMCType, SelectBMCValue} from "../../../type/BMC/BMC.type";
-
+import {SelectBMCValue} from "../../../type/BMC/BMC.type";
 import ChannelsIcon from "../../../assets/icons/bmc/channels.svg"
 import CostStructureIcon from "../../../assets/icons/bmc/cost_structure.svg"
 import CustomerRelationshipsIcon from "../../../assets/icons/bmc/customer_relationships.svg"
@@ -21,6 +19,7 @@ import KeyPartnersIcon from "../../../assets/icons/bmc/key_partners.svg"
 import KeyResourcesIcon from "../../../assets/icons/bmc/key_resources.svg"
 import RevenueStreamsIcon from "../../../assets/icons/bmc/revenue_streams.svg"
 import ValuePropositionIcon from "../../../assets/icons/bmc/value_proposition.svg"
+import SubHeaderBar from '../../../component/home/SubHeaderBar';
 
 const {width} = Dimensions.get('window');
 
@@ -86,16 +85,10 @@ export default function InBMCScreen({navigation, route : {params}} : InBMCScreen
     };
     return (
         <View style={[styles.container,{paddingTop: insets.top, paddingBottom: insets.bottom}]}>
-            <View style={styles.header}>
-                <BackButton
-                        width={24}
-                        height={24}
-                        color={Colors.black2}
-                        onClick={handleBackPress}
-                />
-                <Text style={styles.headerTitle}>{params.BMC.title}</Text>
-                <View style={{paddingEnd: 24}}/>
-            </View>
+            <SubHeaderBar
+                title={params.BMC.title}
+                handleBackPress={handleBackPress}
+            />
             <ScrollView>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <View style={{flexWrap: 'wrap', flexDirection: 'row', paddingStart: 16, paddingTop: 20, paddingBottom: 24}}>
