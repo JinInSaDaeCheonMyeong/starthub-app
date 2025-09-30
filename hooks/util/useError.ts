@@ -32,9 +32,9 @@ export const useError = () => {
             } else {
                 const message = (response.data as ErrorResponse).message
                 if(message[message.length] === '.') {
-                    showError(message.slice(0, -1));
+                    show(message.slice(0, -1));
                 }
-                showError(message + "입니다")
+                show(message + "입니다")
             }
         } else {
             show("예상치 못한 오류가 발생하였습니다")

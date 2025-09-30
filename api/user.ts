@@ -6,6 +6,7 @@ import { Response } from "../type/util/response.type";
 import { GetMeResponse, GetUserResponse } from "../type/user/user.type";
 import { getAccToken } from "../util/token";
 import { SetProfileRequest } from "../type/user/profile.type";
+import axios from "axios";
 
 const GET_TOKEN_API_HEADERS = {'X-Platform': 'app'}
 
@@ -13,8 +14,8 @@ export const signup = async (signupData : SignupRequest) : Promise<Response> =>
     (await StartHubAxios.post('/user/sign-up', signupData)).data
 
 export const signin = async (signinData : SigninRequest) : Promise<SigninResponse> => 
-    (await StartHubAxios.post(
-        '/user/sign-in', 
+    (await axios.post(
+        `${process.env.EXPO_PUBLIC_API_URL}user/sign-in`, 
         signinData, 
         { headers : GET_TOKEN_API_HEADERS }
     )).data
