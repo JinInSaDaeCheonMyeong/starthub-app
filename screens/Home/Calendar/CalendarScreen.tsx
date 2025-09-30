@@ -1,4 +1,4 @@
-import { ScrollView, Text, TouchableOpacity, View, StyleSheet, useWindowDimensions } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, StyleSheet } from "react-native";
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { Colors } from "../../../constants/Color";
 import { Fonts } from "../../../constants/Fonts";
@@ -9,12 +9,12 @@ import CalendarModal from "../../../component/calendar/CalendarModal";
 import * as Progress from "react-native-progress";
 import useCalendarScreen from "../../../hooks/home/useCalendarScreen";
 import { ShowToast, ToastType } from "../../../util/ShowToast";
-import { Item } from "react-native-paper/lib/typescript/components/Drawer/Drawer";
 import { CompositeScreenProps } from "@react-navigation/core";
 import { HomeStackParamList } from "../../../navigation/HomeStack";
 import { RootStackParamList } from "../../../navigation/RootStack";
 import { StackScreenProps } from "@react-navigation/stack";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { useState } from "react";
 
 LocaleConfig.locales['ko'] = {
     monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
@@ -52,11 +52,17 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
             handleModalOpen
         }
     } = useCalendarScreen()
+    const today = new Date()
+    const [currentMonth, setCurrentMonth] = useState(today.getMonth() + 1)
 
     return (
         <>
         <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
             <Calendar
+                onMonthChange={(date) => {
+                    console.log(date.month)
+                    setCurrentMonth(date.month)
+                }}
                 style={styles.calendar}
                 theme={{
                     calendarBackground: Colors.white1,
@@ -64,54 +70,64 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                 }}
                 markingType={"multi-dot"}
                 markedDates={markedDates}
-                customHeader={(props: any) => (
-                    <View style={styles.headerContainer}>
-                        <View style={styles.headerTop}>
-                            <Text style={styles.headerTitle}>
-                                {formatToDate(props.month, "calendar")}
-                            </Text>
-                            <View style={styles.headerButtons}>
-                                <TouchableOpacity hitSlop={8} onPress={() => props.addMonth(-1)}>
-                                    <LeftIcon width={20} height={20} color={Colors.black2} />
-                                </TouchableOpacity>
-                                <TouchableOpacity hitSlop={8} onPress={() => props.addMonth(1)}>
-                                    <RightIcon width={20} height={20} color={Colors.black2} />
-                                </TouchableOpacity>
+                customHeader={(props: any) => {
+                    return (
+                        <View style={styles.headerContainer}>
+                            <View style={styles.headerTop}>
+                                <Text style={styles.headerTitle}>
+                                    {formatToDate(props.month.toDateString(), 'calendar')}
+                                </Text>
+                                <View style={styles.headerButtons}>
+                                    <TouchableOpacity hitSlop={8} onPress={() => props.addMonth(-1)}>
+                                        <LeftIcon width={20} height={20} color={Colors.black2} />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity hitSlop={8} onPress={() => props.addMonth(1)}>
+                                        <RightIcon width={20} height={20} color={Colors.black2} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            <View style={styles.dotLegend}>
+                                {dotInfoList.map((value, index) => (
+                                    <View style={styles.dotLegendItem} key={index}>
+                                        <View style={[styles.dotLegendDot, { backgroundColor: value.color }]} />
+                                        <Text style={styles.dotLegendText}>{value.text}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                            <View style={styles.weekDays}>
+                                {dayDataList.map((value, index) => (
+                                    <View key={index} style={styles.weekDayItem}>
+                                        <Text
+                                            style={[
+                                                styles.weekDayText,
+                                                index === 0 && { color: Colors.error },
+                                                index === 6 && { color: Colors.info },
+                                            ]}
+                                        >
+                                            {value}
+                                        </Text>
+                                    </View>
+                                ))}
                             </View>
                         </View>
-                        <View style={styles.dotLegend}>
-                            {dotInfoList.map((value, index) => (
-                                <View style={styles.dotLegendItem} key={index}>
-                                    <View style={[styles.dotLegendDot, { backgroundColor: value.color }]} />
-                                    <Text style={styles.dotLegendText}>{value.text}</Text>
-                                </View>
-                            ))}
-                        </View>
-                        <View style={styles.weekDays}>
-                            {dayDataList.map((value, index) => (
-                                <View key={index} style={styles.weekDayItem}>
-                                    <Text
-                                        style={[
-                                            styles.weekDayText,
-                                            index === 0 && { color: Colors.error },
-                                            index === 6 && { color: Colors.info },
-                                        ]}
-                                    >
-                                        {value}
-                                    </Text>
-                                </View>
-                            ))}
-                        </View>
-                    </View>
-                )}
+                    )
+                }}
                 dayComponent={({date, state, marking, onPress}) => {
                     const dotIds = marking?.dots?.map((dot : any) => dot.id) ?? [];
+                    const isDisabled = state === 'disabled';
+                    const isToday = state === 'today'
+                    const isSameMonth = date?.month === currentMonth;
+                    console.log(`${date?.dateString} : ${date?.month } ${today.getMonth() + 1}`)
+                    console.log(`${date?.dateString} : ${isDisabled} ${isToday} ${isSameMonth}`)
+                    const backgroundColor = isDisabled ? Colors.white2 : 
+                                            isToday ? 
+                                            isSameMonth ? Colors.white1 : Colors.white2 : Colors.white1
                     return (
                         <TouchableOpacity
                             key={date?.dateString ?? 'undefind'}
                             style={[
                                 styles.dayContainer,
-                                { backgroundColor: state !== 'disabled' ? Colors.white1 : Colors.white2 },
+                                { backgroundColor },
                             ]}
                             onPress={async () => {
                                 try {
