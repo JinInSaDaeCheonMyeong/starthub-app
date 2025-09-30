@@ -27,4 +27,4 @@ export const getUser = async (userId : number) : Promise<GetUserResponse> =>
     (await StartHubAxios.get(`/user/${userId}/profile`)).data
 
 export const deleteUser = async(deleteUserData : {password ?: string}) : Promise<Response> => 
-    (await StartHubAxios.delete('/user', {data : deleteUserData})).data
+    (await StartHubAxios.delete('/user/delete', {data : deleteUserData})).data
