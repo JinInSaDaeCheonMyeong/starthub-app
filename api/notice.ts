@@ -11,11 +11,11 @@ export const getNotices = async (
 ) : Promise<GetNoticesResponse> =>
     (await StartHubAxios.get('announcements/search', {
         params : {
-            title : title,
-            supportField : supportField,
-            targetRegion : targetRegion,
-            targetAge : targetAge,
-            businessExperience : businessExperience,
+            ...(title && { title }),
+            ...(supportField && { supportField }),
+            ...(targetRegion && { targetRegion }),
+            ...(targetAge && { targetAge }),
+            ...(businessExperience && { businessExperience }),
             includeLikeStatus : true,
             page : page,
             size : 15

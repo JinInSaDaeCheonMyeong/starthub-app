@@ -3,7 +3,7 @@ import SearchBar from "../../component/home/SearchBar";
 import DropDown from "../../component/DropDown";
 import { Colors } from "../../constants/Color";
 import {useEffect, useState, useRef, useCallback} from "react";
-import {useFocusEffect} from '@react-navigation/native'; // 추가
+import {useFocusEffect} from '@react-navigation/native';
 import {BusinessExperienceItems} from "../../constants/BusinessExperienceItems";
 import {ShowToast, ToastType} from "../../util/ShowToast";
 import NoticeItem from "../../component/notice/NoticeItem";
@@ -19,6 +19,7 @@ import {RootStackParamList} from "../../navigation/RootStack";
 import {SupportFieldItems} from "../../constants/SupportFieldItems";
 import {RegionItems} from "../../constants/RegionItems";
 import {TargetAgeItems} from "../../constants/TargetAgeItems";
+import {isAxiosError} from "axios";
 
 const {height} = Dimensions.get('window');
 
@@ -98,24 +99,29 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
 
     const [allNotices, setAllNotices] = useState<NoticeType[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isLast, setIsLast] = useState<boolean>(false);
 
-    // 공고 데이터를 가져오는 함수를 별도로 분리
+    const isInitialMount = useRef(true);
+    const [refreshing, setRefreshing] = useState(false);
+
     const fetchNotices = useCallback(async (isRefresh: boolean = false) => {
         try {
             if (!isRefresh) {
                 setLoading(true);
                 setPage(0);
+            } else {
+                setRefreshing(true);
             }
 
-            // params에서 supportField 업데이트
             let currentSupportField = supportField;
             if (typeof params?.supportField === "string" && params.supportField !== supportField) {
                 currentSupportField = params.supportField;
                 setSupportField(params.supportField);
             }
 
-
             const response: GetNoticesResponse = await getNotices(title, currentSupportField, region, targetAge, businessExperience, 0);
+            setIsLast(false);
+
             const mapped = response.data.content.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return {
@@ -127,38 +133,54 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
 
             setAllNotices(mapped);
         } catch (error) {
+            if(isAxiosError(error)) {
+                console.log(error.response);
+            }
             ShowToast(
                 "문제가 발생하였습니다",
                 "데이터를 불러오지 못하였습니다",
                 ToastType.ERROR
             );
         } finally {
-            if (!isRefresh) {
-                setLoading(false);
-            }
+            setLoading(false);
+            setRefreshing(false);
         }
-    }, [title, supportField, region, targetAge, businessExperience, params?.supportField]);
+    }, [title, supportField, region, targetAge, businessExperience]);
 
-    // 필터 변경 시 API 호출 (기존과 동일)
+    // 필터 변경 시 API 호출 (초기 마운트 제외)
     useEffect(() => {
+        if (isInitialMount.current) {
+            return;
+        }
         fetchNotices(false);
-    }, [fetchNotices]);
+    }, [title, supportField, region, targetAge, businessExperience]);
 
     // 화면 포커스시 새로고침 (탭바로 들어올 때)
     useFocusEffect(
         useCallback(() => {
-            fetchNotices(true); // 새로고침 모드
+            if (isInitialMount.current) {
+                isInitialMount.current = false;
+            }
+            fetchNotices(true);
         }, [fetchNotices])
     );
+
+    // params 변경 처리를 별도로
+    useEffect(() => {
+        if (params?.supportField && params.supportField !== supportField) {
+            setSupportField(params.supportField);
+        }
+    }, [params?.supportField]);
 
     const loadNextPage = async () => {
         const now = Date.now();
 
-        if (now - lastRequestTime.current < 200) {
+        // 500ms로 증가하여 중복 요청 방지 강화
+        if (now - lastRequestTime.current < 500) {
             return;
         }
 
-        if (isFetchingNextPage || loading) return;
+        if (isFetchingNextPage || loading || isLast) return;
 
         lastRequestTime.current = now;
         const nextPage = page + 1;
@@ -166,6 +188,8 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
 
         try {
             const response = await getNotices(title, supportField, region, targetAge, businessExperience, nextPage);
+            setIsLast(response.data.isLast);
+
             const data = response.data.content.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return {
@@ -198,7 +222,7 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
 
         const lastIndex = lastVisibleItem.index;
 
-        if (lastIndex >= allNotices.length - 5) {
+        if (lastIndex >= allNotices.length - 5 && !isLast) {
             loadNextPage();
         }
     };
@@ -377,7 +401,7 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                         </View>: <View style={{height:16}}/>
                 }
                 ListEmptyComponent={
-                    !loading || isFetchingNextPage?
+                    !loading && !isFetchingNextPage?
                         <View style={[styles.emptyContainer,{marginTop:height*0.25}]}>
                             <Text style={styles.emptyContainerText}>존재하는 공고가 없습니다.</Text>
                         </View>: <View/>

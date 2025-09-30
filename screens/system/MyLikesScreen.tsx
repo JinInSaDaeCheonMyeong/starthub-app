@@ -85,12 +85,15 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+    const [isLast, setIsLast] = useState<boolean>(false);
     const lastRequestTime = useRef<number>(0);
 
     useEffect(() => {
         const fetchLikes = async () => {
             try {
+                setIsLast(false)
                 const response: GetNoticesResponse = await getLikes(0);
+                setIsLast(response.data.isLast)
                 const mapped = response.data.content.map((notice: BeforeNoticeType) => {
                     const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                     return {
@@ -119,7 +122,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
 
         const lastIndex = lastVisibleItem.index;
 
-        if (lastIndex >= allLikes.length - 5) {
+        if (lastIndex >= allLikes.length - 5 && !isLast) {
             loadNextPage();
         }
     };
@@ -139,6 +142,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
 
         try {
             const response = await getLikes(nextPage);
+            setIsLast(response.data.isLast)
             const data = response.data.content.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return {
