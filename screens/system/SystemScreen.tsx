@@ -12,12 +12,14 @@ import { Fonts } from "../../constants/Fonts";
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import { SystemStackParamList } from "../../navigation/SystemStack";
 import { removeTokens } from "../../util/token";
-import { JSX, useEffect, useState } from "react";
+import { JSX, useCallback, useEffect, useState } from "react";
 import { resetScheduleList } from "../../util/Schedule";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
-import { deleteUser } from "../../api/user";
+import { deleteUser, getMe } from "../../api/user";
 import { isAxiosError } from "axios";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ProfileProvider } from "../../type/user/user.type";
+import { useFocusEffect } from "@react-navigation/native"
 
 type SystemScreenProps = StackScreenProps<SystemStackParamList, 'System'>
 
@@ -36,9 +38,8 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
     const [modalTitle, setModalTitle] = useState('')
     const [password, setPassword] = useState('')
     const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-
-    const userSignType: "Auth" | "OAuth" = "Auth";
-    const isAuth = userSignType === "Auth";
+    const [profileProvider, setProfileProvieder] = useState<ProfileProvider>('LOCAL')
+    const isLocal = profileProvider === "LOCAL";
 
     useEffect(() => {
         const showSub = Keyboard.addListener("keyboardDidShow", () =>
@@ -54,9 +55,24 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
         };
     }, []);
 
+    useFocusEffect(
+        useCallback(() => {
+            const fetchData = async () => {
+                try {
+                    const data = (await getMe()).data.provider
+                    setProfileProvieder(data)
+                } catch (error) {
+                    ShowToast("회원 탈퇴", "사용자 정보를 불러오는데 실패했습니다", ToastType.ERROR);
+                    navigation.goBack()
+                }
+            }
+            fetchData()
+        }, [])
+    )
+
     const insets = useSafeAreaInsets()
 
-    const handleOpenModal = (purpose : 'Delete' | 'SignOut') => {
+    const handleOpenModal = async (purpose : 'Delete' | 'SignOut') => {
         setPurpose(purpose)
         switch(purpose){
             case "Delete":
@@ -75,6 +91,7 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
     const handleCloseModal = () => {
         setIsModalVisible(false)
         setPassword("")
+        setProfileProvieder('LOCAL')
     }
 
     const handleSignOut = async () => {
@@ -91,26 +108,24 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
     };
 
     const handleDeleteUser = async () => {
-        const deleteUserData = isAuth ? {password} : {password : undefined}
-        if(!deleteUserData.password && isAuth){
+        const deleteUserData = isLocal ? {password} : {password : undefined}
+        if(!deleteUserData.password && isLocal){
             ShowToast("회원 탈퇴", "비밀번호를 확인해주세요!", ToastType.ERROR);
             handleCloseModal();
             return
         }
         try {
+            (await deleteUser(deleteUserData)).data
             await removeTokens();
             await resetScheduleList();
-            console.log(deleteUserData);
-            const response = (await deleteUser(deleteUserData)).data
-            console.log(response)
-            ShowToast("회원 탈퇴", "로그아웃에 성공하셨습니다", ToastType.SUCCESS);
+            handleCloseModal();
+            ShowToast("회원 탈퇴", "회원 탈퇴에 성공하셨습니다", ToastType.SUCCESS);
             navigation.popToTop();
         } catch (error) {
-            ShowToast("회원 탈퇴", "로그아웃에 실패하셨습니다", ToastType.ERROR);
+            ShowToast("회원 탈퇴", "회원 탈퇴에 실패하셨습니다", ToastType.ERROR);
             if(isAxiosError(error)){
                 console.log(error.response?.data)
             }
-        } finally {
             handleCloseModal();
         }
     }
@@ -278,7 +293,7 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                         }}>
                             <Text style={styles.modalTitle}>{modalTitle}</Text>
                             {
-                                purpose === 'Delete' && isAuth && (
+                                purpose === 'Delete' && isLocal && (
                                     <TextInput
                                         style={{
                                             fontSize : 16,
@@ -508,7 +523,7 @@ const styles = StyleSheet.create({
         paddingVertical : 16
     },
     modalDivider: {
-        width: 1.5,
+        width: 1,
         backgroundColor: Colors.gray3,
     },
     cancelButton: {
