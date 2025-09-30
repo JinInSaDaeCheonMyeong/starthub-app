@@ -34,9 +34,11 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [purpose, setPurpose] = useState<'Delete' | 'SignOut'>('SignOut')
     const [modalTitle, setModalTitle] = useState('')
-    const [modalSubText, setModalSubText] = useState('');
     const [password, setPassword] = useState('')
-    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false); // 👈 키보드 상태 추적
+    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+    const userSignType: "Auth" | "OAuth" = "Auth";
+    const isAuth = userSignType === "Auth";
 
     useEffect(() => {
         const showSub = Keyboard.addListener("keyboardDidShow", () =>
@@ -59,12 +61,10 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
         switch(purpose){
             case "Delete":
                 setModalTitle("회원 탈퇴를 하시겠습니까?");
-                setModalSubText("탈퇴 시 모든 데이터가 사라집니다");
                 setIsModalVisible(true);
                 return
             case "SignOut":
                 setModalTitle("로그아웃을 하시겠습니까?");
-                setModalSubText("로그아웃 시 일정이 사라집니다");
                 setIsModalVisible(true);
                 return
             default:
@@ -91,7 +91,8 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
     };
 
     const handleDeleteUser = async () => {
-        if(!password){
+        const deleteUserData = isAuth ? {password} : {password : undefined}
+        if(!deleteUserData.password && isAuth){
             ShowToast("회원 탈퇴", "비밀번호를 확인해주세요!", ToastType.ERROR);
             handleCloseModal();
             return
@@ -99,7 +100,9 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
         try {
             await removeTokens();
             await resetScheduleList();
-            await deleteUser({password})
+            console.log(deleteUserData);
+            const response = (await deleteUser(deleteUserData)).data
+            console.log(response)
             ShowToast("회원 탈퇴", "로그아웃에 성공하셨습니다", ToastType.SUCCESS);
             navigation.popToTop();
         } catch (error) {
@@ -275,7 +278,7 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                         }}>
                             <Text style={styles.modalTitle}>{modalTitle}</Text>
                             {
-                                purpose === 'Delete' ? (
+                                purpose === 'Delete' && isAuth && (
                                     <TextInput
                                         style={{
                                             fontSize : 16,
@@ -292,8 +295,6 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                                         placeholderTextColor={Colors.gray3}
                                         numberOfLines={1}
                                     />
-                                ) : (
-                                    <Text style={styles.modalSubText}>{modalSubText}</Text>
                                 )
                             }
                         </View>
@@ -487,7 +488,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: Fonts.semiBold,
         textAlign: "center",
-        color: Colors.black2,
+        color: Colors.error,
     },
     modalSubText : {
         fontSize: 14,
@@ -507,7 +508,7 @@ const styles = StyleSheet.create({
         paddingVertical : 16
     },
     modalDivider: {
-        width: 1,
+        width: 1.5,
         backgroundColor: Colors.gray3,
     },
     cancelButton: {
