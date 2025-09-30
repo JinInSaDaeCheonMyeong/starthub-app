@@ -111,6 +111,7 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                                                 onPress()
                                         }
                                     }} 
+                                    hitSlop={{top : 6, bottom : 6, right : 16, left : 16}}
                                     key={idx} 
                                     style={styles.sectionRow}
                                 >
@@ -130,6 +131,7 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                         {linkSection.sections.map(({label, icon, link}, idx) => (
                             <TouchableOpacity 
                                 onPress={() => Linking.openURL(link)} 
+                                hitSlop={{top : 6, bottom : 6, right : 16, left : 16}}
                                 key={idx} 
                                 style={styles.sectionRow}
                             >
@@ -142,26 +144,45 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                         ))}
                     </View>
                 </View>
-                <TouchableOpacity 
-                    hitSlop={16}
-                    style={{
-                        alignItems : "flex-end", 
-                        marginRight : 12
-                    }} 
-                    onPress={ async() => {
-                        try {
-                            await removeTokens()
-                            await resetScheduleList()
-                            ShowToast("로그아웃", "로그아웃에 성공하셨습니다", ToastType.SUCCESS)
-                            navigation.popToTop()
-                            
-                        } catch (error) {
-                            ShowToast("로그아웃", "로그아웃에 실패하셨습니다", ToastType.ERROR)
-                        }
-                    }}
-                >
-                    <Text style={styles.logoutText}>로그아웃</Text>
-                </TouchableOpacity>
+                <View style={{
+                    flexDirection : 'row-reverse',
+                    alignItems : "flex-end", 
+                    gap : 20,
+                    paddingHorizontal : 16
+                }}>
+                    <TouchableOpacity 
+                        onPress={ async() => {
+                            try {
+                                await removeTokens()
+                                await resetScheduleList()
+                                ShowToast("로그아웃", "로그아웃에 성공하셨습니다", ToastType.SUCCESS)
+                                navigation.popToTop()
+                                
+                            } catch (error) {
+                                ShowToast("로그아웃", "로그아웃에 실패하셨습니다", ToastType.ERROR)
+                            }
+                        }}
+                        hitSlop={{top : 16, bottom : 16, left : 10, right : 16}}
+                    >
+                        <Text style={styles.logoutText}>로그아웃</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        onPress={ async() => {
+                            try {
+                                await removeTokens()
+                                await resetScheduleList()
+                                ShowToast("로그아웃", "로그아웃에 성공하셨습니다", ToastType.SUCCESS)
+                                navigation.popToTop()
+                                
+                            } catch (error) {
+                                ShowToast("로그아웃", "로그아웃에 실패하셨습니다", ToastType.ERROR)
+                            }
+                        }}
+                        hitSlop={{top : 16, bottom : 16, left : 16, right : 10}}
+                    >
+                        <Text style={styles.logoutText}>회원 탈퇴</Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
         </View>
     )
@@ -301,8 +322,8 @@ const styles = StyleSheet.create({
         color: Colors.black2,
     },
     logoutText : {
-        fontSize : 12,
+        fontSize : 14,
         color : Colors.error,
-        fontFamily : Fonts.bold
+        fontFamily : Fonts.semiBold
     }
 });
