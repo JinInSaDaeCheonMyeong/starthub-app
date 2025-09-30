@@ -72,6 +72,11 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
         }
     }
 
+    const handleCloseModal = () => {
+        setIsModalVisible(false)
+        setPassword("")
+    }
+
     const handleSignOut = async () => {
         try {
             await removeTokens();
@@ -81,14 +86,14 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
         } catch (error) {
             ShowToast("로그아웃", "로그아웃에 실패하셨습니다", ToastType.ERROR);
         } finally {
-            setIsModalVisible(false);
+            handleCloseModal()
         }
     };
 
     const handleDeleteUser = async () => {
         if(!password){
             ShowToast("회원 탈퇴", "비밀번호를 확인해주세요!", ToastType.ERROR);
-            setIsModalVisible(false);
+            handleCloseModal();
             return
         }
         try {
@@ -103,7 +108,7 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                 console.log(error.response?.data)
             }
         } finally {
-            setIsModalVisible(false);
+            handleCloseModal();
         }
     }
 
@@ -293,7 +298,9 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
                                 style={styles.modalButton}
-                                onPress={() => setIsModalVisible(false)}
+                                onPress={() => 
+                                    handleCloseModal()
+                                }
                             >
                                 <Text style={styles.cancelButton}>아니오</Text>
                             </TouchableOpacity>
@@ -495,7 +502,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        marginVertical : 16
+        paddingVertical : 16
     },
     modalDivider: {
         width: 1,
