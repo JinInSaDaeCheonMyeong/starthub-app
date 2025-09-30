@@ -1,4 +1,4 @@
-import { ScrollView, Text, TouchableOpacity, View, StyleSheet, Linking, Modal } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, StyleSheet, Linking, Modal, TextInput, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform } from "react-native";
 import RightArrow from "../../assets/icons/right-arrow-back.svg"
 import BookmarkIcon from '../../assets/icons/bookMark/bookmark.svg'
 import TimeIcon from '../../assets/icons/section/time.svg'
@@ -12,11 +12,12 @@ import { Fonts } from "../../constants/Fonts";
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import { SystemStackParamList } from "../../navigation/SystemStack";
 import { removeTokens } from "../../util/token";
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import { resetScheduleList } from "../../util/Schedule";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
 import { deleteUser } from "../../api/user";
-import { AxiosError, isAxiosError } from "axios";
+import { isAxiosError } from "axios";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type SystemScreenProps = StackScreenProps<SystemStackParamList, 'System'>
 
@@ -33,18 +34,36 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [purpose, setPurpose] = useState<'Delete' | 'SignOut'>('SignOut')
     const [modalTitle, setModalTitle] = useState('')
-    const [modalSubText, setModalSubText] = useState("");
+    const [modalSubText, setModalSubText] = useState('');
+    const [password, setPassword] = useState('')
+    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false); // 👈 키보드 상태 추적
+
+    useEffect(() => {
+        const showSub = Keyboard.addListener("keyboardDidShow", () =>
+            setIsKeyboardVisible(true)
+        );
+        const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+            setIsKeyboardVisible(false)
+        );
+
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, []);
+
+    const insets = useSafeAreaInsets()
 
     const handleOpenModal = (purpose : 'Delete' | 'SignOut') => {
         setPurpose(purpose)
         switch(purpose){
             case "Delete":
-                setModalTitle("정말 탈퇴 하시겠습니까?");
-                setModalSubText("탈퇴 시 모든 정보가 사라질 수 있어요");
+                setModalTitle("회원 탈퇴를 하시겠습니까?");
+                setModalSubText("탈퇴 시 모든 데이터가 사라집니다");
                 setIsModalVisible(true);
                 return
             case "SignOut":
-                setModalTitle("정말 로그아웃 하시겠습니까?");
+                setModalTitle("로그아웃을 하시겠습니까?");
                 setModalSubText("로그아웃 시 일정이 사라집니다");
                 setIsModalVisible(true);
                 return
@@ -67,10 +86,15 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
     };
 
     const handleDeleteUser = async () => {
+        if(!password){
+            ShowToast("회원 탈퇴", "비밀번호를 확인해주세요!", ToastType.ERROR);
+            setIsModalVisible(false);
+            return
+        }
         try {
             await removeTokens();
             await resetScheduleList();
-            await deleteUser({password : 'Toadl2015!!'})
+            await deleteUser({password})
             ShowToast("회원 탈퇴", "로그아웃에 성공하셨습니다", ToastType.SUCCESS);
             navigation.popToTop();
         } catch (error) {
@@ -222,12 +246,50 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                 transparent
                 visible={isModalVisible}
                 animationType="fade"
-                onRequestClose={() => setIsModalVisible(false)}
+                onRequestClose={() => {
+                    setIsModalVisible(false)
+                }}
             >
-                <View style={styles.modalOverlay}>
+                <TouchableWithoutFeedback
+                    onPress={() => {
+                        if (isKeyboardVisible) {
+                            Keyboard.dismiss(); // 키보드만 닫기
+                        } else {
+                            setIsModalVisible(false); // 모달 닫기
+                        }
+                    }}
+                >
+                <KeyboardAvoidingView 
+                    style={styles.modalOverlay}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    keyboardVerticalOffset={-insets.top}
+                >
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>{modalTitle}</Text>
-                        <Text style={styles.modalSubText}>{modalSubText}</Text>
+                        <View style={{
+                            gap : 8
+                        }}>
+                            <Text style={styles.modalTitle}>{modalTitle}</Text>
+                            {
+                                purpose === 'Delete' ? (
+                                    <TextInput
+                                        style={{
+                                            fontSize : 16,
+                                            fontFamily : Fonts.medium,
+                                            color : Colors.black2,
+                                            textAlign : 'center',
+                                            marginHorizontal : 16,
+                                        }}
+                                        value={password}
+                                        onChangeText={(v) => setPassword(v)}
+                                        placeholder="비밀번호를 입력해주세요"
+                                        placeholderTextColor={Colors.gray3}
+                                        numberOfLines={1}
+                                    />
+                                ) : (
+                                    <Text style={styles.modalSubText}>{modalSubText}</Text>
+                                )
+                            }
+                        </View>
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
                                 style={styles.modalButton}
@@ -253,7 +315,8 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                             </TouchableOpacity>
                         </View>
                     </View>
-                </View>
+                </KeyboardAvoidingView>
+                </TouchableWithoutFeedback>
             </Modal>
         </View>
     )
@@ -408,11 +471,12 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         width: "80%",
         overflow: "hidden", 
+        paddingTop : 24,
+        gap : 20
     },
     modalTitle: {
         fontSize: 16,
         fontFamily: Fonts.semiBold,
-        paddingVertical: 20,
         textAlign: "center",
         color: Colors.black2,
     },
@@ -420,19 +484,18 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontFamily: Fonts.medium,
         textAlign: "center",
-        marginBottom : 22,
         color: Colors.gray2,
     },
     modalButtons: {
         flexDirection: "row",
         borderTopWidth: 1,
         borderTopColor: Colors.gray3,
-        height: 48,
     },
     modalButton: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+        marginVertical : 16
     },
     modalDivider: {
         width: 1,
