@@ -1,10 +1,10 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { SystemStackParamList } from "../../navigation/SystemStack";
-import BackButton from "../../component/BackButton";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import useEditProfileScreen from "../../hooks/system/useEditProfileScreen";
+import SubHeaderBar from "../../component/home/SubHeaderBar";
 
 export type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'EditProfile'>
 
@@ -45,24 +45,12 @@ export default function EditProfileScreen(props: ProfileScreenProps){
             contentContainerStyle={{backgroundColor : Colors.black2}}
         > 
         <View style={styles.mainContainer}>
-            <View style={styles.header}>
-                <BackButton
-                    width={24}
-                    height={24}
-                    color={Colors.black2}
-                    onClick={() => {goBack()}}
-                />
-                <Text style={styles.headerTitle}>프로필</Text>
-                <TouchableOpacity
-                    onPress={() => {sendEditProfile()}}
-                >   
-                    <Text
-                        style={styles.headerRight}
-                    >
-                        완료
-                    </Text>
-                </TouchableOpacity>
-            </View>
+            <SubHeaderBar
+                title="프로필 수정"
+                handleBackPress={goBack}
+                subIcon='EditProfile'
+                handleSubPress={sendEditProfile}
+            />
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <ScrollView 
                 style={styles.dataContainer}

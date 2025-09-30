@@ -1,19 +1,11 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { SystemStackParamList } from "../../navigation/SystemStack";
-import { Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import BackButton from "../../component/BackButton";
-import EditIcon from "../../assets/icons/header/edit.svg"
+import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
-import { GetMeResponse } from "../../type/user/user.type";
-import { useFocusEffect } from "@react-navigation/native"
-import { useCallback, useState } from "react";
-import { getMe } from "../../api/user";
-import { isAxiosError } from "axios";
-import { ShowToast, ToastType } from "../../util/ShowToast";
-import { ErrorResponse } from "../../type/util/response.type"
 import StartupStatus from "../../constants/StartupStatus";
 import useProfileScreen from "../../hooks/system/useProfileScreen";
+import SubHeaderBar from "../../component/home/SubHeaderBar";
 
 export type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'Profile'>
 
@@ -36,22 +28,12 @@ export default function ProfileScreen(props : ProfileScreenProps){
     } = useProfileScreen(props)
     return (
         <View style={styles.mainContainer}>
-            <View style={styles.header}>
-                <BackButton
-                    width={24}
-                    height={24}
-                    color={Colors.black2}
-                    onClick={() => {goBack()}}
-                />
-                <Text style={styles.headerTitle}>프로필</Text>
-                <EditIcon 
-                    style={styles.headerRight} 
-                    width={24}
-                    height={24}
-                    hitSlop={16}
-                    onTouchEnd={()=>{goEditProfile()}}
-                />
-            </View>
+            <SubHeaderBar
+                title="프로필"
+                handleBackPress={goBack}
+                subIcon='Profile'
+                handleSubPress={goEditProfile}
+            />
             <ScrollView 
                 style={styles.scorllContainer}
                 contentContainerStyle={{
