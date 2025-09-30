@@ -3,12 +3,8 @@ import { SystemStackParamList } from "../../navigation/SystemStack";
 import {
     Dimensions,
     FlatList,
-    Linking,
-    Platform,
-    ScrollView,
     StyleSheet,
     Text,
-    TouchableOpacity,
     View
 } from "react-native";
 import  *  as  Progress  from  'react-native-progress' ;
@@ -19,12 +15,9 @@ import { ShowToast, ToastType } from "../../util/ShowToast";
 import {getLikes} from "../../api/likes";
 import {BeforeNoticeType, GetNoticesResponse, NoticeType} from "../../type/notice/notice.type";
 import NoticeItem from "../../component/notice/NoticeItem";
-import BackButton from "../../component/BackButton";
-import EditIcon from "../../assets/icons/header/edit.svg";
 import {CompositeScreenProps} from "@react-navigation/core";
-import {BottomTabScreenProps} from "@react-navigation/bottom-tabs";
-import {HomeStackParamList} from "../../navigation/HomeStack";
 import {RootStackParamList} from "../../navigation/RootStack";
+import SubHeaderBar from "../../component/home/SubHeaderBar";
 
 
 export type MyLikesScreenProps = CompositeScreenProps<
@@ -33,7 +26,7 @@ export type MyLikesScreenProps = CompositeScreenProps<
 >
 
 
-const {width, height} = Dimensions.get("window");
+const { height} = Dimensions.get("window");
 
 export default function MyLikesScreen({navigation, route : {params}}: MyLikesScreenProps){
     const parseReceptionPeriod = (period: string) => {
@@ -191,18 +184,10 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
 
     return (
         <View style={styles.container}>
-            <View>
-                <View style={styles.header}>
-                    <BackButton
-                        width={24}
-                        height={24}
-                        color={Colors.black2}
-                        onClick={() => {navigation.goBack()}}
-                    />
-                    <Text style={styles.headerTitle}>북마크</Text>
-                    <View style={styles.headerRight}/>
-                </View>
-            </View>
+            <SubHeaderBar
+                title="내 좋아요"
+                handleBackPress={navigation.goBack}
+            />
             <FlatList
                 data={allLikes}
                 viewabilityConfig={{

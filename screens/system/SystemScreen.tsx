@@ -1,5 +1,4 @@
 import { ScrollView, Text, TouchableOpacity, View, StyleSheet, Linking } from "react-native";
-import BackButton from "../../component/BackButton";
 import RightArrow from "../../assets/icons/right-arrow-back.svg"
 import BookmarkIcon from '../../assets/icons/bookMark/bookmark.svg'
 import TimeIcon from '../../assets/icons/section/time.svg'
@@ -15,6 +14,7 @@ import { SystemStackParamList } from "../../navigation/SystemStack";
 import { removeTokens } from "../../util/token";
 import { JSX } from "react";
 import { resetScheduleList } from "../../util/Schedule";
+import SubHeaderBar from "../../component/home/SubHeaderBar";
 
 type SystemScreenProps = StackScreenProps<SystemStackParamList, 'System'>
 
@@ -83,16 +83,10 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
 
     return (
         <View style={styles.safeArea}>
-            <View style={styles.header}>
-                <BackButton
-                    width={24}
-                    height={24}
-                    color={Colors.black2}
-                    onClick={() => {navigation.goBack()}}
-                />
-                <Text style={styles.headerTitle}>설정</Text>
-                <View style={styles.headerRight}/>
-            </View>
+            <SubHeaderBar
+                title="설정"
+                handleBackPress={navigation.goBack}
+            />
             <ScrollView
                 horizontal={false}
                 showsVerticalScrollIndicator={false} 

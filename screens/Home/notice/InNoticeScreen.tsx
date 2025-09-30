@@ -30,6 +30,7 @@ import BookMarkFill from "../../../assets/icons/bookMark/bookmark.fill.svg";
 import BookMark from "../../../assets/icons/bookMark/bookmark.svg";
 import { getScheduleList, isScheduleExist, removeScheduleById, saveScheduleList } from '../../../util/Schedule';
 import { ShowToast, ToastType } from '../../../util/ShowToast';
+import SubHeaderBar from '../../../component/home/SubHeaderBar';
 
 
 
@@ -108,16 +109,10 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
 
     return (
         <View style={{paddingTop: insets.top, paddingBottom: insets.bottom}}>
-            <View style={styles.header}>
-                <BackButton
-                    width={24}
-                    height={24}
-                    color={Colors.black2}
-                    onClick={handleBackPress}
-                />
-                <Text style={styles.headerTitle}>{"공고"}</Text>
-                <View style={{paddingEnd: 24}}/>
-            </View>
+            <SubHeaderBar
+                title="공고"
+                handleBackPress={handleBackPress}
+            />
             <ScrollView style={{paddingHorizontal: 16}}>
                 <View style={styles.topTitle}>
                     <View style={styles.topIconContainer}>
