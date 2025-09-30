@@ -284,6 +284,8 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                                             textAlign : 'center',
                                             marginHorizontal : 16,
                                         }}
+                                        secureTextEntry={true}
+                                        autoCapitalize="none"
                                         value={password}
                                         onChangeText={(v) => setPassword(v)}
                                         placeholder="비밀번호를 입력해주세요"
@@ -515,7 +517,7 @@ const styles = StyleSheet.create({
     },
     confirmButton: {
         fontSize: 14,
-        color: Colors.error,
+        color: Colors.info,
         fontFamily: Fonts.semiBold,
     },
 });
