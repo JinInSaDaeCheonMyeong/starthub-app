@@ -86,10 +86,6 @@ export default function SigninScreen(props: SigninScreenProps) {
                         />
                     </View>
                     <View style={styles.signupContainer}>
-                        <LinkActionText title="이메일 찾기" onPress={() => {}}/>
-                        <Text style={styles.contourText}>⏐</Text>
-                        <LinkActionText title="비밀번호 찾기" onPress={() => {}}/>
-                        <Text style={styles.contourText}>⏐</Text>
                         <LinkActionText title="회원가입" onPress={() => {goSignupScreen()}}/>
                     </View>
                 </View>
