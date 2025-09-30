@@ -20,7 +20,11 @@ export default function BackButton(props: BackButtonProps) {
     };
 
     return (
-        <TouchableOpacity onPress={handleClick} hitSlop={16}>
+        <TouchableOpacity
+            onPress={handleClick}
+            hitSlop={16}
+            style={{ width: props.width, height: props.height}}
+        >
         <LeftArrow
             width={props.width}
             height={props.height}
