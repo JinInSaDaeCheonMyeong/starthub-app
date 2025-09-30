@@ -1,4 +1,4 @@
-import { ScrollView, Text, TouchableOpacity, View, StyleSheet, Linking } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, StyleSheet, Linking, Modal } from "react-native";
 import RightArrow from "../../assets/icons/right-arrow-back.svg"
 import BookmarkIcon from '../../assets/icons/bookMark/bookmark.svg'
 import TimeIcon from '../../assets/icons/section/time.svg'
@@ -12,9 +12,11 @@ import { Fonts } from "../../constants/Fonts";
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import { SystemStackParamList } from "../../navigation/SystemStack";
 import { removeTokens } from "../../util/token";
-import { JSX } from "react";
+import { JSX, useState } from "react";
 import { resetScheduleList } from "../../util/Schedule";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
+import { deleteUser } from "../../api/user";
+import { AxiosError, isAxiosError } from "axios";
 
 type SystemScreenProps = StackScreenProps<SystemStackParamList, 'System'>
 
@@ -28,6 +30,58 @@ type navSectionType = {
 };
 
 export default function SystemScreen({navigation} : SystemScreenProps) {
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [purpose, setPurpose] = useState<'Delete' | 'SignOut'>('SignOut')
+    const [modalTitle, setModalTitle] = useState('')
+    const [modalSubText, setModalSubText] = useState("");
+
+    const handleOpenModal = (purpose : 'Delete' | 'SignOut') => {
+        setPurpose(purpose)
+        switch(purpose){
+            case "Delete":
+                setModalTitle("정말 탈퇴 하시겠습니까?");
+                setModalSubText("탈퇴 시 모든 정보가 사라질 수 있어요");
+                setIsModalVisible(true);
+                return
+            case "SignOut":
+                setModalTitle("정말 로그아웃 하시겠습니까?");
+                setModalSubText("로그아웃 시 일정이 사라집니다");
+                setIsModalVisible(true);
+                return
+            default:
+                return
+        }
+    }
+
+    const handleSignOut = async () => {
+        try {
+            await removeTokens();
+            await resetScheduleList();
+            ShowToast("로그아웃", "로그아웃에 성공하셨습니다", ToastType.SUCCESS);
+            navigation.popToTop();
+        } catch (error) {
+            ShowToast("로그아웃", "로그아웃에 실패하셨습니다", ToastType.ERROR);
+        } finally {
+            setIsModalVisible(false);
+        }
+    };
+
+    const handleDeleteUser = async () => {
+        try {
+            await removeTokens();
+            await resetScheduleList();
+            await deleteUser({password : 'Toadl2015!!'})
+            ShowToast("회원 탈퇴", "로그아웃에 성공하셨습니다", ToastType.SUCCESS);
+            navigation.popToTop();
+        } catch (error) {
+            ShowToast("회원 탈퇴", "로그아웃에 실패하셨습니다", ToastType.ERROR);
+            if(isAxiosError(error)){
+                console.log(error.response?.data)
+            }
+        } finally {
+            setIsModalVisible(false);
+        }
+    }
 
     const onPress = () => {
         ShowToast("개발", "아직 개발 중인 기능입니다", ToastType.INFO)
@@ -151,39 +205,56 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                     paddingHorizontal : 16
                 }}>
                     <TouchableOpacity 
-                        onPress={ async() => {
-                            try {
-                                await removeTokens()
-                                await resetScheduleList()
-                                ShowToast("로그아웃", "로그아웃에 성공하셨습니다", ToastType.SUCCESS)
-                                navigation.popToTop()
-                                
-                            } catch (error) {
-                                ShowToast("로그아웃", "로그아웃에 실패하셨습니다", ToastType.ERROR)
-                            }
-                        }}
+                        onPress={() => {handleOpenModal('SignOut')}}
                         hitSlop={{top : 16, bottom : 16, left : 10, right : 16}}
                     >
                         <Text style={styles.logoutText}>로그아웃</Text>
                     </TouchableOpacity>
                     <TouchableOpacity 
-                        onPress={ async() => {
-                            try {
-                                await removeTokens()
-                                await resetScheduleList()
-                                ShowToast("로그아웃", "로그아웃에 성공하셨습니다", ToastType.SUCCESS)
-                                navigation.popToTop()
-                                
-                            } catch (error) {
-                                ShowToast("로그아웃", "로그아웃에 실패하셨습니다", ToastType.ERROR)
-                            }
-                        }}
+                        onPress={() => {handleOpenModal("Delete")}}
                         hitSlop={{top : 16, bottom : 16, left : 16, right : 10}}
                     >
                         <Text style={styles.logoutText}>회원 탈퇴</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+            <Modal
+                transparent
+                visible={isModalVisible}
+                animationType="fade"
+                onRequestClose={() => setIsModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>{modalTitle}</Text>
+                        <Text style={styles.modalSubText}>{modalSubText}</Text>
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity
+                                style={styles.modalButton}
+                                onPress={() => setIsModalVisible(false)}
+                            >
+                                <Text style={styles.cancelButton}>아니오</Text>
+                            </TouchableOpacity>
+                            <View style={styles.modalDivider} />
+                            <TouchableOpacity
+                                style={styles.modalButton}
+                                onPress={async () => {
+                                    switch(purpose){
+                                        case "Delete":
+                                            await handleDeleteUser()
+                                            return
+                                        case "SignOut":
+                                            await handleSignOut();
+                                            return
+                                    }
+                                }}
+                            >
+                                <Text style={styles.confirmButton}>예</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     )
 }
@@ -325,5 +396,56 @@ const styles = StyleSheet.create({
         fontSize : 14,
         color : Colors.error,
         fontFamily : Fonts.semiBold
-    }
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalContent: {
+        backgroundColor: Colors.white1,
+        borderRadius: 12,
+        width: "80%",
+        overflow: "hidden", 
+    },
+    modalTitle: {
+        fontSize: 16,
+        fontFamily: Fonts.semiBold,
+        paddingVertical: 20,
+        textAlign: "center",
+        color: Colors.black2,
+    },
+    modalSubText : {
+        fontSize: 14,
+        fontFamily: Fonts.medium,
+        textAlign: "center",
+        marginBottom : 22,
+        color: Colors.gray2,
+    },
+    modalButtons: {
+        flexDirection: "row",
+        borderTopWidth: 1,
+        borderTopColor: Colors.gray3,
+        height: 48,
+    },
+    modalButton: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalDivider: {
+        width: 1,
+        backgroundColor: Colors.gray3,
+    },
+    cancelButton: {
+        fontSize: 14,
+        color: Colors.gray2,
+        fontFamily: Fonts.semiBold,
+    },
+    confirmButton: {
+        fontSize: 14,
+        color: Colors.error,
+        fontFamily: Fonts.semiBold,
+    },
 });
