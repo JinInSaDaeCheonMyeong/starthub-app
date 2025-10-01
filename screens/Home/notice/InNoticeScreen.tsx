@@ -40,9 +40,14 @@ type InNoticeScreenProps = StackScreenProps<RootStackParamList, 'InNotice'>;
 export default function InNoticeScreen({navigation, route : {params}} : InNoticeScreenProps) {
     const notice = params.Notice
     const insets = useSafeAreaInsets();
+    const cleanedContent = notice.content
+        .replace(/<br>\s*<!--/g, "<!--")
+        .replace(/<br>\s*<\/(.*?)>/gi, "</$1>");
+    
     const source = {
-        html: notice.content,
+        html: cleanedContent,
     };
+    console.log(source.html)
     const [isSelected, setIsSelected] = useState(notice.isLiked)
     const [isBookmarkLoading, setIsBookmarkLoading] = useState(false)
     const handleBackPress = () => {
@@ -189,29 +194,26 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                         tagsStyles={{
                             ul: { listStyleType: 'none', paddingLeft: 0, marginLeft: 0 },
                         }}
-                        systemFonts={[Fonts.semiBold, Fonts.medium]}
+                        systemFonts={[Fonts.semiBold, Fonts.medium, Fonts.reqular]}
                         renderers={{
+                            br: () => <Text>{'\n'}</Text>,
                             a: ({ TDefaultRenderer, tnode, ...props }: any) => {
-                                // btn_by-bl 클래스가 있는 a 태그인지 확인
                                 if (tnode.classes?.includes('btn_by-bl')) {
-                                    // 버튼 스타일로 렌더링
                                     return (
-                                        <View style={{
-                                            transform: [
-                                                { translateY: 7 },
-                                            ]
-                                        }}>
                                         <TouchableOpacity
                                             style={{
                                                 borderColor: Colors.primary,
                                                 borderWidth: 2,
                                                 backgroundColor: Colors.primary,
-                                                paddingHorizontal: 6,
-                                                paddingVertical: 4,
+                                                paddingHorizontal: 8,
+                                                paddingVertical: 6,
                                                 borderRadius: 4,
-                                                alignSelf: 'center', // flex-start에서 center로 변경
                                                 marginVertical: 0, // 2에서 0으로 변경하여 세로 여백 제거
                                                 marginLeft: 4,
+                                                alignSelf: 'flex-start',
+                                                transform : [
+                                                    {translateY : 11}
+                                                ]
                                             }}
                                             onPress={() => {
                                                 // 링크가 있다면 처리
@@ -238,14 +240,13 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                                             <Text style={{
                                                 color: Colors.white1,
                                                 fontFamily: Fonts.semiBold,
-                                                fontSize: 10,
+                                                fontSize: 14,
                                                 textAlign: 'center',
                                                 alignItems: 'center'
                                             }}>
                                                 {tnode.children?.map((child: any) => child.data || child.children?.[0]?.data).join('') || tnode.data || '버튼'}
                                             </Text>
                                         </TouchableOpacity>
-                                        </View>
                                     );
                                 }
                                 // 일반 a 태그는 기본 렌더링
@@ -276,38 +277,39 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                         classesStyles={{
                             title: {
                                 fontFamily: Fonts.semiBold,
-                                fontSize: 16,
+                                fontSize: 18,
                                 color: Colors.black1,
-                                paddingBottom: 6,
+                                marginTop : 28
                             },
                             tit: {
                                 fontFamily: Fonts.medium,
-                                fontSize: 14,
+                                fontSize: 16,
                                 color: Colors.black1,
-                                paddingBottom: 6,
+                                marginTop : 8,
+                                marginBottom : 6
                             },
                             txt: {
                                 fontFamily: Fonts.reqular,
-                                fontSize: 12,
+                                flex : 1,
+                                fontSize: 14,
                                 color: Colors.black1,
-                                paddingBottom: 6,
+                                marginBottom : 16
                             },
                             "txt-button": {
-                                fontSize: 12,
+                                fontSize: 14,
                                 color: Colors.black1,
                                 fontFamily: Fonts.reqular,
                             },
                             list: {
-                                fontSize: 12,
+                                fontSize: 16,
                                 fontFamily: Fonts.reqular,
                             },
                             dot_list: {
-                                paddingBottom: 10,
                             }
                         }}
                     />
                 </View>
-                <View style={{height: insets.bottom + 30}}/>
+                <View style={{height: insets.bottom + insets.top}}/>
             </ScrollView>
         </View>
     );
@@ -360,8 +362,8 @@ const styles = StyleSheet.create({
     },
     titleText: {
         fontFamily: Fonts.semiBold,
-        fontSize: 18,
-        paddingTop: 12,
+        fontSize: 20,
+        paddingTop: 8,
         paddingBottom: 12,
         color: Colors.black1,
     },
@@ -372,16 +374,16 @@ const styles = StyleSheet.create({
     },
     hashTagText: {
         fontFamily: Fonts.medium,
-        fontSize: 12,
+        fontSize: 14,
         color: Colors.primary,
         paddingEnd: 12,
+        marginBottom : 4
     },
     buttons: {
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
         height: 40,
-        marginBottom: 28,
     },
     featureButtons: {
         flexDirection: 'row',
@@ -404,6 +406,6 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         fontFamily: Fonts.semiBold,
-        fontSize: 12,
+        fontSize: 14,
     }
 });
