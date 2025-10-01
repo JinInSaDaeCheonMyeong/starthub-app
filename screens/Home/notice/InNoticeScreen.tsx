@@ -139,7 +139,7 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                 </View>
                 <View style={styles.buttons}>
                     <View style={styles.featureButtons}>
-                        <TouchableOpacity onPress={() => {
+                        {/* <TouchableOpacity onPress={() => {
                             
                         }}>
                             <View style={styles.buttonsContainer}>
@@ -158,11 +158,12 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                                     일정 추가
                                 </Text>
                             </View>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
                     <TouchableOpacity
                         onPress={handleBookmarkToggle}
                         disabled={isBookmarkLoading}
+                        hitSlop={16}
                         activeOpacity={0.7}
                     >
                         {isSelected ? (
