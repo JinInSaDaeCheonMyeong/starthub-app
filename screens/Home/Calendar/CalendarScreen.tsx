@@ -117,8 +117,6 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                     const isDisabled = state === 'disabled';
                     const isToday = state === 'today'
                     const isSameMonth = date?.month === currentMonth;
-                    console.log(`${date?.dateString} : ${date?.month } ${today.getMonth() + 1}`)
-                    console.log(`${date?.dateString} : ${isDisabled} ${isToday} ${isSameMonth}`)
                     const backgroundColor = isDisabled ? Colors.white2 : 
                                             isToday ? 
                                             isSameMonth ? Colors.white1 : Colors.white2 : Colors.white1
