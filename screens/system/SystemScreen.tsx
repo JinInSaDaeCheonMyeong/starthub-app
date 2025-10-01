@@ -161,7 +161,7 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
             {
                 label : '이용 약관', 
                 icon : <InfoIcon width={20} height={20} color={Colors.black2}/>,
-                link : 'https://www.dominilbo.com/news/articleView.html?idxno=216474'
+                link : 'https://various-bougon-d76.notion.site/27f507c40eaf80acbf4afba41b9964b7'
             },
             // {
             //     label : '고객 센터', 

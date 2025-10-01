@@ -104,6 +104,7 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
 
     const isInitialMount = useRef(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [isFirst, setIsFirst] = useState(false);
 
     const fetchNotices = useCallback(async (isRefresh: boolean = false) => {
         try {
@@ -115,9 +116,12 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
             }
 
             let currentSupportField = supportField;
-            if (typeof params?.supportField === "string" && params.supportField !== supportField) {
-                currentSupportField = params.supportField;
-                setSupportField(params.supportField);
+            if (!isFirst){
+                if (typeof params?.supportField === "string" && params.supportField !== supportField) {
+                    currentSupportField = params.supportField;
+                    setSupportField(params.supportField);
+                }
+                setIsFirst(true);
             }
 
             const response: GetNoticesResponse = await getNotices(title, currentSupportField, region, targetAge, businessExperience, 0);
@@ -270,13 +274,9 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                 >
                     <View style={{paddingBottom: dropDownMargin, marginStart: 16}}>
                         <DropDown
-                            placeholderStyle={
-                                {
-                                    color : Colors.gray2,
-                                    fontSize : 14,
-                                    fontFamily : Fonts.medium
-                                }
-                            }
+                            placeholderStyle={styles.dropDownPlaceHolder}
+                            labelStyle={styles.dropDownLabel}
+                            textStyle={styles.dropDownText}
                             open={supportFieldOpen}
                             value={supportField}
                             items={SupportFieldItems}
@@ -466,4 +466,21 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         paddingVertical: 20,
     },
+    dropDownPlaceHolder: {
+        color : Colors.gray2,
+        fontSize : 14,
+        fontFamily : Fonts.medium
+    },
+    dropDownText : {
+        color : Colors.black2,
+        fontSize : 14,
+        fontFamily : Fonts.medium,
+        paddingVertical : 8,
+        paddingHorizontal : 6,
+    },
+    dropDownLabel : {
+        color : Colors.black2,
+        fontSize : 14,
+        fontFamily : Fonts.medium,
+    }
 })
