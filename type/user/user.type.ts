@@ -1,6 +1,5 @@
-import { InterestType } from "../../constants/InterestType";
-import StartupStatus from "../../constants/StartupStatus";
 import { Response } from "../util/response.type";
+import { StartupField } from "./companyInput.type";
 
 export type ProfileProvider = "LOCAL" | "GOOGLE" | "NAVER" | "APPLE"
 
@@ -18,7 +17,7 @@ export interface GetMeResponse extends Response {
         companyWebsite ?: string;
         startupLocation ?: string;
         annualRevenue ?: number;
-        startupFields ?: string[]
+        startupFields ?: StartupField[]
         provider : ProfileProvider
     };
 }
@@ -37,6 +36,6 @@ export interface GetUserResponse extends Response {
         companyWebsite ?: string;
         startupLocation ?: string;
         annualRevenue ?: number;
-        startupFields ?: string[]
+        startupFields ?: StartupField[]
     }
 }

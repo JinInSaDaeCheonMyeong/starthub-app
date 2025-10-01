@@ -3,12 +3,13 @@ import CategorySelectButton from "../../../../component/auth/CategorySelectButto
 import { Colors } from "../../../../constants/Color";
 import { InterestTypeList } from "../../../../constants/InterestTypeList";
 import { Fonts } from "../../../../constants/Fonts";
+import { StartupField } from "../../../../type/user/companyInput.type";
 
 type PreInterestScreenProps = {
     startupLocation : string
     setStartupLocation : (companyLocation : string) => void
-    startupFields : string[]
-    setStartupFields : (list : string[]) => void
+    startupFields: StartupField[];
+    setStartupFields: (list: StartupField[]) => void;
 }
 
 export default function PreInterestScreen(props : PreInterestScreenProps){
@@ -38,25 +39,31 @@ export default function PreInterestScreen(props : PreInterestScreenProps){
                 data={InterestTypeList}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle = {styles.listContentContainer}
-                renderItem={({item : {id, color, text, icon}}) => (
-                <CategorySelectButton
-                    key={id}
-                    id={id}
-                    color={color}
-                    text={text}
-                    icons={icon}
-                    onClick={(id) => {
-                        if (props.startupFields.includes(id)) {
-                            props.setStartupFields(props.startupFields.filter(key => key !== id))
-                        } else {
-                            const interestList = [...props.startupFields]
-                            interestList.push(id)
-                            props.setStartupFields(interestList)
-                        }
-                    }}
-                    selected = {props.startupFields.includes(id)}
-                />
-            )}
+                renderItem={({item : {id, color, text, icon}}) => {
+                    const selectItem : StartupField = {
+                        businessType : id,
+                        customField : text
+                    }
+                    return (
+                        <CategorySelectButton
+                            key={id}
+                            id={id}
+                            color={color}
+                            text={text}
+                            icons={icon}
+                            onClick={() => {
+                                const isSelected = props.startupFields.some(field => field.businessType === id);
+                            
+                                if (isSelected) {
+                                    props.setStartupFields(props.startupFields.filter(field => field.businessType !== id));
+                                } else {
+                                    props.setStartupFields([...props.startupFields, selectItem]);
+                                }
+                            }}
+                            selected={props.startupFields.some(field => field.businessType === id)}
+                        />
+                    )
+                }}
             />
             </View>
         </View>

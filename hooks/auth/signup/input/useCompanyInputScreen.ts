@@ -134,15 +134,18 @@ export const useCompanyInputScreen = (
                     startupLocation,
                     startupFields
                 })
-                ShowToast("프로필 수정", "프로필 수정에 성공하셨습니다", ToastType.SUCCESS)
+                ShowToast("프로필 등록", "프로필 수정에 등록하셨습니다", ToastType.SUCCESS)
                 navigation.navigate('HomeStack')
             } catch (error : any) {
                 if(error.isAxiosError){
-                    ShowToast("프로필 수정", "프로필 수정에 실패하셨습니다", ToastType.ERROR)
+                    ShowToast("프로필 등록", "프로필 등록에 실패하셨습니다", ToastType.ERROR)
                     console.log(error.message)
                     return
                 }
-                ShowToast("프로필 수정", "알 수 없는 오류가 발생했습니다", ToastType.ERROR)
+                ShowToast("프로필 등록", "알 수 없는 오류가 발생했습니다", ToastType.ERROR)
+            } finally{
+                hideError();
+                enabledBtn();
             }
         } else {
             setCurrentProgress(prev => prev + 1)
