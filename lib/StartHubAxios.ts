@@ -36,7 +36,7 @@ StartHubAxios.interceptors.response.use(
                 const {
                     data: { access: accessToken, refresh: refreshToken },
                 }: RefreshResponse = (await axios.post(
-                    `${process.env.EXPO_PUBLIC_API_URL}/user/reissue`,
+                    `${process.env.EXPO_PUBLIC_API_URL}user/reissue`,
                     { refresh : refreshData },
                     {headers: {'X-Platform': 'app'}}
                 )).data
