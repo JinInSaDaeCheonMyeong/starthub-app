@@ -9,6 +9,7 @@ import {View} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import CompanyInputScreen from "../screens/CompanyInputScreen";
 import StartupStatus from "../constants/StartupStatus";
+import SplashScreen from "../screens/SplashScreen";
 
 const Stack = createStackNavigator<AuthStackParamList>()
 
@@ -17,6 +18,7 @@ export type AuthStackParamList = {
     Signin : undefined;
     Signup : undefined;
     Start : undefined;
+    Splash : undefined;
     SignupInput : undefined;
     CompanyInput : {
         username : string
@@ -31,7 +33,7 @@ export default function AuthStack() {
     return (
         <View style= {{paddingTop: insets.top, paddingBottom: insets.bottom, flex: 1}}>
             <Stack.Navigator
-                initialRouteName={"Welcome"}
+                initialRouteName={"Splash"}
                 screenOptions={{
                     cardStyle : {
                         backgroundColor : Colors.white1,
@@ -39,6 +41,7 @@ export default function AuthStack() {
                     headerShown: false
                 }}
             >
+                <Stack.Screen name="Splash" component={SplashScreen} />
                 <Stack.Screen name="Welcome" component={WelcomeScreen} />
                 <Stack.Screen name="Signin" component={SigninScreen} />
                 <Stack.Screen name="Start" component={StartScreen} />
