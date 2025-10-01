@@ -7,8 +7,6 @@ import Carousel from "react-native-reanimated-carousel";
 import CommonButton from "../component/CommonButton";
 import { useDisabled } from '../hooks/util/useDisabled';
 import { Fonts } from '../constants/Fonts';
-import {getAccToken, getRefToken} from "../util/token";
-import {getMe} from "../api/user";
 import {CompositeScreenProps} from "@react-navigation/core";
 import {RootStackParamList} from "../navigation/RootStack";
 
@@ -27,30 +25,6 @@ export type WelcomeScreenProps = CompositeScreenProps<
 >;
 
 export default function WelcomeScreen({navigation}: WelcomeScreenProps) {
-
-    useEffect(() => {
-        async function autoLogin() {
-            const token = await getAccToken();
-            console.log(token);
-            if (token != null){
-                try {
-                    const response =  await (await getMe()).data
-                    console.log("response", response)
-                    if(response.username){
-                        navigation.navigate("HomeStack")
-                    } else {
-                        navigation.navigate("SignupInput")
-                    }
-                }
-                catch {
-
-                }
-            }
-        }
-        autoLogin();
-    }, []);
-
-
   const [currentIndex, setCurrentIndex] = useState(0);
   const { disabled } = useDisabled()
 
