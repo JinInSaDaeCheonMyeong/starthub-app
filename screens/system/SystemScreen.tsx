@@ -39,7 +39,7 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
     const [password, setPassword] = useState('')
     const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
     const [profileProvider, setProfileProvieder] = useState<ProfileProvider>('LOCAL')
-    const isLocal = profileProvider === "LOCAL";
+    const isLocal = profileProvider === 'LOCAL';
 
     useEffect(() => {
         const showSub = Keyboard.addListener("keyboardDidShow", () =>
@@ -91,7 +91,6 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
     const handleCloseModal = () => {
         setIsModalVisible(false)
         setPassword("")
-        setProfileProvieder('LOCAL')
     }
 
     const handleSignOut = async () => {
@@ -276,9 +275,9 @@ export default function SystemScreen({navigation} : SystemScreenProps) {
                 <TouchableWithoutFeedback
                     onPress={() => {
                         if (isKeyboardVisible) {
-                            Keyboard.dismiss(); // 키보드만 닫기
+                            Keyboard.dismiss(); 
                         } else {
-                            setIsModalVisible(false); // 모달 닫기
+                            setIsModalVisible(false);
                         }
                     }}
                 >
