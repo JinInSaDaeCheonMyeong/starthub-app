@@ -4,21 +4,22 @@ import {
     Text,
     TouchableOpacity,
     View,
-    Image, Dimensions,
+    Image, Dimensions, RefreshControl,
 } from "react-native";
 import {Fonts} from "../../constants/Fonts";
 import {Colors} from "../../constants/Color";
-import {PaperProvider} from "react-native-paper";
 import {CompositeScreenProps} from "@react-navigation/core";
 import {BottomTabScreenProps} from "@react-navigation/bottom-tabs";
 import {HomeStackParamList} from "../../navigation/HomeStack";
 import {StackScreenProps} from "@react-navigation/stack";
 import {RootStackParamList} from "../../navigation/RootStack";
 import {getBMCs} from "../../api/bmc";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {BMCType, GetBMCsResponse} from "../../type/BMC/BMC.type";
+import  *  as  Progress  from  'react-native-progress' ;
+import {useFocusEffect} from "@react-navigation/native";
 
-const screenWidth = Dimensions.get('window').width;
+const {width, height} = Dimensions.get('window');
 
 export type BMCScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, 'BMC'>,
@@ -28,66 +29,97 @@ export type BMCScreenProps = CompositeScreenProps<
 export default function BMCScreen(navigation: BMCScreenProps) {
     const [allBMCs, setAllBMCs] = useState<BMCType[]>([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
-    useEffect(() => {
-        const fetchBMCs = async () => {
-            try {
-                const response: GetBMCsResponse = await getBMCs();
-                setAllBMCs(response.data);
-            } catch (error) {
-                console.error('BMC 데이터 로딩 실패:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchBMCs();
+    const fetchBMCs = useCallback(async () => {
+        console.log("asdkf")
+        setLoading(true);
+        try {
+            const response: GetBMCsResponse = await getBMCs();
+            setAllBMCs(response.data);
+        } catch (error) {
+            console.error('BMC 데이터 로딩 실패:', error);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
     }, []);
 
-    const BMCs = async ()=> {
-        return await getBMCs();
+    // 화면 포커스될 때마다 데이터 갱신
+    useFocusEffect(
+        useCallback(() => {
+            fetchBMCs();
+        }, [fetchBMCs])
+    );
+
+    const handleRefresh = () => {
+        setRefreshing(true);
+        fetchBMCs();
+    };
+    if (loading) {
+        return (
+            <View style={styles.container}>
+                <View style={[styles.indicatorContainer,]}>
+                    <Progress.Circle
+                        color={Colors.primary}
+                        size = { 50 } indeterminate = { true }
+                        thickness = {300}
+                    />
+                </View>
+            </View>
+        );
     }
+
+
     return (
         <View style={styles.container}>
-            <PaperProvider>
                 <FlatList
-                    data={allBMCs}
-                    ItemSeparatorComponent={() => <View style={{ height: 16 }} />} // 세로 간격
+                    data={refreshing ? [] : allBMCs}
+                    ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={false}  // ✅ 이렇게 변경
+                            onRefresh={refreshing ? undefined : handleRefresh}
+                            tintColor={Colors.white1}
+                            colors={[Colors.white1]}
+                        />
+                    }
                     ListHeaderComponent={
-                        <View style={{ paddingHorizontal: 0 }}>
-                            <Text style={[styles.headerText, {marginTop: 16}]}>최근 BMC </Text>
-                            <FlatList
-                                data={allBMCs.slice(0,8)}
-                                horizontal={true}
-                                ItemSeparatorComponent={() => <View style={{ width: 12 }} />} // 세로 간격
-                                showsHorizontalScrollIndicator={false}
-                                ListHeaderComponent={
-                                    <View style={styles.flatMargin}/>
-                                }
-                                renderItem={({item}) => (
-                                    <TouchableOpacity>
-                                        <View style={{backgroundColor: Colors.white2, borderRadius: 8, padding:2}}>
-                                            <View style={styles.recentBMCBox}>
-                                                <Image
-                                                    source={require('../../assets/images/bmc-thumbnail-exam.png')}
-                                                    style={styles.thumbnail}
-                                                />
-                                                <View style={styles.BMCContentContainer}>
-                                                    <View style={styles.BMCTextContainer}>
-                                                        <Text style={styles.titleText}>{item.title}</Text>
-                                                        <Text style={styles.dateText}>
-                                                            {item.updatedAt}
-                                                        </Text>
+                        allBMCs.length > 0 ? (  // ✅ 삼항 연산자 사용
+                            <View style={{ paddingHorizontal: 0 }}>
+                                <Text style={[styles.headerText, {marginTop: 16}]}>최근 BMC </Text>
+                                <FlatList
+                                    data={allBMCs.slice(0,8)}
+                                    horizontal={true}
+                                    ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+                                    showsHorizontalScrollIndicator={false}
+                                    ListHeaderComponent={
+                                        <View style={styles.flatMargin}/>
+                                    }
+                                    renderItem={({item}) => (
+                                        <TouchableOpacity>
+                                            <View style={{backgroundColor: Colors.white2, borderRadius: 8, padding:2}}>
+                                                <View style={styles.recentBMCBox}>
+                                                    <Image
+                                                        source={require('../../assets/images/bmc-thumbnail-exam.png')}
+                                                        style={styles.thumbnail}
+                                                    />
+                                                    <View style={styles.BMCContentContainer}>
+                                                        <View style={styles.BMCTextContainer}>
+                                                            <Text style={styles.titleText}>{item.title}</Text>
+                                                            <Text style={styles.dateText}>
+                                                                {item.updatedAt}
+                                                            </Text>
+                                                        </View>
                                                     </View>
                                                 </View>
                                             </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                )
-                                }
-                            />
-                            <Text style={styles.middleText}>내 BMC</Text>
-                        </View>
+                                        </TouchableOpacity>
+                                    )}
+                                />
+                                <Text style={styles.middleText}>내 BMC</Text>
+                            </View>
+                        ) : null  // ✅ null 추가
                     }
                     renderItem={({ item }) => (
                         <View style={{paddingHorizontal:16}}>
@@ -118,8 +150,25 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                     ListFooterComponent={
                         <View style={{marginTop: 20}}/>
                     }
+                    ListEmptyComponent={
+                        refreshing ? (  // ✅ 새로고침 중일 때도 인디케이터 추가
+                            <View style={styles.emptyContainer}>
+                                <Progress.Circle
+                                    color={Colors.primary}
+                                    size={50}
+                                    indeterminate={true}
+                                    thickness={300}
+                                />
+                            </View>
+                        ) : (
+                            <View style={styles.emptyContainer}>
+                                <Text style={styles.emptyText}>
+                                    BMC 가 없습니다.
+                                </Text>
+                            </View>
+                        )
+                    }
                 />
-            </PaperProvider>
         </View>
     )
 
@@ -201,5 +250,20 @@ const styles = StyleSheet.create({
         width: '100%',
         resizeMode: 'cover',
         height: 200,
-    }
+    },
+    indicatorContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        flex: 1
+    },
+    emptyContainer: {
+        height: height * 0.7,  // ✅ 화면 높이의 70%
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    emptyText: {
+        fontSize: 18,
+        fontFamily: Fonts.medium,
+        color: Colors.gray2,
+    },
 })

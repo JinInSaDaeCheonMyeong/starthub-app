@@ -28,6 +28,7 @@ export type NoticeScreenProps = CompositeScreenProps<
     StackScreenProps<RootStackParamList>
 >
 
+
 export default function NoticeScreen({navigation, route : {params}}: NoticeScreenProps) {
 
     const parseReceptionPeriod = (period: string) => {
@@ -120,7 +121,7 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
             }
 
             const response: GetNoticesResponse = await getNotices(title, currentSupportField, region, targetAge, businessExperience, 0);
-            setIsLast(false);
+            setIsLast(response.data.isLast);
 
             const mapped = response.data.content.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
@@ -145,7 +146,7 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
             setLoading(false);
             setRefreshing(false);
         }
-    }, [title, supportField, region, targetAge, businessExperience]);
+    }, [title, supportField, region, targetAge, businessExperience, params?.supportField]);
 
     // 필터 변경 시 API 호출 (초기 마운트 제외)
     useEffect(() => {
@@ -236,6 +237,11 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
             )
         );
     }, []);
+
+    const handleRefresh = () => {
+        setRefreshing(true);
+        fetchNotices(true);
+    };
 
     return (
         <View style={styles.container}>
@@ -370,7 +376,9 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
             </View>
             <FlatList
                 style={{paddingTop: 50}}
-                data={allNotices}
+                data={refreshing ? [] : allNotices}  // ✅ 새로고침 시 빈 배열
+                refreshing={false}  // ✅ 이렇게 변경
+                onRefresh={refreshing ? undefined : handleRefresh}
                 viewabilityConfig={{
                     itemVisiblePercentThreshold: 50
                 }}
@@ -395,16 +403,27 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                         <View style={[styles.indicatorContainer, {marginTop:height*0.25}]}>
                             <Progress.Circle
                                 color={Colors.primary}
-                                size = { 50 } indeterminate = { true }
-                                thickness = {300}
+                                size={50}
+                                indeterminate={true}
+                                thickness={300}
                             />
                         </View>: <View style={{height:16}}/>
                 }
                 ListEmptyComponent={
-                    !loading && !isFetchingNextPage?
-                        <View style={[styles.emptyContainer,{marginTop:height*0.25}]}>
+                    refreshing ? (  // ✅ 새로고침 중일 때 중앙에 인디케이터
+                        <View style={[styles.indicatorContainer, {marginTop:height*0.25}]}>
+                            <Progress.Circle
+                                color={Colors.primary}
+                                size={50}
+                                indeterminate={true}
+                                thickness={300}
+                            />
+                        </View>
+                    ) : !loading && !isFetchingNextPage ? (
+                        <View style={styles.emptyContainer}>
                             <Text style={styles.emptyContainerText}>존재하는 공고가 없습니다.</Text>
-                        </View>: <View/>
+                        </View>
+                    ) : <View/>
                 }
             />
         </View>
@@ -435,12 +454,16 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        height: "100%",
-        width: "100%",
+        marginTop: height * 0.25,
     },
     emptyContainerText: {
         fontSize: 18,
         color: Colors.gray2,
         fontFamily: Fonts.medium
-    }
+    },
+    refreshIndicatorContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 20,
+    },
 })
