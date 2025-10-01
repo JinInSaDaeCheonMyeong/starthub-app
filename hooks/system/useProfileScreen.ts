@@ -10,7 +10,7 @@ import { ProfileScreenProps } from "../../screens/system/ProfileScreen";
 import { Linking } from "react-native";
 
 const useProfileScreen = ({navigation} : ProfileScreenProps) => {
-    const DEFAULT_DATA = "내용을 불러올 수 없습니다";
+    const DEFAULT_DATA = "내용이 없습니다";
     const genderMap = new Map<string, string>([['MALE', "남"], ["FEMALE", "여"]])
     const startupStatusMap = new Map<string, string>([
         ['EARLY_STAGE', '예비 창업'], 
@@ -30,7 +30,8 @@ const useProfileScreen = ({navigation} : ProfileScreenProps) => {
         companyWebsite : DEFAULT_DATA,
         startupLocation : DEFAULT_DATA,
         annualRevenue : -1,
-        startupFields : []
+        startupFields : [],
+        provider : "LOCAL"
     })
     
     const profileList = [
