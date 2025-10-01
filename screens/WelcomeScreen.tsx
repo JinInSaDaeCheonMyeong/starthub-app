@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, SafeAreaView, StyleSheet, Dimensions, Image, StatusBar} from 'react-native';
 import {StackScreenProps} from "@react-navigation/stack";
 import {AuthStackParamList} from "../navigation/AuthStack";
@@ -7,6 +7,10 @@ import Carousel from "react-native-reanimated-carousel";
 import CommonButton from "../component/CommonButton";
 import { useDisabled } from '../hooks/util/useDisabled';
 import { Fonts } from '../constants/Fonts';
+import {getAccToken, getRefToken} from "../util/token";
+import {getMe} from "../api/user";
+import {CompositeScreenProps} from "@react-navigation/core";
+import {RootStackParamList} from "../navigation/RootStack";
 
 const { width } = Dimensions.get('window');
 
@@ -17,11 +21,40 @@ const images = [
     require('../assets/images/onBoarding3.png')
 ];
 
-type WelcomeScreenProps = StackScreenProps<AuthStackParamList, 'Welcome'>;
+export type WelcomeScreenProps = CompositeScreenProps<
+    StackScreenProps<AuthStackParamList, 'Welcome'>,
+    StackScreenProps<RootStackParamList>
+>;
 
 export default function WelcomeScreen({navigation}: WelcomeScreenProps) {
+
+    useEffect(() => {
+        async function autoLogin() {
+            const token = await getAccToken();
+            console.log(token);
+            if (token != null){
+                try {
+                    const response =  await (await getMe()).data
+                    console.log("response", response)
+                    if(response.username){
+                        navigation.navigate("HomeStack")
+                    } else {
+                        navigation.navigate("SignupInput")
+                    }
+                }
+                catch {
+
+                }
+            }
+        }
+        autoLogin();
+    }, []);
+
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const { disabled } = useDisabled()
+
+
   return (
       <View style={styles.container}>
           <Text style={styles.headText}>
