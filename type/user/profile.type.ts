@@ -1,10 +1,10 @@
-import { InterestType } from "../../constants/InterestType"
+import { StartupField } from "./companyInput.type";
 
 export interface SetProfileRequest {
     username: string;
     birth: string;
     gender: string;
-    startupFields?: string[];
+    startupFields?: StartupField[];
     startupStatus: string;
     companyName?: string;
     companyDescription?: string;
