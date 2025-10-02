@@ -71,7 +71,9 @@ export default function SignupInputScreen(props : SignupInputScreenProps) {
                         <BackButton
                             width={20}
                             height={20}
-                            color={Colors.black2}
+                            color={
+                                currentProgress <= 1 ? Colors.white1: Colors.black2
+                            }
                             onClick={() => {
                                 goBack();
                             }}
