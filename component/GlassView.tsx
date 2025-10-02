@@ -1,11 +1,11 @@
 import React, { ReactElement } from "react";
-import { StyleProp, StyleSheet, View, ViewProps } from "react-native";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { BlurView } from "@react-native-community/blur"
 import { Colors } from "../constants/Color";
 
 type GlassViewProps = {
-    containerStyle ?: StyleProp<ViewProps>,
-    blurStyle ?: StyleProp<ViewProps>,
+    containerStyle ?: StyleProp<ViewStyle>,
+    blurStyle ?: StyleProp<ViewStyle>,
     blurAmount ?: number
     blurType ?: 'dark' | 'light'
     children ?: React.ReactNode | undefined
