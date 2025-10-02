@@ -34,19 +34,19 @@ export const formatToTime = (data : string) : string => {
 }
 
 export const formatToDate = (
-    data : string, 
+    data : string | Date, 
     type : 'dotted'| 'solid' | 'kor' | 'calendar' = 'dotted'
 ) : string => {
-    const dateTime = new Date(data)
+    const dateTime = typeof data === 'string' ? new Date(data) : data
     const years = dateTime.getFullYear()
-    const months = dateTime.getMonth()+1
-    const days = dateTime.getDate()
+    const months = String(dateTime.getMonth() + 1).padStart(2, "0");
+    const days = String(dateTime.getDate()).padStart(2, "0")
     if(type === 'dotted'){
         return `${years}.${months}.${days}`;
     } else if (type === 'solid') {
         return `${years}-${months}-${days}`;
     } else if (type === 'calendar') {
-        return `${years}년 ${months}월`
+        return `${years}.${months}`
     } else {
         return `${years}년 ${months}월 ${days}일`;
     }
