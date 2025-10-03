@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { MonthScheduleType } from "../type/schedules/schedules";
+import { MonthScheduleType } from "../type/schedules/schedules.type";
 
 const categoryMap: Record<string, string> = {
     "사업화": "#5D85E5",
