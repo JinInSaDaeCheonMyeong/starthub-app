@@ -8,7 +8,7 @@ import { ShowToast, ToastType } from "../../util/ShowToast";
 import { getNotice } from "../../api/notice";
 import { useWindowDimensions } from "react-native";
 import { formatToDate } from "../../util/DateFormat";
-import { getMonthSchedules } from "../../api/schedule";
+import { getDateSchedules, getMonthSchedules } from "../../api/schedule";
 import { getScheduleList } from "../../util/Schedule";
 
 const useCalendarScreen = () => {
@@ -20,15 +20,6 @@ const useCalendarScreen = () => {
     const [loading, setLoading] = useState(false);
     const [markedDates, setMarkedDates] = useState<MarkedDates>({})
     const [noticeItemList, setNoticeItemList] = useState<NoticeType[]>([]);
-
-    const handleChangeMonth = useCallback((props : any) => {
-        const prevMonth = new Date(
-            props.month.getFullYear(),
-            props.month.getMonth() - 1,
-            1
-        );
-        setViewingMonth(formatToDate(prevMonth, "solid").substring(0, 7));
-    }, []);
 
     const parseReceptionPeriod = (period: string) => {
         try {
@@ -100,26 +91,20 @@ const useCalendarScreen = () => {
         }
     };
 
-    const getNoticeItem = async (ids: number[]): Promise<NoticeType[]> => {
+    const getNoticeItem = async (date : string): Promise<NoticeType[]> => {
         try {
-            const idList = await getScheduleList(); // NoticeType[]
-    
-            // ids 중 실제 존재하는 id만 필터링
-            const filteredIds = ids.filter(id => idList.includes(id));
-    
-            const noticePromises = filteredIds.map(async (id) => {
-                const noticeData = await getNotice(id);
-                const {startDate, endDate} = parseReceptionPeriod(noticeData.data.receptionPeriod)
+            const noticeItems = (await getDateSchedules(date)).data.map((value) => {
+                const {startDate, endDate} = parseReceptionPeriod(value.receptionPeriod)
                 return {
-                    ...noticeData.data,
-                    startDate: typeof startDate === "string" ? new Date(startDate) : startDate,
-                    endDate: typeof endDate === "string" ? new Date(endDate) : endDate,
-                };
+                    ...value,
+                    startDate,
+                    endDate
+                }
             });
-    
-            const resolvedNotices = await Promise.all(noticePromises);
+
+            const resolvedNotices : NoticeType[] = noticeItems;
             setNoticeItemList(resolvedNotices);
-    
+
             return resolvedNotices;
         } catch (error) {
             ShowToast("오류 발생", "일정을 불러올 수 없습니다", ToastType.ERROR);
@@ -129,10 +114,12 @@ const useCalendarScreen = () => {
 
     const initMarkedDates = async () => {
         try {
+            setLoading(true)
             const schedules = await getMonthSchedules(currentDate);
             console.log(schedules)
             const dates = buildDeadlineMarks(schedules.data);
             setMarkedDates(dates);
+            setLoading(false);
         } catch (error) {
             console.error(error)
             ShowToast("오류 발생", "일정을 불러올 수 없습니다", ToastType.ERROR)
@@ -162,7 +149,6 @@ const useCalendarScreen = () => {
             todayString
         },
         action : {
-            handleChangeMonth,
             getNoticeItem,
         }
     }

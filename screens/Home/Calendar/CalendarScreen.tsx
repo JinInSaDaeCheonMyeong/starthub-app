@@ -39,11 +39,13 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
             loading,
             noticeItemList,
             setLoading,
-            setNoticeItemList
         },
         ui : {
             markedDates,
         },
+        action : {
+            getNoticeItem
+        }
     } = useCalendarScreen()
     const {width} = useWindowDimensions()
     const today = new Date()
@@ -63,9 +65,6 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                         calendarBackground: 'transparent',
                         backgroundColor: 'transparent',
                     }}
-                    onMonthChange={(date) => {
-                        setViewingMonth(date.dateString.substring(0, 7))
-                    }}
                     markingType={"multi-dot"}
                     markedDates={markedDates}
                     customHeader={(props: any) => {
@@ -77,9 +76,9 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                                     <TouchableOpacity
                                         hitSlop={8}
                                         onPress={() => {
-                                        props.addMonth(-1);
-                                        const prevMonth = new Date(props.month.getFullYear(), props.month.getMonth() - 1, 1);
-                                        setViewingMonth(formatToDate(prevMonth, 'solid').substring(0, 7));
+                                            props.addMonth(-1);
+                                            const prevMonth = new Date(props.month.getFullYear(), props.month.getMonth() - 1, 1);
+                                            setViewingMonth(formatToDate(prevMonth, 'solid').substring(0, 7));
                                         }}
                                     >
                                         <LeftIcon width={16} height={16} color={Colors.black2} />
@@ -89,24 +88,21 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                                         {currentMonth}
                                     </Text>
                         
-                                    <View style={styles.headerButtons}>
-                                        <TouchableOpacity
-                                        hitSlop={8}
-                                        onPress={() => {
+                                    <TouchableOpacity
+                                    hitSlop={8}
+                                    onPress={() => {
                                             props.addMonth(1);
                                             const nextMonth = new Date(props.month.getFullYear(), props.month.getMonth() + 1, 1);
                                             setViewingMonth(formatToDate(nextMonth, 'solid').substring(0, 7));
                                         }}
-                                        >
+                                    >
                                         <RightIcon width={16} height={16} color={Colors.black2} />
-                                        </TouchableOpacity>
-                                    </View>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         )
                     }}
                     dayComponent={({date, state, marking, onPress}) => {
-                        const dotIds = marking?.dots?.map((dot : any) => dot.id) ?? [];
                         const isSelect = date?.dateString === currentDate;
                         const isDisable = state === 'disabled'
                         const isToday = date?.dateString === todayString 
@@ -129,6 +125,7 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                                         onPress?.(date);
                                         setCurrentDate(date?.dateString ?? currentDate)
                                         setLoading(true);
+                                        await getNoticeItem(date?.dateString ?? currentDate)
                                         setLoading(false);
                                     } catch (error) {
                                         ShowToast("오류 발생", "일정 리스트를 불러 올 수 없습니다", ToastType.ERROR)
