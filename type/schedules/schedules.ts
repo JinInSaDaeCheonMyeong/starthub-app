@@ -6,8 +6,12 @@ export interface BaseScheduleType {
     endDate : string
 }
 
+export interface MonthScheduleType extends BaseScheduleType {
+    supportFields : string
+}
+
 export interface GetMonthScheduleResponse extends Response {
-    data : BaseScheduleType[]
+    data : MonthScheduleType[]
 }
 
 export interface GetDateSchedulesResponse extends Response {

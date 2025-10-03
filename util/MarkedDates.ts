@@ -1,16 +1,26 @@
-import { eachDayOfInterval, subDays, format, parse } from "date-fns";
-import { Colors } from "../constants/Color";
-import { NoticeType } from "../type/notice/notice.type";
+import { format } from "date-fns";
+import { MonthScheduleType } from "../type/schedules/schedules";
 
-type DotColor =
-    | typeof Colors.info
-    | typeof Colors.warning
-    | typeof Colors.error;
+const categoryMap: Record<string, string> = {
+    "사업화": "#5D85E5",
+    "멘토링ㆍ컨설팅ㆍ교육": "#34ABF0",
+    "창업교육": "#34ABF0",
+    "행사ㆍ네트워크": "#F965AD",
+    "시설ㆍ공간ㆍ보육": "#FA6B6B",
+    "정책자금": "#F6CD48",
+    "글로벌": "#31CAB4",
+    "기술개발(R&D)": "#A964EE",
+    "인력": "#F6A071",
+    "판로ㆍ해외진출": "#31CAB4",
+};
+
+type DotPriority = "end" | "start";
 
 export type Dot = {
-    id : number
-    color : DotColor
-}
+    id: number;
+    color: string;
+    priority: DotPriority;
+};
 
 export type MarkedDates = Record<
     string,
@@ -21,39 +31,41 @@ export type MarkedDates = Record<
     }
 >;
 
-export function buildDeadlineMarks(items: NoticeType[]): MarkedDates {
+export function buildDeadlineMarks(
+    items: MonthScheduleType[],
+    markType: DotPriority | "none" = "none"
+): MarkedDates {
     const marked: MarkedDates = {};
-    try {
-    
-        items.forEach((event) => {
-            const start = event.startDate;
-            const end = event.endDate;
-            const yellowStart = subDays(end, 14);
-            const redStart = subDays(end, 1);
-            const allDates = eachDayOfInterval({ start, end });
-    
-            allDates.forEach((date) => {
-                const key = format(date, "yyyy-MM-dd");
-                const dots: Dot[] = marked[key]?.dots
-                    ? [...marked[key].dots]
-                    : [];
-                if (date >= start && date < yellowStart) dots.push({id : event.id, color: Colors.info }); // 기본 파랑
-                if (date >= yellowStart && date < end) dots.push({ id: event.id, color: Colors.warning }); // 2주 전부터 노랑
-                if (date > redStart) dots.push({ id: event.id, color: Colors.error }); // 당일 날부터 빨강
-                dots.sort((a, b) => {
-                    const colorOrder : DotColor[] = [Colors.error, Colors.warning, Colors.info];
-                    return colorOrder.indexOf(a.color) - colorOrder.indexOf(b.color);
-                });
-                marked[key] = {
-                    dots: dots,
-                    selected: true,
-                    selectedColor: "transparent",
-                };
-            });
-        });
 
-    } catch (error) {
-        console.error(error)
-    }
+    const allowed: DotPriority[] =
+        markType === "none" ? ["start", "end"] : [markType];
+
+    items.forEach((schedule) => {
+        const points: { date: Date; priority: DotPriority }[] = [
+            { date: new Date(schedule.startDate), priority: "start" },
+            { date: new Date(schedule.endDate), priority: "end" },
+        ];
+
+        points.forEach(({ date, priority }) => {
+            if (!allowed.includes(priority)) return;
+            const key = format(date, "yyyy-MM-dd");
+            const dots: Dot[] = marked[key]?.dots ? [...marked[key].dots] : [];
+            dots.push({
+                id: schedule.announcementId,
+                color: categoryMap[schedule.supportFields ?? '사업화'],
+                priority,
+            });
+            marked[key] = {
+                dots: sortDots(dots),
+            };
+        });
+    });
     return marked;
+}
+
+function sortDots(dots: Dot[]): Dot[] {
+    const dotPriority: DotPriority[] = ["end", "start"];
+    return dots.sort(
+        (a, b) => dotPriority.indexOf(a.priority) - dotPriority.indexOf(b.priority)
+    );
 }
