@@ -4,30 +4,30 @@ import { useCallback, useRef, useState } from "react";
 import { NoticeType } from "../../type/notice/notice.type";
 import { buildDeadlineMarks, MarkedDates } from "../../util/MarkedDates";
 import { useFocusEffect } from "@react-navigation/native"
-import { getScheduleList } from "../../util/Schedule";
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import { getNotice } from "../../api/notice";
+import { useWindowDimensions } from "react-native";
+import { formatToDate } from "../../util/DateFormat";
+import { getMonthSchedules } from "../../api/schedule";
+import { getScheduleList } from "../../util/Schedule";
 
 const useCalendarScreen = () => {
-    const [day, setDay] = useState("");
+    const {width} = useWindowDimensions()
+    const today = new Date()
+    const todayString = formatToDate(today, 'solid');
+    const [currentDate, setCurrentDate] = useState(todayString)
+    const [viewingMonth, setViewingMonth] = useState(todayString.substring(0, 7))
     const [loading, setLoading] = useState(false);
     const [markedDates, setMarkedDates] = useState<MarkedDates>({})
     const [noticeItemList, setNoticeItemList] = useState<NoticeType[]>([]);
-    const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-    const dotInfoList = [
-        { color: Colors.info, text: "마감 4주전" },
-        { color: Colors.warning, text: "마감 2주전" },
-        { color: Colors.error, text: "마감 1주전" },
-    ];
-    const dayDataList = ["일", "월", "화", "수", "목", "금", "토"];
-
-    const handleModalClose = useCallback(() => {
-        bottomSheetModalRef.current?.dismiss();
-    }, []);
-
-    const handleModalOpen = useCallback(() => {
-        bottomSheetModalRef.current?.present(0);
+    const handleChangeMonth = useCallback((props : any) => {
+        const prevMonth = new Date(
+            props.month.getFullYear(),
+            props.month.getMonth() - 1,
+            1
+        );
+        setViewingMonth(formatToDate(prevMonth, "solid").substring(0, 7));
     }, []);
 
     const parseReceptionPeriod = (period: string) => {
@@ -129,20 +129,9 @@ const useCalendarScreen = () => {
 
     const initMarkedDates = async () => {
         try {
-            const storageList = await getScheduleList();
-            const noticePromises = storageList
-                .filter((id): id is number => typeof id === "number")
-                .map(async (id): Promise<NoticeType> => {
-                    const noticeData = (await getNotice(id)).data;
-                    const {startDate, endDate} = parseReceptionPeriod(noticeData.receptionPeriod)
-                    return {
-                        ...noticeData,
-                        startDate: typeof startDate === "string" ? new Date(startDate) : startDate,
-                        endDate: typeof endDate === "string" ? new Date(endDate) : endDate,
-                    };
-                });
-            const resolvedNotices = await Promise.all(noticePromises);
-            const dates = buildDeadlineMarks(resolvedNotices);
+            const schedules = await getMonthSchedules(currentDate);
+            console.log(schedules)
+            const dates = buildDeadlineMarks(schedules.data);
             setMarkedDates(dates);
         } catch (error) {
             console.error(error)
@@ -158,23 +147,23 @@ const useCalendarScreen = () => {
 
     return {
         form : {
-            day,
             loading,
             noticeItemList,
-            getNoticeItem,
-            setDay,
+            currentDate,
             setLoading,
-            setNoticeItemList
+            setNoticeItemList,
+            setViewingMonth,
+            setCurrentDate,
+            viewingMonth
         },
         ui : {
-            dotInfoList,
-            dayDataList,
             markedDates,
-            bottomSheetModalRef
+            width,
+            todayString
         },
         action : {
-            handleModalClose,
-            handleModalOpen
+            handleChangeMonth,
+            getNoticeItem,
         }
     }
 }

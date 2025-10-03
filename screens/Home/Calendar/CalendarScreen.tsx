@@ -36,17 +36,12 @@ export type CalendarScreenProps = CompositeScreenProps<
 export default function CalendarScreen({navigation} : CalendarScreenProps) {
     const {
         form : {
-            day,
             loading,
             noticeItemList,
-            getNoticeItem,
-            setDay,
             setLoading,
             setNoticeItemList
         },
         ui : {
-            dotInfoList,
-            dayDataList,
             markedDates,
         },
     } = useCalendarScreen()
@@ -134,11 +129,6 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                                         onPress?.(date);
                                         setCurrentDate(date?.dateString ?? currentDate)
                                         setLoading(true);
-                                        const result = await getNoticeItem(dotIds);
-                                        setNoticeItemList(result)
-                                        setDay(
-                                            `${date ? `${date.month}월 ${date.day}일 공고 일정` : "날짜를 찾을 수 없습니다"}`
-                                        );
                                         setLoading(false);
                                     } catch (error) {
                                         ShowToast("오류 발생", "일정 리스트를 불러 올 수 없습니다", ToastType.ERROR)
