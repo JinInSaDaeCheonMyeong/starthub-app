@@ -1,7 +1,8 @@
+import { BeforeNoticeType } from "../notice/notice.type";
 import { Response } from "../util/response.type";
 
 export interface BaseScheduleType {
-    announcementId : 20
+    announcementId : number
     startDate : string
     endDate : string
 }
@@ -15,11 +16,5 @@ export interface GetMonthScheduleResponse extends Response {
 }
 
 export interface GetDateSchedulesResponse extends Response {
-    data : {
-        id : number
-        title : string
-        organization : string
-        receptionPeriod: string,
-        likeCount : number
-    }
+    data : BeforeNoticeType[]
 }
