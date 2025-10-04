@@ -19,28 +19,27 @@ export default function SplashScreen({ navigation }: SplashScreenProps) {
             const token = await getAccToken();
             console.log(token);
 
-            await new Promise(resolve => setTimeout(resolve,1200));
+            await new Promise(resolve => setTimeout(resolve, 1200));
 
-            if (token != null){
+            if (token != null) {
                 try {
-                    const response =  await (await getMe()).data
-                    console.log("response", response)
-                    if(response.username){
-                        navigation.navigate("HomeStack")
+                    const response = await (await getMe()).data;
+                    console.log("response", response);
+                    if (response.username) {
+                        navigation.replace("HomeStack" as any);
                     } else {
-                        navigation.navigate("SignupInput")
+                        navigation.replace("SignupInput");
                     }
+                } catch {
+                    navigation.replace("Welcome");
                 }
-                catch {
-                    navigation.navigate("Welcome")
-                }
-            }
-            else {
-                navigation.navigate("Welcome");
+            } else {
+                navigation.replace("Welcome");
             }
         }
         autoLogin();
     }, []);
+
 
     return (
         <View style={styles.container}>
