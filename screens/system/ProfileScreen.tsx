@@ -60,7 +60,12 @@ export default function ProfileScreen(props : ProfileScreenProps){
                                 isWebLink(index) ? (
                                     <Text 
                                     onPress={() => {goWeb(data)}} 
-                                    style={[styles.dataText, { color : Colors.info, textDecorationLine : "underline" }]}
+                                    style={[
+                                        styles.dataText, 
+                                        !data.includes("내용이 없습니다") && { 
+                                            color : Colors.info, 
+                                            textDecorationLine : "underline" 
+                                        }]}
                                     >
                                     {data}
                                     </Text>
