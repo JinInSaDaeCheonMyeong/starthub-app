@@ -1,5 +1,5 @@
 import { StackScreenProps } from "@react-navigation/stack";
-import { FlatList, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
 import { Colors } from "../../constants/Color";
@@ -9,6 +9,9 @@ import { BMCType, GetBMCsResponse } from "../../type/BMC/BMC.type";
 import { getBMCs } from "../../api/bmc";
 import { formatToDate } from "../../util/DateFormat";
 import { Shadow } from "react-native-shadow-2";
+import * as Progress from "react-native-progress"
+import { BlurView } from "@react-native-community/blur";
+import { ShowToast, ToastType } from "../../util/ShowToast";
 
 type SelectScreenProps = StackScreenProps<CompoetitorStackParamList>
 
@@ -16,6 +19,7 @@ export default function SelectScreen({navigation} : SelectScreenProps){
     const [allBMCs, setAllBMCs] = useState<BMCType[]>([]);
     const [selectBMC, setSelectBMC] = useState<number | undefined>(undefined)
     const [loading, setLoading] = useState(true);
+    const [analyzing, setAnalyzing] = useState(false)
 
     useEffect(() => {
         const fetchBMCs = async () => {
@@ -32,15 +36,25 @@ export default function SelectScreen({navigation} : SelectScreenProps){
     }, []);
 
     return (
+        <>
         <ImageBackground 
-            style={{flex : 1}} 
+            style={{flex : 1, position : 'relative'}} 
             source={require("../../assets/images/glass-background.png")}
         >
             <SubHeaderBar
                 handleBackPress={navigation.goBack}
-                handleSubPress={() => {
-                    navigation.navigate('Result', {
-                    image : require('../../assets/images/bmc-thumbnail-exam.png')})
+                handleSubPress={async () => {
+                    if(!selectBMC){
+                        ShowToast('경쟁사 분석', 'BMC를 선택해주세요', ToastType.ERROR)
+                        return
+                    }
+                    setAnalyzing(true)
+                    setTimeout(() => {
+                        setAnalyzing(false);
+                        navigation.navigate("Result", {
+                            image: require("../../assets/images/bmc-thumbnail-exam.png"),
+                        });
+                    }, 5000);
                 }}
                 title="BMC 선택"
                 subIcon="Profile"
@@ -55,56 +69,56 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                     
                     const content = (
                         <View style={{ borderRadius: 8, overflow: 'hidden' }}>
-                        <View style={[styles.myBMCBox, { width: '100%' }]}>
-                            <View
-                            style={{
-                                backgroundColor: Colors.white2,
-                                borderTopLeftRadius: 8,
-                                borderTopRightRadius: 8,
-                            }}
-                            >
-                            <Image
-                                source={require('../../assets/images/bmc-thumbnail-exam.png')}
-                                style={styles.myBMCThumbnail}
-                            />
-                            </View>
-                            <View style={[styles.BMCContentContainer, { backgroundColor: Colors.white1 }]}>
-                            <View style={styles.BMCTextContainer}>
-                                <Text style={styles.titleText}>{item.title}</Text>
-                                <Text style={styles.dateText}>
-                                {formatToDate(item.updatedAt, 'solid')}
-                                </Text>
-                            </View>
-                            </View>
-                    
-                            {!selected && selectBMC !== undefined && (
-                            <View
+                            <View style={[styles.myBMCBox, { width: '100%' }]}>
+                                <View
                                 style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                backgroundColor: 'rgba(255, 255, 255, 0.6)',
-                                borderRadius: 8,
+                                    backgroundColor: Colors.white2,
+                                    borderTopLeftRadius: 8,
+                                    borderTopRightRadius: 8,
                                 }}
-                            />
-                            )}
-                        </View>
+                                    >
+                                    <Image
+                                        source={require('../../assets/images/bmc-thumbnail-exam.png')}
+                                        style={styles.myBMCThumbnail}
+                                    />
+                                </View>
+                                <View style={[styles.BMCContentContainer, { backgroundColor: Colors.white1 }]}>
+                                    <View style={styles.BMCTextContainer}>
+                                        <Text style={styles.titleText}>{item.title}</Text>
+                                        <Text style={styles.dateText}>
+                                        {formatToDate(item.updatedAt, 'solid')}
+                                        </Text>
+                                    </View>
+                                </View>
+                                {!selected && selectBMC !== undefined && (
+                                <View
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                                        borderRadius: 8,
+                                    }}
+                                />
+                                )}
+                            </View>
                         </View>
                     );
                     
                     return (
                         <TouchableOpacity
                         style={{ position: 'relative' }}
-                        onPress={() => setSelectBMC(selected ? undefined : item.id)}
-                        >
+                        onPress={() => {
+                            setSelectBMC(selected ? undefined : item.id)
+                        }}>
                         {selected ? (
                             <Shadow
-                            offset={[0, 4]}
-                            distance={16}
-                            startColor="rgba(72, 130, 255, 0.4)"
-                            style={{ width: '100%' }}
+                                offset={[0, 4]}
+                                distance={16}
+                                startColor="rgba(72, 130, 255, 0.4)"
+                                style={{ width: '100%' }}
                             >
                             {content}
                             </Shadow>
@@ -115,13 +129,68 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                     );
                 }}
                 ListEmptyComponent={() => (
-                    !loading ?
+                    !loading ? (
                         <View style={styles.emptyContainer}>
                             <Text style={styles.emptyContainerText}>존재하는 공고가 없습니다.</Text>
-                        </View>: <View/>
+                        </View>
+                    ) : (
+                        <View style={{
+                            flex : 1,
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <Progress.Circle
+                                color={Colors.primary}
+                                size={50}
+                                indeterminate={true}
+                                thickness={300}
+                                borderWidth={4}
+                            />
+                        </View>
+                    )
                 )}
             />
         </ImageBackground>
+        {analyzing && (
+            <>
+                <BlurView
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }}
+                    blurType='dark'
+                    blurAmount={
+                        Platform.select({
+                            ios : 6,
+                            android : Math.round(32 * 0.06)
+                        })
+                    }
+                />
+                <View style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 10
+                }}>
+                    <Progress.Circle
+                        color={Colors.primary}
+                        size={50}
+                        indeterminate={true}
+                        thickness={300}
+                        borderWidth={4}
+                    />
+                    <Text style={{ 
+                        color: Colors.white1, 
+                        marginTop: 16,
+                        fontSize : 18,
+                        fontFamily : Fonts.semiBold,
+                        textAlign : 'center'
+                    }}>
+                        {"경쟁사 분석\n진행중"}
+                    </Text>
+                </View>
+            </>
+        )}
+        </>
     )
 }
 
