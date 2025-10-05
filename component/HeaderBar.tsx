@@ -29,8 +29,8 @@ export default function HeaderBar({ onClickMenu }: HeaderBarProps) {
                     <TitleLogo width={104} height={29} fill='none' color='none' />
                 </View>
                 <View style={styles.iconContainer}>
-                    <TouchableOpacity onPress={onClickMenu}>
-                    <MenuIcon width={28} height={28} color={Colors.gray1} fill="none"/>
+                    <TouchableOpacity hitSlop={16} onPress={onClickMenu}>
+                        <MenuIcon width={28} height={28} color={Colors.gray1} fill="none"/>
                     </TouchableOpacity>
                 </View>
             </View>
