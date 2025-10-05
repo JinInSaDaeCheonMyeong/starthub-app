@@ -115,6 +115,7 @@ export const useCompanyInputScreen = (
                 showError(
                     '올바른 URL 형식이 아닙니다. (예: https://example.com)'
                 );
+                enabledBtn();
                 return;
             }
         } else if (
@@ -149,7 +150,7 @@ export const useCompanyInputScreen = (
                     startupLocation,
                     startupFields
                 })
-                ShowToast("프로필 등록", "프로필 수정에 등록하셨습니다", ToastType.SUCCESS)
+                ShowToast("프로필 등록", "프로필 등록에 성공하셨습니다", ToastType.SUCCESS)
                 navigation.navigate('HomeStack')
             } catch (error : any) {
                 if(error.isAxiosError){
