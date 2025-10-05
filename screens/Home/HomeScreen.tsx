@@ -55,6 +55,7 @@ export default function HomeScreen(props : HomeScreenProps) {
             noticeItems,
             bookmarkItems,
             noticeCategoryList,
+            userName
         },
         ui : {
             navItemList
@@ -69,7 +70,7 @@ export default function HomeScreen(props : HomeScreenProps) {
             <View style={styles.flatListContainer}>
                 <View style={styles.bannerContainer}> 
                     <Text style={styles.mainText}>
-                        {'좋은 아침이에요,\n홍길동님!'}
+                        {`좋은 아침이에요,\n${userName}님!`}
                     </Text>
                     <View style={styles.navIconContainer}>
                         {
@@ -131,28 +132,31 @@ export default function HomeScreen(props : HomeScreenProps) {
                         })}
                     </View>
                 </View>
-                <View style={styles.flatListWrapper}>
-                    <View style={styles.textWrapper}>
-                        <Text style={styles.titleText}>맞춤 추천 공고</Text>
-                        <Text style={styles.captionText}>사용자님의 관심을 분석하여 제공해 드려요</Text>
-                    </View>
-                    <FlatList
-                        contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
-                        showsHorizontalScrollIndicator={false}
-                        onEndReached={() => {}}
-                        style={{ overflow: "visible" }}
-                        data={noticeItems}
-                        renderItem={({ item }) => (
-                        <NoticeItem
-                            item={item}
-                            isHome={false}
-                            onPress={() => {
-                                props.navigation.navigate('InNotice', {Notice : item})
-                            }}
+                {
+                    noticeItems.length !== 0 && 
+                    <View style={styles.flatListWrapper}>
+                        <View style={styles.textWrapper}>
+                            <Text style={styles.titleText}>맞춤 추천 공고</Text>
+                            <Text style={styles.captionText}>사용자님의 관심을 분석하여 제공해 드려요</Text>
+                        </View>
+                        <FlatList
+                            contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
+                            showsHorizontalScrollIndicator={false}
+                            onEndReached={() => {}}
+                            style={{ overflow: "visible" }}
+                            data={noticeItems}
+                            renderItem={({ item }) => (
+                                <NoticeItem
+                                    item={item}
+                                    isHome={false}
+                                    onPress={() => {
+                                        props.navigation.navigate('InNotice', {Notice : item})
+                                    }}
+                                />
+                            )}
                         />
-                        )}
-                    />
-                </View>
+                    </View>
+                }
                 {
                     bookmarkItems.length !== 0 && (
                         <View style={styles.flatListWrapper}>

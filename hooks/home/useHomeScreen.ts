@@ -9,14 +9,13 @@ import { useFocusEffect } from "@react-navigation/native"
 import type { HomeScreenProps } from "../../screens/Home/HomeScreen";
 import { NoticeCategory } from "../../constants/NoticeCategory";
 import { getScheduleList, saveScheduleList } from "../../util/Schedule";
+import { getMe } from "../../api/user";
 
 const useHomeScreen = ({navigation} : HomeScreenProps) => {
     const [noticeItems, setNoticeItems] = useState<NoticeType[]>([]);
     const [bookmarkItems, setBookmarkItems] = useState<NoticeType[]>([]);
     const {width} = useWindowDimensions()
-    const carouselHeight = 160
-    const [carouselList, setCarouselList] = useState<NoticeType[]>([])
-    const carouselMaxIndex = carouselList.length
+    const [userName, setUserName] = useState('')
 
     const noticeCategoryList = [
         {
@@ -139,10 +138,9 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
         }
     };
 
-    const fetchNoticeItems = async () => {
+    const fetchItems = async () => {
         try {
             const noticeList : GetRecommendedNoticeResponse = await getRecommendedNotices();
-            
             const mapped = noticeList.data.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return {
@@ -163,6 +161,9 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
                 }
             }))
 
+            const name = await (await getMe()).data.username
+            
+            setUserName(name)
             setNoticeItems(mapped);
             setBookmarkItems(resultBookmarkList);
         } catch (error: unknown) {
@@ -184,13 +185,9 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
         navigation.navigate("Notice", { supportField });
     }
 
-    function goInNotice(index : number) {
-        navigation.navigate("InNotice", { Notice : carouselList[index]});
-    }
-
     useFocusEffect(
         useCallback(() => {
-            fetchNoticeItems();
+            fetchItems();
         }, [])
     );
 
@@ -198,18 +195,15 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
         form : {
             noticeItems,
             bookmarkItems,
-            carouselList,
-            carouselMaxIndex,
-            noticeCategoryList
+            noticeCategoryList,
+            userName
         },
         ui : {
             width,
-            carouselHeight,
             navItemList
         },
         actions : {
             goNotice,
-            goInNotice
         }
     }
 }
