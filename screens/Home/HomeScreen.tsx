@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     iconLabel : {
         fontSize : 14,
         fontFamily : Fonts.medium,
-        color : Colors.black2
+        color : Colors.gray1
     },
     navIconContainer : {
         flexDirection : 'row',
@@ -257,10 +257,12 @@ const styles = StyleSheet.create({
     navIconText : {
         textAlign : 'center', 
         fontFamily : Fonts.medium, 
-        fontSize : 14
+        fontSize : 14,
+        color : Colors.black2
     },
     mainText : {
         fontFamily : Fonts.semiBold,
+        color : Colors.black1,
         fontSize : 28,
         marginStart : 16
     }
