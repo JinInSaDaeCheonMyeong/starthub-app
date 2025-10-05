@@ -1,8 +1,8 @@
 import { isAxiosError } from "axios";
 import { ShowToast, ToastType } from "../../util/ShowToast";
-import { getNotice, getNotices } from "../../api/notice";
+import { getNotice, getNotices, getRecommendedNotices } from "../../api/notice";
 import { useCallback, useState } from "react";
-import { BeforeNoticeType, GetNoticesResponse, NoticeType } from "../../type/notice/notice.type";
+import { BeforeNoticeType, GetNoticesResponse, GetRecommendedNoticeResponse, NoticeType } from "../../type/notice/notice.type";
 import { ErrorResponse } from "../../type/util/response.type";
 import { Linking, useWindowDimensions } from "react-native";
 import { useFocusEffect } from "@react-navigation/native"
@@ -141,9 +141,9 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
 
     const fetchNoticeItems = async () => {
         try {
-            const noticeList : GetNoticesResponse = await getNotices("", "", "", "", "", 0);
+            const noticeList : GetRecommendedNoticeResponse = await getRecommendedNotices();
             
-            const mapped = noticeList.data.content.map((notice: BeforeNoticeType) => {
+            const mapped = noticeList.data.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return {
                     ...notice,
@@ -165,8 +165,6 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
 
             setNoticeItems(mapped);
             setBookmarkItems(resultBookmarkList);
-            setCarouselList(mapped.splice(0, 3))
-
         } catch (error: unknown) {
             if (isAxiosError(error)) {
                 const response = error.response;
