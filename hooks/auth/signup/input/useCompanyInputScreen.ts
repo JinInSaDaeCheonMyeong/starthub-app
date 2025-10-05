@@ -102,6 +102,21 @@ export const useCompanyInputScreen = (
             showError("총 인원 수를 입력해주세요");
             enabledBtn();
             return;
+        } else if(
+            !!companyWebsite && 
+            currentProgress === 2 && 
+            startupType === StartupStatus.EARLY_STAGE
+        ){
+            // URL 검사식 (HTTP, HTTPS만 허용)
+            const urlRegex =
+                /^(https?:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/;
+                
+            if (!urlRegex.test(companyWebsite.trim())) {
+                showError(
+                    '올바른 URL 형식이 아닙니다. (예: https://example.com)'
+                );
+                return;
+            }
         } else if (
             !annualRevenue &&
             currentProgress === 3
