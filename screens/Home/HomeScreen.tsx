@@ -84,7 +84,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                     <View style={styles.navIconContainer}>
                         {navList.map(({icon, label, navItem}, index) => (
                             <TouchableOpacity 
-                                onPress={() => {console.log(navItem)}}
+                                onPress={() => {props.navigation.navigate("Competitor");}}
                                 key={index} 
                                 style={styles.navIconWrapper}
                             >
