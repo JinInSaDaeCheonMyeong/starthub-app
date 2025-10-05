@@ -12,6 +12,10 @@ import { Shadow } from "react-native-shadow-2";
 import * as Progress from "react-native-progress"
 import { BlurView } from "@react-native-community/blur";
 import { ShowToast, ToastType } from "../../util/ShowToast";
+import { competitorAnalysis } from "../../api/competitor";
+import { CompetitorRequest } from "../../type/competitor/competitor.type";
+import { isAxiosError } from "axios";
+import { ErrorResponse } from "../../type/util/response.type";
 
 type SelectScreenProps = StackScreenProps<CompoetitorStackParamList>
 
@@ -20,6 +24,35 @@ export default function SelectScreen({navigation} : SelectScreenProps){
     const [selectBMC, setSelectBMC] = useState<number | undefined>(undefined)
     const [loading, setLoading] = useState(true);
     const [analyzing, setAnalyzing] = useState(false)
+
+    const handelCompetitorRequest = async () => {
+        setAnalyzing(true)
+        if(!selectBMC) return
+        try {
+            const data : CompetitorRequest = {
+                bmcId : selectBMC,
+                searchKeywords : []
+            }
+            const response = (await competitorAnalysis(data)).data
+            navigation.navigate('Result', {image : require('../../assets/images/glass-background.png'),data : response})
+        } catch (error) {
+            if(isAxiosError(error)){
+                const response = error.response
+                if(!response){
+                    ShowToast("경쟁사 분석", '네트워크 오류가 발생하였습니다', ToastType.ERROR);
+                } else {
+                    const message = (response.data as ErrorResponse).message
+                    if(message[message.length] === '.') {
+                        const errorMsg = message.slice(0, -1);
+                        ShowToast("경쟁사 분석", errorMsg, ToastType.ERROR);
+                    }
+                    ShowToast("경쟁사 분석", message + '입니다', ToastType.ERROR);
+                }
+            }
+        } finally {
+            setAnalyzing(false)
+        }
+    }
 
     useEffect(() => {
         const fetchBMCs = async () => {
@@ -48,13 +81,7 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                         ShowToast('경쟁사 분석', 'BMC를 선택해주세요', ToastType.ERROR)
                         return
                     }
-                    setAnalyzing(true)
-                    setTimeout(() => {
-                        setAnalyzing(false);
-                        navigation.navigate("Result", {
-                            image: require("../../assets/images/bmc-thumbnail-exam.png"),
-                        });
-                    }, 5000);
+                    await handelCompetitorRequest()
                 }}
                 title="BMC 선택"
                 subIcon="Profile"
@@ -131,7 +158,7 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                 ListEmptyComponent={() => (
                     !loading ? (
                         <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyContainerText}>존재하는 공고가 없습니다.</Text>
+                            <Text style={styles.emptyContainerText}>존재하는 BMC가 없습니다.</Text>
                         </View>
                     ) : (
                         <View style={{

@@ -2,7 +2,7 @@ import { Response } from "../util/response.type";
 
 export interface CompetitorRequest {
     bmcId : number,
-    searchKeyword : string[]
+    searchKeywords : string[]
 }
 
 export interface CompetitorResponse extends Response {

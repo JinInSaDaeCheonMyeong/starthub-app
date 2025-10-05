@@ -3,12 +3,13 @@ import { ImageBackground, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import SelectScreen from "../screens/competitor/SelectScreen";
 import ResultScreen from "../screens/competitor/ResultScreen";
+import { CompetitorResponse } from "../type/competitor/competitor.type";
 
 const Stack = createStackNavigator<CompoetitorStackParamList>()
 
 export type CompoetitorStackParamList = {
     Select : undefined;
-    Result : {image : string};
+    Result : {image : string, data : CompetitorResponse['data']};
 };
 
 export default function CompetitorStack() {
