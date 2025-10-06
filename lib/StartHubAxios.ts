@@ -5,7 +5,7 @@ import { RefreshResponse } from "../type/user/refresh.type";
 
 const StartHubAxios = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_URL,
-    timeout: 50000,
+    timeout: 65000,
 });
 
 StartHubAxios.interceptors.request.use(
