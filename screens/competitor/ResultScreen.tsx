@@ -123,13 +123,13 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
         ) : (
             <Carousel
                 style={{overflow : 'visible'}}
-                width={width - 32}
+                width={width - 28}
                 height={carouselHeight}
                 data={body as CompetitorComparison[]}
                 renderItem={({index, item}) => {
                     return (
                     <View 
-                        style={{marginRight : 16}}
+                        style={{marginRight : 8}}
                         onLayout={(event) => {
                             const {height} = event.nativeEvent.layout;
                             if (height > carouselHeight) {
