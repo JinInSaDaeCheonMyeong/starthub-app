@@ -9,7 +9,7 @@ const Stack = createStackNavigator<CompoetitorStackParamList>()
 
 export type CompoetitorStackParamList = {
     Select : undefined;
-    Result : {image : string, data : CompetitorResponse['data']};
+    Result : {image : string, bmcId : number, data : CompetitorResponse['data']};
 };
 
 export default function CompetitorStack() {

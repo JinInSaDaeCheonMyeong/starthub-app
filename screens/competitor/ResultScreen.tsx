@@ -1,4 +1,4 @@
-import { Alert, ImageBackground, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { Alert, ImageBackground, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import { StackScreenProps } from "@react-navigation/stack";
 import { Image } from "react-native";
@@ -6,9 +6,17 @@ import SubHeaderBar from "../../component/home/SubHeaderBar";
 import { Colors } from "../../constants/Color";
 import GlassView from "../../component/GlassView";
 import { Fonts } from "../../constants/Fonts";
-import React, { Children, ReactNode, useState } from "react";
-import { CompetitorAnalysisData, CompetitorComparison } from "../../type/competitor/competitor.type";
+import React, { useState } from "react";
+import { CompetitorComparison, CompetitorRequest, CompetitorResponse } from "../../type/competitor/competitor.type";
 import Carousel from "react-native-reanimated-carousel";
+import CommonButton from "../../component/CommonButton";
+import DownloadIcon from "../../assets/icons/download.svg"
+import { BlurView } from "@react-native-community/blur";
+import * as Progress from "react-native-progress"
+import { ShowToast, ToastType } from "../../util/ShowToast";
+import { ErrorResponse } from "../../type/util/response.type";
+import { isAxiosError } from "axios";
+import { competitorAnalysis } from "../../api/competitor";
 
 type ResultScreenProps = StackScreenProps<CompoetitorStackParamList>
 
@@ -16,6 +24,41 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
     const {width} = useWindowDimensions()
     const [carouselHeight, setCarouselHeight] = useState(400);
     const supportList = [0, 1, 2]
+    const [loading, setLoading] = useState(false)
+    const [form, setForm] = useState<CompetitorResponse['data'] | undefined>(params?.data)
+
+    const handelCompetitorRequest = async () => {
+        setLoading(true)
+        if(!params?.bmcId) {
+            setLoading(false) 
+            return
+        }
+        try {
+            const data : CompetitorRequest = {
+                bmcId : params.bmcId,
+                searchKeywords : []
+            }
+            const response = (await competitorAnalysis(data)).data
+            ShowToast("경쟁사 분석", '경쟁사 분석에 성공했습니다', ToastType.SUCCESS);
+            setForm(response)
+        } catch (error) {
+            if(isAxiosError(error)){
+                const response = error.response
+                if(!response){
+                    ShowToast("경쟁사 분석", '네트워크 오류가 발생했습니다', ToastType.ERROR);
+                } else {
+                    const message = (response.data as ErrorResponse).message
+                    if(message[message.length] === '.') {
+                        const errorMsg = message.slice(0, -1);
+                        ShowToast("경쟁사 분석", errorMsg, ToastType.ERROR);
+                    }
+                    ShowToast("경쟁사 분석", message + '입니다', ToastType.ERROR);
+                }
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const setHighlight = (value: string) => {
         if (!value) return <Text>값이 존재하지 않습니다</Text>;
@@ -79,12 +122,14 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
         ))
         ) : (
             <Carousel
+                style={{overflow : 'visible'}}
                 width={width - 32}
                 height={carouselHeight}
                 data={body as CompetitorComparison[]}
                 renderItem={({index, item}) => {
                     return (
                     <View 
+                        style={{marginRight : 16}}
                         onLayout={(event) => {
                             const {height} = event.nativeEvent.layout;
                             if (height > carouselHeight) {
@@ -92,75 +137,75 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                             }
                         }}
                     >
-                    <GlassView 
-                        containerStyle={{padding : 16, gap : 16}}
-                        key={index}
-                    >
-                        <View style={{flexDirection : 'row', gap : 16}}>
-                            <Image style={{height : 88, width : 88, resizeMode : 'center', borderRadius : 8, backgroundColor : Colors.white2}} src={item.logoUrl}/>
-                            <View style={{gap : 8, flex : 1}}>
-                                <View style={{flexDirection : 'row', justifyContent : 'space-between', gap : 8}}>
-                                    <Text style={{
-                                        color : Colors.black1,
-                                        fontFamily : Fonts.semiBold,
-                                        fontSize : 16,
-                                        flex : 1
-                                    }}>
-                                        {item.name}
-                                    </Text>
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            Alert.alert(
-                                                "링크 열기",
-                                                "외부 사이트로 이동하시겠습니까?",
-                                                [
-                                                    { text: "취소", style: "cancel" },
-                                                    {
-                                                        text: "이동",
-                                                        onPress: () => Linking.openURL(item.websiteUrl)
-                                                    }
-                                                ]
-                                            );
-                                        }}
-                                    >
+                        <GlassView 
+                            containerStyle={{padding : 16, gap : 16, height : carouselHeight}}
+                            key={index}
+                        >
+                            <View style={{flexDirection : 'row', gap : 16}}>
+                                <Image style={{height : 88, width : 88, resizeMode : 'center', borderRadius : 8, backgroundColor : Colors.white2}} src={item.logoUrl}/>
+                                <View style={{gap : 8, flex : 1}}>
+                                    <View style={{flexDirection : 'row', justifyContent : 'space-between', gap : 8}}>
                                         <Text style={{
-                                            color : Colors.primary,
-                                            fontSize : 14,
-                                            fontFamily : Fonts.reqular,
-                                            textDecorationLine : 'underline'
+                                            color : Colors.black1,
+                                            fontFamily : Fonts.semiBold,
+                                            fontSize : 16,
+                                            flex : 1
                                         }}>
-                                            바로가기
+                                            {item.name}
                                         </Text>
-                                    </TouchableOpacity>
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                Alert.alert(
+                                                    "링크 열기",
+                                                    "외부 사이트로 이동하시겠습니까?",
+                                                    [
+                                                        { text: "취소", style: "cancel" },
+                                                        {
+                                                            text: "이동",
+                                                            onPress: () => Linking.openURL(item.websiteUrl)
+                                                        }
+                                                    ]
+                                                );
+                                            }}
+                                        >
+                                            <Text style={{
+                                                color : Colors.primary,
+                                                fontSize : 14,
+                                                fontFamily : Fonts.reqular,
+                                                textDecorationLine : 'underline'
+                                            }}>
+                                                바로가기
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    {setHighlight(item.estimatedScale)}
                                 </View>
-                                {setHighlight(item.estimatedScale)}
                             </View>
-                        </View>
-                        <View style={{gap : 24}}>
-                            <View style={{gap : 4}}>
-                                <Text style={styles.boxTitle}>시장 점유율</Text>
-                                {setHighlight(item.marketShare)}
-                            </View>
-                            <View style={{gap : 6}}>
-                                <View style={{flexDirection : 'row', gap : 16}}>
-                                    <Text style={[styles.boxTitle, {flex : 1}]}>공통점</Text>
-                                    <Text style={[styles.boxTitle, {flex : 1}]}>차이점</Text>
+                            <View style={{gap : 24}}>
+                                <View style={{gap : 4}}>
+                                    <Text style={styles.boxTitle}>시장 점유율</Text>
+                                    {setHighlight(item.marketShare)}
                                 </View>
-                                <View style={{gap : 12}}>
-                                    {supportList.map((value) => (
-                                        <View style={{flexDirection : 'row', gap : 16}} key={value}>
-                                            <View style={{flex : 1}}>
-                                                {setHighlight(item.similarities[value] ?? '')}
+                                <View style={{gap : 6}}>
+                                    <View style={{flexDirection : 'row', gap : 16}}>
+                                        <Text style={[styles.boxTitle, {flex : 1}]}>공통점</Text>
+                                        <Text style={[styles.boxTitle, {flex : 1}]}>차이점</Text>
+                                    </View>
+                                    <View style={{gap : 12}}>
+                                        {supportList.map((value) => (
+                                            <View style={{flexDirection : 'row', gap : 16}} key={value}>
+                                                <View style={{flex : 1}}>
+                                                    {setHighlight(item.similarities[value] ?? '')}
+                                                </View>
+                                                <View style={{flex : 1}}>
+                                                    {setHighlight(item.differences[value] ?? '')}
+                                                </View>
                                             </View>
-                                            <View style={{flex : 1}}>
-                                                {setHighlight(item.differences[value] ?? '')}
-                                            </View>
-                                        </View>
-                                    ))}
+                                        ))}
+                                    </View>
                                 </View>
                             </View>
-                        </View>
-                    </GlassView>
+                        </GlassView>
                     </View>
                 )}}
             />
@@ -172,16 +217,18 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
     const renderUserBMC = () => (
         <>
             <Image 
-                source={params?.image ?? require('../../assets/images/glass-background.png')}
-                style={styles.bmcImage} 
+                source={require('../../assets/images/bmc-thumbnail-exam.png')}
+                style={[styles.bmcImage, {
+                    height : 245 * width / 361
+                }]} 
             />
             {createDataContainer('서비스 개요', 
                 createDataBox(
                     <>
-                        {createDataWrap("서비스명", params?.data.userBmc.title ?? '')}
-                        {createDataWrap("핵심 가치 제안", params?.data.userBmc.valueProposition ?? '')}
-                        {createDataWrap("목표 고객", params?.data.userBmc.targetCustomer ?? '')}
-                        {createDataWrap("핵심 강점 목록", params?.data.userBmc.keyStrengths ?? '')}
+                        {createDataWrap("서비스명", form?.userBmc.title ?? '')}
+                        {createDataWrap("핵심 가치 제안", form?.userBmc.valueProposition ?? '')}
+                        {createDataWrap("목표 고객", form?.userBmc.targetCustomer ?? '')}
+                        {createDataWrap("핵심 강점 목록", form?.userBmc.keyStrengths ?? '')}
                     </>
                 )
             )}
@@ -194,10 +241,9 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
             {createDataContainer('사용자 규모', 
                 createDataBox(
                     <>
-                        {createDataWrap("추정 사용자 기반", params?.data.userScale.estimatedUserBase ?? '')}
-                        {createDataWrap("시장 포지션", params?.data.userScale.marketPosition ?? '')}
-                        {createDataWrap("성장 잠재력", params?.data.userScale.growthPotential ?? '')}
-                        {createDataWrap("경쟁사 비교", params?.data.userScale.competitorComparison ?? '')}
+                        {createDataWrap("추정 사용자 기반", form?.userScale.estimatedUserBase ?? '')}
+                        {createDataWrap("시장 포지션", form?.userScale.marketPosition ?? '')}
+                        {createDataWrap("경쟁사 비교", form?.userScale.competitorComparison ?? '')}
                     </>
                 )
             )}
@@ -210,10 +256,10 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
             {createDataContainer('서비스 강점', 
                 createDataBox(
                     <>
-                        {createDataWrap("경쟁 우위", params?.data.strengths.competitiveAdvantages ?? '')}
-                        {createDataWrap("가치 제안", params?.data.strengths.uniqueValuePropositions ?? '')}
-                        {createDataWrap("시장 기회", params?.data.strengths.marketOpportunities ?? '')}
-                        {createDataWrap("전략 제안", params?.data.strengths.strategicRecommendations ?? '')}
+                        {createDataWrap("경쟁 우위", form?.strengths.competitiveAdvantages ?? '')}
+                        {createDataWrap("가치 제안", form?.strengths.uniqueValuePropositions ?? '')}
+                        {createDataWrap("시장 기회", form?.strengths.marketOpportunities ?? '')}
+                        {createDataWrap("전략 제안", form?.strengths.strategicRecommendations ?? '')}
                     </>
                 )
             )}
@@ -226,10 +272,10 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
             {createDataContainer('서비스 약점', 
                 createDataBox(
                     <>
-                        {createDataWrap("경쟁 열세", params?.data.weaknesses.competitiveDisadvantages ?? '')}
-                        {createDataWrap("도전 과제", params?.data.weaknesses.marketChallenges ?? '')}
-                        {createDataWrap("제한 자원", params?.data.weaknesses.resourceLimitations ?? '')}
-                        {createDataWrap("개선 제안", params?.data.weaknesses.improvementAreas ?? '')}
+                        {createDataWrap("경쟁 열세", form?.weaknesses.competitiveDisadvantages ?? '')}
+                        {createDataWrap("도전 과제", form?.weaknesses.marketChallenges ?? '')}
+                        {createDataWrap("제한 자원", form?.weaknesses.resourceLimitations ?? '')}
+                        {createDataWrap("개선 제안", form?.weaknesses.improvementAreas ?? '')}
                     </>
                 )
             )}
@@ -242,11 +288,11 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
             {createDataContainer('글로벌 확장 전략', 
                 createDataBox(
                     <>
-                        {createDataWrap("우선 진출 시장", params?.data.globalExpansionStrategy.priorityMarkets ?? '')}
-                        {createDataWrap("진입 전략", params?.data.globalExpansionStrategy.entryStrategies ?? '')}
-                        {createDataWrap("현지화 요구사항", params?.data.globalExpansionStrategy.localizationRequirements ?? '')}
-                        {createDataWrap("파트너십 기회", params?.data.globalExpansionStrategy.partnershipOpportunities ?? '')}
-                        {createDataWrap("예상 도전 과제", params?.data.globalExpansionStrategy.expectedChallenges ?? '')}
+                        {createDataWrap("우선 진출 시장", form?.globalExpansionStrategy.priorityMarkets ?? '')}
+                        {createDataWrap("진입 전략", form?.globalExpansionStrategy.entryStrategies ?? '')}
+                        {createDataWrap("현지화 요구사항", form?.globalExpansionStrategy.localizationRequirements ?? '')}
+                        {createDataWrap("파트너십 기회", form?.globalExpansionStrategy.partnershipOpportunities ?? '')}
+                        {createDataWrap("예상 도전 과제", form?.globalExpansionStrategy.expectedChallenges ?? '')}
                     </>
                 )
             )}
@@ -254,6 +300,7 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
     )
 
     return (
+        <>
         <ImageBackground
             style={{flex : 1, position : 'relative'}} 
             source={require("../../assets/images/glass-background.png")}
@@ -262,9 +309,8 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                 handleBackPress={navigation.goBack}
                 title="경쟁사 분석 결과"
             />
-            <ScrollView  
-                style={{paddingVertical : 16}}
-                contentContainerStyle={{gap : 20}} 
+            <ScrollView
+                contentContainerStyle={{gap : 20, paddingVertical : 16}} 
                 showsVerticalScrollIndicator={false}
             >
                 {renderUserBMC()}
@@ -273,17 +319,92 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                 {renderWeakeness()}
                 {renderGlobalExpansionStrategy()}
             </ScrollView>
+            <GlassView
+                blurPercent={0.06}
+                containerStyle={{
+                    padding : 16,
+                    paddingVertical : 12,
+                    borderWidth : 0,
+                    borderRadius : 0,
+                    flexDirection : 'row',
+                    justifyContent : 'space-between',
+                    gap : 12
+                }}
+            >
+                <View style={{flex :1}}>
+                    <CommonButton 
+                        title="다시하기" 
+                        onPress={() => handelCompetitorRequest()}
+                        disabled={false}
+                    />
+                </View>
+                <TouchableOpacity 
+                    style={{
+                        padding : 20,
+                        borderWidth : 2,
+                        borderRadius : 8,
+                        borderColor : Colors.primary,
+                        alignItems : 'center',
+                        justifyContent : 'center'
+                    }} 
+                    onPress={() => {}}
+                >
+                    <DownloadIcon fill={Colors.primary} width={20} height={20}/>
+                </TouchableOpacity>
+            </GlassView>
         </ImageBackground>
+        {
+            loading && (
+                <>
+                <BlurView
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }}
+                    blurType='dark'
+                    blurAmount={
+                        Platform.select({
+                            ios : 6,
+                            android : Math.round(32 * 0.06)
+                        })
+                    }
+                />
+                <View style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 10
+                }}>
+                    <Progress.Circle
+                        color={Colors.primary}
+                        size={50}
+                        indeterminate={true}
+                        thickness={300}
+                        borderWidth={4}
+                    />
+                    <Text style={{ 
+                        color: Colors.white1, 
+                        marginTop: 16,
+                        fontSize : 18,
+                        fontFamily : Fonts.semiBold,
+                        textAlign : 'center'
+                    }}>
+                        {"경쟁사 분석\n진행중"}
+                    </Text>
+                </View>
+            </>
+            )
+        }
+        </>
     )
 }
 
 const styles = StyleSheet.create({
     bmcImage : {
-        paddingHorizontal: 8,
-        paddingVertical :8,
-        backgroundColor: Colors.white2,
         width: 'auto',
-        resizeMode: 'cover',
+        resizeMode: 'stretch',
+        backgroundColor : Colors.white1,
+        borderWidth : 1,
+        borderColor : Colors.gray4,
         height: 245,
         marginHorizontal : 16
     },

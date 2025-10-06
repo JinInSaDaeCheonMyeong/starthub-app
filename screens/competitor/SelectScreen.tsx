@@ -34,7 +34,8 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                 searchKeywords : []
             }
             const response = (await competitorAnalysis(data)).data
-            navigation.navigate('Result', {image : require('../../assets/images/glass-background.png'),data : response})
+            ShowToast("경쟁사 분석", '경쟁사 분석에 성공했습니다', ToastType.SUCCESS);
+            navigation.navigate('Result', {image : require('../../assets/images/glass-background.png'), bmcId : selectBMC, data : response})
         } catch (error) {
             if(isAxiosError(error)){
                 const response = error.response
