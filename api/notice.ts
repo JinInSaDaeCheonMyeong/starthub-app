@@ -1,5 +1,5 @@
 import StartHubAxios from "../lib/StartHubAxios";
-import {GetNoticeResponse, GetNoticesResponse} from "../type/notice/notice.type";
+import {GetNoticeResponse, GetNoticesResponse, GetRecommendedNoticeResponse} from "../type/notice/notice.type";
 
 export const getNotices = async (
     title : string,
@@ -30,3 +30,7 @@ export const getNotice = async (
             includeLikeStatus : true
         }
     })).data;
+
+export const getRecommendedNotices = 
+    async () : Promise<GetRecommendedNoticeResponse> =>
+    (await StartHubAxios.get(`announcements/recommendations`)).data

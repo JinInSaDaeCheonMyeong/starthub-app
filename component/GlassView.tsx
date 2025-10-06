@@ -1,12 +1,12 @@
-import React, { ReactElement } from "react";
-import { StyleProp, StyleSheet, View, ViewProps } from "react-native";
+import React from "react";
+import { Platform, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { BlurView } from "@react-native-community/blur"
 import { Colors } from "../constants/Color";
 
 type GlassViewProps = {
-    containerStyle ?: StyleProp<ViewProps>,
-    blurStyle ?: StyleProp<ViewProps>,
-    blurAmount ?: number
+    containerStyle ?: StyleProp<ViewStyle>,
+    blurStyle ?: StyleProp<ViewStyle>,
+    blurPercent ?: number
     blurType ?: 'dark' | 'light'
     children ?: React.ReactNode | undefined
 }
@@ -15,9 +15,16 @@ export default function GlassView({
     children,
     containerStyle,
     blurStyle,
-    blurAmount = 60,
+    blurPercent = 0.6,
     blurType = 'light'
 } : GlassViewProps){
+    const iosMax = 100;
+    const androidMax = 32;
+
+    const blurAmount =
+        Platform.OS === "android"
+            ? Math.round(androidMax * blurPercent)
+            : Math.round(iosMax * blurPercent);
     return (
         <View style={[styles.container, containerStyle]}>
             <BlurView
