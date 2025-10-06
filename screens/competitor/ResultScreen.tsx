@@ -27,7 +27,7 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
     const [loading, setLoading] = useState(false)
     const [form, setForm] = useState<CompetitorResponse['data'] | undefined>(params?.data)
 
-    const handelCompetitorRequest = async () => {
+    const handleCompetitorRequest = async () => {
         setLoading(true)
         if(!params?.bmcId) {
             setLoading(false) 
@@ -334,7 +334,19 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                 <View style={{flex :1}}>
                     <CommonButton 
                         title="다시하기" 
-                        onPress={() => handelCompetitorRequest()}
+                        onPress={() => {
+                            Alert.alert(
+                                "경쟁사 재분석",
+                                "기존 분석 결과가 \n사라질 수 있습니다.\n계속 진행하시겠습니까?",
+                                [
+                                    { text: "취소", style: "cancel" },
+                                    {
+                                        text: "진행",
+                                        onPress: () => handleCompetitorRequest()
+                                    }
+                                ]
+                            );
+                        }}
                         disabled={false}
                     />
                 </View>

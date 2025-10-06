@@ -25,7 +25,7 @@ export default function SelectScreen({navigation} : SelectScreenProps){
     const [loading, setLoading] = useState(true);
     const [analyzing, setAnalyzing] = useState(false)
 
-    const handelCompetitorRequest = async () => {
+    const handleCompetitorRequest = async () => {
         setAnalyzing(true)
         if(!selectBMC) return
         try {
@@ -82,7 +82,7 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                         ShowToast('경쟁사 분석', 'BMC를 선택해주세요', ToastType.ERROR)
                         return
                     }
-                    await handelCompetitorRequest()
+                    await handleCompetitorRequest()
                 }}
                 title="BMC 선택"
                 subIcon="Profile"
