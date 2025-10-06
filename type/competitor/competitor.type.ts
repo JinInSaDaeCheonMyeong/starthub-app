@@ -31,7 +31,7 @@ interface UserScale {
     competitorComparison: CompetitorComparison[];
 }
 
-interface CompetitorComparison {
+export interface CompetitorComparison {
     name: string;
     logoUrl: string;
     websiteUrl: string;
