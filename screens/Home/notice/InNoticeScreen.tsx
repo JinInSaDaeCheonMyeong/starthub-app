@@ -32,7 +32,7 @@ import { ShowToast, ToastType } from '../../../util/ShowToast';
 import SubHeaderBar from '../../../component/home/SubHeaderBar';
 import { BaseScheduleType } from '../../../type/schedules/schedules.type';
 import { formatToDate } from '../../../util/DateFormat';
-import { getDateSchedules, postScheduls } from '../../../api/schedule';
+import { getDateSchedules, registerSchedules, removeSchedules } from '../../../api/schedule';
 import {useFocusEffect} from "@react-navigation/native"
 import { isAxiosError } from 'axios';
 import { ErrorResponse } from '../../../type/util/response.type';
@@ -51,6 +51,7 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
     const [isSelected, setIsSelected] = useState(notice.isLiked)
     const [isBookmarkLoading, setIsBookmarkLoading] = useState(false)
     const [isSchedules, setIsSchedules] = useState(false)
+    const [isScheduleLoading, setIsScheduleLoading] = useState(true)
 
     const handleBackPress = () => {
         navigation.goBack()
@@ -80,10 +81,15 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
     }
 
     const handleSaveSchedules = async () => {
+        if (isScheduleLoading) return
+        setIsScheduleLoading(true)
+
         try {
             if(isSchedules){
                 setIsSchedules(false)
-                // 삭제 api 구현 예정
+                const announcementId = params.Notice.id
+                await removeSchedules(announcementId)
+                ShowToast("삭제 성공", "일정을 삭제하였습니다", ToastType.SUCCESS)
                 return
             }
             const data : BaseScheduleType = {
@@ -91,11 +97,13 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                 startDate : formatToDate(params.Notice.startDate, 'solid'),
                 endDate : formatToDate(params.Notice.endDate, 'solid')
             }
-            await postScheduls(data)
+            await registerSchedules(data)
             setIsSchedules(true)
             ShowToast("추가 성공", "일정을 추가하였습니다", ToastType.SUCCESS)
         } catch (error) {
             ShowToast("오류 발생", "알 수 없는 오류가 발생하였습니다", ToastType.ERROR)
+        } finally {
+            setIsScheduleLoading(false)
         }
     }
 
@@ -121,16 +129,16 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
     // 일정에 들어있는지 안들어있는지 검사하는 코드, 일정 추가 기능을 만들때 필요해서 작성함
     useFocusEffect(
         useCallback(() => {  
-            try {
-                const fetchIsSchedule = async () => {
+            const fetchIsSchedule = async () => {
+                console.log(isScheduleLoading)
+                setIsScheduleLoading(true);
+                try {
                     const exists = (await getDateSchedules(
-                        formatToDate('2025-10-02', 'solid'))
+                        formatToDate(new Date(), 'solid'))
                     ).data.some((value) => value.id === params.Notice.id);
                     
                     setIsSchedules(exists)
-                }
-                fetchIsSchedule()
-            } catch (error) {
+                } catch (error) {
                     if (isAxiosError(error)) {
                         const response = error.response;
                         if (!response) {
@@ -143,7 +151,11 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                     }
                     ShowToast("오류 발생", "알 수 없는 오류가 발생하였습니다", ToastType.ERROR);
                     console.log(error);
+                } finally {
+                    setIsScheduleLoading(false)
                 }
+            }
+            fetchIsSchedule(); // async 함수 호출
         }, [])
     )
 
@@ -195,7 +207,7 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                             <View style={styles.buttonsContainer}>
                                 <CalendarIcon width={18} height={18} color={Colors.primary}/>
                                 <Text style={styles.buttonText}>
-                                    {`일정 ${isSchedules ? '삭제' : '추가'}`}
+                                    {`일정 ${isScheduleLoading ? '로딩 중' : isSchedules ? '삭제' : '추가'}`}
                                 </Text>
                             </View>
                         </TouchableOpacity>

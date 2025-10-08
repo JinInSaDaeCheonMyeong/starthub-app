@@ -1,15 +1,11 @@
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { Colors } from "../../constants/Color";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { NoticeType } from "../../type/notice/notice.type";
 import { buildDeadlineMarks, MarkedDates } from "../../util/MarkedDates";
 import { useFocusEffect } from "@react-navigation/native"
 import { ShowToast, ToastType } from "../../util/ShowToast";
-import { getNotice } from "../../api/notice";
 import { useWindowDimensions } from "react-native";
 import { formatToDate } from "../../util/DateFormat";
 import { getDateSchedules, getMonthSchedules } from "../../api/schedule";
-import { getScheduleList } from "../../util/Schedule";
 
 const useCalendarScreen = () => {
     const {width} = useWindowDimensions()
@@ -91,20 +87,40 @@ const useCalendarScreen = () => {
         }
     };
 
-    const getNoticeItem = async (date : string): Promise<NoticeType[]> => {
+    const getNoticeItem = async (date: string): Promise<NoticeType[]> => {
         try {
             const noticeItems = (await getDateSchedules(date)).data.map((value) => {
-                const {startDate, endDate} = parseReceptionPeriod(value.receptionPeriod)
+                const { startDate, endDate } = parseReceptionPeriod(value.receptionPeriod);
                 return {
                     ...value,
                     startDate,
-                    endDate
-                }
+                    endDate,
+                };
             });
-
-            const resolvedNotices : NoticeType[] = noticeItems;
+    
+            const today = new Date(date);
+    
+            const sortedNotices = noticeItems.sort((a, b) => {
+                const startA = new Date(a.startDate);
+                const endA = new Date(a.endDate);
+                const startB = new Date(b.startDate);
+                const endB = new Date(b.endDate);
+    
+                const isTodayA =
+                    startA.toDateString() === today.toDateString() &&
+                    endA.toDateString() === today.toDateString();
+                const isTodayB =
+                    startB.toDateString() === today.toDateString() &&
+                    endB.toDateString() === today.toDateString();
+    
+                if (isTodayA && !isTodayB) return -1;
+                if (!isTodayA && isTodayB) return 1;
+    
+                return endA.getTime() - endB.getTime();
+            });
+            const resolvedNotices: NoticeType[] = sortedNotices;
             setNoticeItemList(resolvedNotices);
-
+    
             return resolvedNotices;
         } catch (error) {
             ShowToast("오류 발생", "일정을 불러올 수 없습니다", ToastType.ERROR);
@@ -115,21 +131,28 @@ const useCalendarScreen = () => {
     const initMarkedDates = async () => {
         try {
             setLoading(true)
-            const schedules = await getMonthSchedules(currentDate);
-            console.log(schedules)
+            const schedules = await getMonthSchedules(viewingMonth + '-01');
+            console.log(viewingMonth + "-01");
             const dates = buildDeadlineMarks(schedules.data);
             setMarkedDates(dates);
-            setLoading(false);
         } catch (error) {
-            console.error(error)
             ShowToast("오류 발생", "일정을 불러올 수 없습니다", ToastType.ERROR)
+        } finally {
+            setLoading(false);
         }
     }
 
+    // viewingMonth가 변경될 때 호출
+    useEffect(() => {
+        initMarkedDates()
+    }, [viewingMonth])
+
+    // 화면에 포커스될 때 마크와 일정 모두 리프레시
     useFocusEffect(
         useCallback(() => {
-            initMarkedDates()
-        }, [])
+            initMarkedDates(); // 마크 리프레시
+            getNoticeItem(currentDate); // 일정 리프레시
+        }, [currentDate, viewingMonth]) // viewingMonth도 의존성에 추가
     );
 
     return {
@@ -150,6 +173,7 @@ const useCalendarScreen = () => {
         },
         action : {
             getNoticeItem,
+            initMarkedDates
         }
     }
 }

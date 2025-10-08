@@ -8,7 +8,7 @@ export interface BaseScheduleType {
 }
 
 export interface MonthScheduleType extends BaseScheduleType {
-    supportFields : string
+    supportField : string
 }
 
 export interface GetMonthScheduleResponse extends Response {
