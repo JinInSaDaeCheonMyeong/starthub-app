@@ -36,6 +36,14 @@ export interface NoticeType extends BeforeNoticeType {
     endDate: Date;
 }
 
+export interface RecommendedNoticeType extends NoticeType {
+    score : number
+}
+
 export interface GetNoticeResponse extends Response{
     data : NoticeType;
+}
+
+export interface GetRecommendedNoticeResponse extends Response{
+    data : RecommendedNoticeType[]
 }

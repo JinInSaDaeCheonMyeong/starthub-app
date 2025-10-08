@@ -1,106 +1,83 @@
 import { isAxiosError } from "axios";
 import { ShowToast, ToastType } from "../../util/ShowToast";
-import { getNotice, getNotices } from "../../api/notice";
+import { getNotice, getNotices, getRecommendedNotices } from "../../api/notice";
 import { useCallback, useState } from "react";
-import { BeforeNoticeType, GetNoticesResponse, NoticeType } from "../../type/notice/notice.type";
+import { BeforeNoticeType, GetNoticesResponse, GetRecommendedNoticeResponse, NoticeType } from "../../type/notice/notice.type";
 import { ErrorResponse } from "../../type/util/response.type";
 import { Linking, useWindowDimensions } from "react-native";
 import { useFocusEffect } from "@react-navigation/native"
 import type { HomeScreenProps } from "../../screens/Home/HomeScreen";
 import { NoticeCategory } from "../../constants/NoticeCategory";
 import { getScheduleList, saveScheduleList } from "../../util/Schedule";
+import { getMe } from "../../api/user";
 
 const useHomeScreen = ({navigation} : HomeScreenProps) => {
     const [noticeItems, setNoticeItems] = useState<NoticeType[]>([]);
     const [bookmarkItems, setBookmarkItems] = useState<NoticeType[]>([]);
     const {width} = useWindowDimensions()
-    const carouselHeight = 160
-    const [carouselList, setCarouselList] = useState<NoticeType[]>([])
-    const carouselMaxIndex = carouselList.length 
-
-    const navList = [
-        {
-            icon : require("../../assets/images/analyzeNotice.png"),
-            label : '경쟁사\n분석',
-            navItem : 'Analyze'
-        },
-        {
-            icon : require("../../assets/images/compareNotice.png"),
-            label : '공고\n비교',
-            navItem : 'Compare'
-        },
-        {
-            icon : require("../../assets/images/suggestionAI.png"),
-            label : 'AI 추천\n공고',
-            navItem : 'Suggestion'
-        },
-        {
-            icon : require("../../assets/images/calendar.png"),
-            label : '달력\n보기',
-            navItem : 'Calendar'
-        }
-    ]
+    const [userName, setUserName] = useState('')
 
     const noticeCategoryList = [
         {
             label : '사업화',
             value : '사업화',
             noticeType : NoticeCategory.BUSINESS,
-            backgroundColor : '#E5ECFF',
-            iconColor : '#709DFF'
         },
         {
             label : 'R&D',
             value : '기술개발',
             noticeType : NoticeCategory.RND,
-            backgroundColor : '#EBE3FF',
-            iconColor : '#D176FF'
         },
         {
             label : '시설',
             value : '시설',
             noticeType : NoticeCategory.FACILITY,
-            backgroundColor : '#FFEAEA',
-            iconColor : '#FF7F7F'
         },
         {
             label : '교육',
             value : '교육',
             noticeType : NoticeCategory.EDUCATION,
-            backgroundColor : '#E3F5FF',
-            iconColor : '#37B6FF'
         },
         {
             label : '글로벌',
             value : '글로벌',
             noticeType : NoticeCategory.GLOBAL,
-            backgroundColor : '#E7FFE1',
-            iconColor : '#92E4A8'
         },
         {
             label : '인력',
             value : '인력',
             noticeType : NoticeCategory.TALENT,
-            backgroundColor : '#FFF2DF',
-            iconColor : '#FFBE62'
         },
         {
             label : '행사',
             value : '행사',
             noticeType : NoticeCategory.EVENT,
-            backgroundColor : '#FFE6F3',
-            iconColor : '#FF7FB8'
         },
         {
             label : '자금',
             value : '자금',
             noticeType : NoticeCategory.FUNDING,
-            backgroundColor : '#FFFED7',
-            iconColor : '#D8D378'
         }
     ]
 
-    
+    const navItemList : {label : string, nav : 'Competitor' | 'Compare' | 'Suggest' | 'Calendar'}[] = [
+        {
+            label: "경쟁사 분석",
+            nav: "Competitor",
+        },
+        {
+            label: "공고 비교",
+            nav: "Compare",
+        },
+        {
+            label: "AI 추천 공고",
+            nav: "Suggest",
+        },
+        {
+            label: "일정 추가",
+            nav: "Calendar",
+        },
+    ];
 
     const parseReceptionPeriod = (period: string) => {
         try {
@@ -161,11 +138,10 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
         }
     };
 
-    const fetchNoticeItems = async () => {
+    const fetchItems = async () => {
         try {
-            const noticeList : GetNoticesResponse = await getNotices("", "", "", "", "", 0);
-            
-            const mapped = noticeList.data.content.map((notice: BeforeNoticeType) => {
+            const noticeList : GetRecommendedNoticeResponse = await getRecommendedNotices();
+            const mapped = noticeList.data.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return {
                     ...notice,
@@ -185,10 +161,11 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
                 }
             }))
 
+            const name = await (await getMe()).data.username
+            
+            setUserName(name)
             setNoticeItems(mapped);
             setBookmarkItems(resultBookmarkList);
-            setCarouselList(mapped.splice(0, 3))
-
         } catch (error: unknown) {
             if (isAxiosError(error)) {
                 const response = error.response;
@@ -208,13 +185,9 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
         navigation.navigate("Notice", { supportField });
     }
 
-    function goInNotice(index : number) {
-        navigation.navigate("InNotice", { Notice : carouselList[index]});
-    }
-
     useFocusEffect(
         useCallback(() => {
-            fetchNoticeItems();
+            fetchItems();
         }, [])
     );
 
@@ -222,18 +195,15 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
         form : {
             noticeItems,
             bookmarkItems,
-            carouselList,
-            carouselMaxIndex,
             noticeCategoryList,
-            navList
+            userName
         },
         ui : {
             width,
-            carouselHeight
+            navItemList
         },
         actions : {
             goNotice,
-            goInNotice
         }
     }
 }
