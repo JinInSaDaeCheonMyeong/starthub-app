@@ -13,7 +13,6 @@ import { HomeStackParamList } from "../../../navigation/HomeStack";
 import { RootStackParamList } from "../../../navigation/RootStack";
 import { StackScreenProps } from "@react-navigation/stack";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { useMemo, useState } from "react";
 import GlassView from "../../../component/GlassView";
 import { NoticeType } from "../../../type/notice/notice.type";
 import NoticeItem from "../../../component/notice/NoticeItem";
@@ -38,25 +37,27 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
         form : {
             loading,
             noticeItemList,
+            currentDate,
             setLoading,
+            setViewingMonth,
+            setCurrentDate,
+            viewingMonth
         },
         ui : {
             markedDates,
+            width,
+            todayString
         },
         action : {
-            getNoticeItem
+            getNoticeItem,
+            initMarkedDates
         }
     } = useCalendarScreen()
-    const {width} = useWindowDimensions()
-    const today = new Date()
-    const todayString = formatToDate(today, 'solid');
-    const [currentDate, setCurrentDate] = useState(todayString)
-    const [viewingMonth, setViewingMonth] = useState(todayString.substring(0, 7))
     return (
         <>
         <View style={styles.container}>
             <GlassView
-                containerStyle={{padding : 20}}
+                containerStyle={{padding : 20, marginTop : 16}}
             >
                 <Calendar
                     style={styles.calendar}
@@ -164,6 +165,7 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{
                     paddingTop : 8,
+                    paddingBottom : 16,
                     gap : 12,
                 }}
                 style={{
@@ -207,7 +209,7 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
+        paddingHorizontal: 16,
         position : 'relative',
         gap : 8
     },

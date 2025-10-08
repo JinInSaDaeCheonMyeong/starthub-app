@@ -52,7 +52,7 @@ export function buildDeadlineMarks(
             const dots: Dot[] = marked[key]?.dots ? [...marked[key].dots] : [];
             dots.push({
                 id: schedule.announcementId,
-                color: categoryMap[schedule.supportFields ?? '사업화'],
+                color: categoryMap[schedule.supportField ?? '사업화'],
                 priority,
             });
             marked[key] = {
