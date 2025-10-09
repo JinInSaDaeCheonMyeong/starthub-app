@@ -1,6 +1,6 @@
 import React, {useCallback, useState} from 'react';
 import {
-    Alert, Linking,
+    Alert, ImageBackground, Linking,
     ScrollView,
     StyleSheet,
     Text,
@@ -12,7 +12,6 @@ import RenderHtml from 'react-native-render-html';
 import {StackScreenProps} from "@react-navigation/stack";
 import {RootStackParamList} from "../../../navigation/RootStack";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
-import BackButton from "../../../component/BackButton";
 import {Colors} from "../../../constants/Color";
 import {Fonts} from "../../../constants/Fonts";
 import BusinessIcon from "../../../assets/icons/category/notice/business.svg";
@@ -25,6 +24,7 @@ import RNDIcon from "../../../assets/icons/category/notice/rnd.svg";
 import TalentIcon from "../../../assets/icons/category/notice/talent.svg";
 import CalendarIcon from "../../../assets/icons/notice/calendar.svg";
 import ComparisonIcon from "../../../assets/icons/notice/comparison.svg";
+import OriginalIcon from "../../../assets/icons/notice/rectangle.svg"
 import {deleteLikes, postLikes} from "../../../api/likes";
 import BookMarkFill from "../../../assets/icons/bookMark/bookmark.fill.svg";
 import BookMark from "../../../assets/icons/bookMark/bookmark.svg";
@@ -36,9 +36,7 @@ import { getDateSchedules, registerSchedules, removeSchedules } from '../../../a
 import {useFocusEffect} from "@react-navigation/native"
 import { isAxiosError } from 'axios';
 import { ErrorResponse } from '../../../type/util/response.type';
-
-
-
+import GlassView from '../../../component/GlassView';
 
 type InNoticeScreenProps = StackScreenProps<RootStackParamList, 'InNotice'>;
 
@@ -46,16 +44,21 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
     const notice = params.Notice
     const insets = useSafeAreaInsets();
     const source = {
-        html: notice.content,
+        html: notice.content.replace(
+            /(<p class="txt-button">.*?<\/p>)\s*<br\s*\/?>/gi,
+            '$1'
+        )
     };
     const [isSelected, setIsSelected] = useState(notice.isLiked)
     const [isBookmarkLoading, setIsBookmarkLoading] = useState(false)
     const [isSchedules, setIsSchedules] = useState(false)
     const [isScheduleLoading, setIsScheduleLoading] = useState(true)
+    const [isPressed, setIsPressed] = useState(false)
 
     const handleBackPress = () => {
         navigation.goBack()
     };
+
     const handleBookmarkToggle = async () => {
         if (isBookmarkLoading) return
 
@@ -87,15 +90,15 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
         try {
             if(isSchedules){
                 setIsSchedules(false)
-                const announcementId = params.Notice.id
+                const announcementId = notice.id
                 await removeSchedules(announcementId)
                 ShowToast("삭제 성공", "일정을 삭제하였습니다", ToastType.SUCCESS)
                 return
             }
             const data : BaseScheduleType = {
-                announcementId : params.Notice.id,
-                startDate : formatToDate(params.Notice.startDate, 'solid'),
-                endDate : formatToDate(params.Notice.endDate, 'solid')
+                announcementId : notice.id,
+                startDate : formatToDate(notice.startDate, 'solid'),
+                endDate : formatToDate(notice.endDate, 'solid')
             }
             await registerSchedules(data)
             setIsSchedules(true)
@@ -105,6 +108,20 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
         } finally {
             setIsScheduleLoading(false)
         }
+    }
+
+    const handleOpenURL = (url : string) => {
+        Alert.alert(
+            "링크 열기",
+            "외부 사이트로 이동하시겠습니까?",
+            [
+                { text: "취소", style: "cancel" },
+                {
+                    text: "이동",
+                    onPress: () => Linking.openURL(url)
+                }
+            ]
+        );
     }
 
     const targetAge = notice.targetAge == "전체" ? "전체연령" : notice.targetAge;
@@ -129,6 +146,10 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
     // 일정에 들어있는지 안들어있는지 검사하는 코드, 일정 추가 기능을 만들때 필요해서 작성함
     useFocusEffect(
         useCallback(() => {  
+            console.log("content :" + JSON.stringify(notice.content.replace(
+                /(<p class="txt-button">.*?<\/p>)\s*<br\s*\/?>/gi,
+                '$1'
+            )))
             const fetchIsSchedule = async () => {
                 console.log(isScheduleLoading)
                 setIsScheduleLoading(true);
@@ -160,209 +181,165 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
     )
 
     return (
-        <View style={{paddingTop: insets.top, paddingBottom: insets.bottom}}>
+        <ImageBackground source={require("../../../assets/images/glass-background.png")} style={{flex : 1, paddingTop: insets.top, paddingBottom: insets.bottom}}>
             <SubHeaderBar
-                title="공고"
+                title={categoryMap[notice.supportField as keyof typeof categoryMap]?.label}
                 handleBackPress={handleBackPress}
             />
-            <ScrollView style={{paddingHorizontal: 16}}>
-                <View style={styles.topTitle}>
-                    <View style={styles.topIconContainer}>
-                        {categoryMap[notice.supportField as keyof typeof categoryMap]?.icon}
-                    </View>
-                    <Text style={styles.topLabelText}>
-                        {categoryMap[notice.supportField as keyof typeof categoryMap]?.label}
+            <ScrollView style={{padding: 16}} showsVerticalScrollIndicator={false}>
+                <View style={styles.topWrapper}>
+                    <Text style={styles.titleText}>
+                        {notice.title}
                     </Text>
                     <Text style={styles.topDateText}>
                         {transformDate(notice.startDate)}~{transformDate(notice.endDate)}
                     </Text>
-                </View>
-                <Text style={styles.titleText}>
-                    {notice.title}
-                </Text>
-                <View style={styles.hashTagContainer}>
-                    {[notice.region, targetAge, startupHistory].map((item, index) => (
-                        <View key={index}>
-                            <Text style={styles.hashTagText}>
-                                #{item}
-                            </Text>
+                    <View style={styles.hashTagContainer}>
+                        {[notice.region, targetAge, startupHistory].map((item, index) => (
+                            <View key={index}>
+                                <Text style={styles.hashTagText}>
+                                    #{item}
+                                </Text>
+                            </View>
+                        ))}
+                    </View>
+                    <View style={styles.buttons}>
+                        <View style={styles.featureButtons}>
+                            <TouchableOpacity onPress={() => handleOpenURL(params.Notice.url)}>
+                                <GlassView 
+                                    containerStyle={styles.buttonsContainer}
+                                    blurPercent={0.45}
+                                >
+                                    <OriginalIcon height={20} color={Colors.primary}/>
+                                    <Text style={styles.buttonText}>
+                                        원문 보기
+                                    </Text>
+                                </GlassView>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                disabled={isScheduleLoading}
+                                onPress={() => handleSaveSchedules()}
+                            >
+                                <GlassView containerStyle={styles.buttonsContainer}>
+                                    <CalendarIcon height={20}/>
+                                    <Text style={styles.buttonText}>
+                                        {`일정 ${isScheduleLoading ? '로딩 중' : isSchedules ? '삭제' : '추가'}`}
+                                    </Text>
+                                </GlassView>
+                            </TouchableOpacity>
                         </View>
-                    ))}
-                </View>
-                <View style={styles.buttons}>
-                    <View style={styles.featureButtons}>
-                        <TouchableOpacity onPress={() => {
-                            
-                        }}>
-                            <View style={styles.buttonsContainer}>
-                                <ComparisonIcon width={18} height={18} color={Colors.primary}/>
-                                <Text style={styles.buttonText}>
-                                    공고 비교
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => {
-                            handleSaveSchedules()
-                        }}>
-                            <View style={styles.buttonsContainer}>
-                                <CalendarIcon width={18} height={18} color={Colors.primary}/>
-                                <Text style={styles.buttonText}>
-                                    {`일정 ${isScheduleLoading ? '로딩 중' : isSchedules ? '삭제' : '추가'}`}
-                                </Text>
-                            </View>
+                        <TouchableOpacity
+                            onPress={handleBookmarkToggle}
+                            disabled={isBookmarkLoading}
+                            activeOpacity={0.7}
+                        >
+                            {isSelected ? (
+                                <BookMarkFill
+                                    width={24}
+                                    height={24}
+                                    fill={Colors.primary}
+                                    color={Colors.primary}
+                                />
+                            ) : (
+                                <BookMark
+                                    width={24}
+                                    height={24}
+                                    color={Colors.primary}
+                                />
+                            )}
                         </TouchableOpacity>
                     </View>
-                    <TouchableOpacity
-                        onPress={handleBookmarkToggle}
-                        disabled={isBookmarkLoading}
-                        activeOpacity={0.7}
-                    >
-                        {isSelected ? (
-                            <BookMarkFill
-                                width={24}
-                                height={24}
-                                fill={Colors.primary}
-                                color={Colors.primary}
-                            />
-                        ) : (
-                            <BookMark
-                                width={24}
-                                height={24}
-                                color={Colors.primary}
-                            />
-                        )}
-                    </TouchableOpacity>
                 </View>
-                <View>
-                    <RenderHtml
-                        contentWidth={width - 32}
-                        source={source}
-                        tagsStyles={{
-                            ul: { listStyleType: 'none', paddingLeft: 0, marginLeft: 0 },
-                        }}
-                        systemFonts={[Fonts.semiBold, Fonts.medium]}
-                        renderers={{
-                            a: ({ TDefaultRenderer, tnode, ...props }: any) => {
-                                // btn_by-bl 클래스가 있는 a 태그인지 확인
-                                if (tnode.classes?.includes('btn_by-bl')) {
-                                    // 버튼 스타일로 렌더링
-                                    return (
-                                        <View style={{
-                                            transform: [
-                                                { translateY: 7 },
-                                            ]
-                                        }}>
-                                        <TouchableOpacity
-                                            style={{
-                                                borderColor: Colors.primary,
-                                                borderWidth: 2,
-                                                backgroundColor: Colors.primary,
-                                                paddingHorizontal: 6,
-                                                paddingVertical: 4,
-                                                borderRadius: 4,
-                                                alignSelf: 'center', // flex-start에서 center로 변경
-                                                marginVertical: 0, // 2에서 0으로 변경하여 세로 여백 제거
-                                                marginLeft: 4,
-                                            }}
-                                            onPress={() => {
-                                                // 링크가 있다면 처리
-                                                const href = tnode.attributes?.href;
-                                                if (href) {
-                                                    const matches = href.match(/'(.*?)'/) || [null, href];
-                                                    const url = matches[1];
-                                                    if (url) {
-                                                        Alert.alert(
-                                                            "링크 열기",
-                                                            "외부 사이트로 이동하시겠습니까?",
-                                                            [
-                                                                { text: "취소", style: "cancel" },
-                                                                {
-                                                                    text: "이동",
-                                                                    onPress: () => Linking.openURL(url)
-                                                                }
-                                                            ]
-                                                        );
-                                                    }
+                <RenderHtml
+                    contentWidth={width - 32}
+                    source={source}
+                    tagsStyles={{
+                        ul: { listStyleType: 'none', paddingLeft: 0, marginLeft: 0 },
+                    }}
+                    systemFonts={[Fonts.semiBold, Fonts.medium]}
+                    renderers={{
+                        a: ({ TDefaultRenderer, tnode, ...props }: any) => {
+                            // btn_by-bl 클래스가 있는 a 태그인지 확인
+                            if (tnode.classes?.includes('btn_by-bl')) {
+                                // 버튼 스타일로 렌더링
+                                const href = tnode.attributes?.href;
+                                const matches = href.match(/'(.*?)'/) || [null, href];
+                                const url = matches[1];
+                                return (
+                                    <Text
+                                        onPress={() => {
+                                            if (href) {
+                                                console.log(url)
+                                                if (url) {
+                                                    handleOpenURL(url)
                                                 }
-                                            }}
-                                        >
-                                            <Text style={{
-                                                color: Colors.white1,
-                                                fontFamily: Fonts.semiBold,
-                                                fontSize: 10,
-                                                textAlign: 'center',
-                                                alignItems: 'center'
-                                            }}>
-                                                {tnode.children?.map((child: any) => child.data || child.children?.[0]?.data).join('') || tnode.data || '버튼'}
-                                            </Text>
-                                        </TouchableOpacity>
-                                        </View>
-                                    );
-                                }
-                                // 일반 a 태그는 기본 렌더링
-                                return <TDefaultRenderer tnode={tnode} {...props} />;
+                                            }
+                                        }}
+                                        style={{
+                                            color: Colors.info,
+                                            fontFamily: Fonts.reqular,
+                                            fontSize: 14,
+                                            opacity : isPressed ? 0.2 : 1,
+                                            textDecorationLine : 'underline'
+                                        }}
+                                    >
+                                        접수 바로가기
+                                    </Text>
+                                );
                             }
-                        }}
-                        renderersProps={{
-                            a: {
-                                onPress(event, href, htmlAttribs, target) {
-                                    const matches = href.match(/'(.*?)'/)
-                                    if (matches !== null) {
-                                        const url: string = matches[1];
-                                        Alert.alert(
-                                            "링크 열기",
-                                            "외부 사이트로 이동하시겠습니까?",
-                                            [
-                                                { text: "취소", style: "cancel" },
-                                                {
-                                                    text: "이동",
-                                                    onPress: () => Linking.openURL(url)
-                                                }
-                                            ]
-                                        );
-                                    }
+                            // 일반 a 태그는 기본 렌더링
+                            return <TDefaultRenderer tnode={tnode} {...props} />;
+                        }
+                    }}
+                    renderersProps={{
+                        a: {
+                            onPress(event, href, htmlAttribs, target) {
+                                const matches = href.match(/'(.*?)'/)
+                                if (matches !== null) {
+                                    const url: string = matches[1];
+                                    handleOpenURL(url);
                                 }
                             }
-                        }}
-                        classesStyles={{
-                            title: {
-                                fontFamily: Fonts.semiBold,
-                                fontSize: 16,
-                                color: Colors.black1,
-                                paddingBottom: 6,
-                            },
-                            tit: {
-                                fontFamily: Fonts.medium,
-                                fontSize: 14,
-                                color: Colors.black1,
-                                paddingBottom: 6,
-                            },
-                            txt: {
-                                fontFamily: Fonts.reqular,
-                                fontSize: 12,
-                                color: Colors.black1,
-                                paddingBottom: 6,
-                            },
-                            "txt-button": {
-                                fontSize: 12,
-                                color: Colors.black1,
-                                fontFamily: Fonts.reqular,
-                            },
-                            list: {
-                                fontSize: 12,
-                                fontFamily: Fonts.reqular,
-                            },
-                            dot_list: {
-                                paddingBottom: 10,
-                            }
-                        }}
-                    />
-                </View>
+                        }
+                    }}
+                    classesStyles={{
+                        title: {
+                            fontFamily: Fonts.semiBold,
+                            fontSize: 18,
+                            color: Colors.black1,
+                            marginTop : 28
+                        },
+                        tit: {
+                            fontFamily: Fonts.medium,
+                            fontSize: 16,
+                            color: Colors.black1,
+                            marginTop : 8,
+                            marginBottom : 6
+                        },
+                        txt: {
+                            fontFamily: Fonts.reqular,
+                            flex : 1,
+                            fontSize: 14,
+                            color: Colors.black1,
+                            marginBottom : 16
+                        },
+                        "txt-button": {
+                            fontSize: 14,
+                            color: Colors.black1,
+                            fontFamily: Fonts.reqular,
+                        },
+                        list: {
+                            fontSize: 14,
+                            fontFamily: Fonts.reqular,
+                        },
+                    }}
+                />
                 <View style={{height: insets.bottom + 30}}/>
             </ScrollView>
-        </View>
+        </ImageBackground>
     );
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -377,7 +354,6 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.white1,
     },
     backButton: {
-        width: 40,
         padding: 8,
     },
     headerTitle: {
@@ -391,8 +367,6 @@ const styles = StyleSheet.create({
     },
     topTitle: {
         flexDirection: 'row',
-        height: 23,
-        marginTop: 16,
         alignItems: 'center',
     },
     topIconContainer: {
@@ -405,56 +379,54 @@ const styles = StyleSheet.create({
         paddingEnd: 12,
     },
     topDateText: {
-        fontFamily: Fonts.reqular,
+        fontFamily: Fonts.medium,
         fontSize: 14,
-
+        color : Colors.gray1
     },
     titleText: {
-        fontFamily: Fonts.semiBold,
+        fontFamily: Fonts.bold,
         fontSize: 18,
-        paddingTop: 12,
-        paddingBottom: 12,
+        paddingTop: 8,
         color: Colors.black1,
     },
     hashTagContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        paddingBottom: 12,
+        columnGap : 8
     },
     hashTagText: {
         fontFamily: Fonts.medium,
-        fontSize: 12,
+        fontSize: 14,
         color: Colors.primary,
-        paddingEnd: 12,
+        marginBottom : 4
     },
     buttons: {
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        height: 40,
-        marginBottom: 28,
     },
     featureButtons: {
         flexDirection: 'row',
-        height: 40
-    },
-    likeButton: {
-
+        gap : 12
     },
     buttonsContainer: {
-        marginEnd: 12,
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: 10,
-        borderColor: Colors.white2,
+        paddingVertical: 10,
+        paddingLeft : 10,
+        paddingRight : 14,
+        backgroundColor : 'rgba(255, 255, 255, 0.45)',
+        borderColor: 'rgba(255, 255, 255, 0.17)',
         borderWidth: 2,
-        height: 40,
-        width: 94,
+        gap : 10,
         borderRadius: 8,
     },
     buttonText: {
-        fontFamily: Fonts.semiBold,
-        fontSize: 12,
+        fontFamily: Fonts.reqular,
+        fontSize: 14,
+    },
+    topWrapper : {
+        gap : 12
     }
 });
