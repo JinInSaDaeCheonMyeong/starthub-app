@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
         overflow : "hidden"
     },
     hashTagText: {
-        fontSize: 14,
+        fontSize: 13,
         fontFamily: Fonts.medium,
         color: Colors.primary
     },
