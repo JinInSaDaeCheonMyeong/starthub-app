@@ -235,15 +235,15 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                         >
                             {isSelected ? (
                                 <BookMarkFill
-                                    width={24}
-                                    height={24}
+                                    width={28}
+                                    height={28}
                                     fill={Colors.primary}
                                     color={Colors.primary}
                                 />
                             ) : (
                                 <BookMark
-                                    width={24}
-                                    height={24}
+                                    width={28}
+                                    height={28}
                                     color={Colors.primary}
                                 />
                             )}
