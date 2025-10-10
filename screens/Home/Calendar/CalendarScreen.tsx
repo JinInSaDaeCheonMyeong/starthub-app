@@ -117,8 +117,10 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                                 style={[
                                     styles.dayContainer,
                                     {
-                                        width : (width - 36)/7,
-                                        backgroundColor : isSelect ? Colors.primary : 'transparent'
+                                        width : (width - 26 * 7) / 7,
+                                        height : (width - 26 * 7) / 7,
+                                        backgroundColor : isSelect ? Colors.second : 'transparent',
+                                        borderColor : isSelect ? 'rgba(255, 255, 255, 0.48)' : 'transparent'
                                     }
                                 ]}
                                 onPress={async () => {
@@ -133,28 +135,30 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                                     }
                                 }}
                             >
-                                <Text
-                                    style={[
-                                        styles.dayText,
-                                        isSelect
-                                            ? { color: Colors.white1 }
-                                            : !isDisable
-                                            ? { color: Colors.black2 }
-                                            : { color: Colors.gray3 },
-                                    ]}
-                                >
-                                    {date?.day}
-                                </Text>
-                                {marking?.dots && !isSelect && (
-                                    <View style={styles.dotsContainer}>
-                                        {marking.dots.slice(0,3).map((dot, index) => (
-                                            <View
-                                                key={index}
-                                                style={[styles.dot, { backgroundColor: dot.color }]}
-                                            />
-                                        ))}
-                                    </View>
-                                )}
+                                <View style={{position : 'absolute'}}>
+                                    <Text
+                                        style={[
+                                            styles.dayText,
+                                            isSelect
+                                                ? { color: Colors.white1 }
+                                                : !isDisable
+                                                ? { color: Colors.black2 }
+                                                : { color: Colors.gray3 },
+                                        ]}
+                                    >
+                                        {date?.day}
+                                    </Text>
+                                    {!isSelect && (
+                                        <View style={styles.dotsContainer}>
+                                            {marking?.dots?.slice(0,3).map((dot, index) => (
+                                                <View
+                                                    key={index}
+                                                    style={[styles.dot, { backgroundColor: dot.color }]}
+                                                />
+                                            ))}
+                                        </View>
+                                    )}
+                                </View>
                             </TouchableOpacity>
                         )
                     }}
@@ -177,7 +181,6 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                 renderItem={({item}) => (
                     <NoticeItem
                         item={item}
-                        isHome={false}
                         onPress={() => {navigation.navigate("InNotice", { Notice : item });}}
                     />
                 )}
@@ -215,6 +218,8 @@ const styles = StyleSheet.create({
     },
     calendar: {
         gap: 9,
+        paddingLeft : 0,
+        paddingRight : 0
     },
     headerContainer: {
         gap: 8,
@@ -254,10 +259,11 @@ const styles = StyleSheet.create({
     },
     dayContainer: {
         alignItems: 'center',
+        justifyContent : 'center',
         paddingVertical : 5,
-        borderRadius : 16,
+        borderWidth : 1,
+        borderRadius : 30,
         margin : 9,
-        maxWidth : 30,
         gap : 1
     },
     dayCircle: {
@@ -275,6 +281,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 4,
+        height : 4
     },
     dot: {
         width: 4,

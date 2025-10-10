@@ -115,7 +115,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                             noticeType,
                         }, index) => {
                             const IconComponent = categoryMap[noticeType];
-                            const buttonSide = (width-96)/4
+                            const buttonSide = (width-80)/4
                             return (
                                 <TouchableOpacity
                                     onPress={() => {
@@ -159,7 +159,6 @@ export default function HomeScreen(props : HomeScreenProps) {
                             renderItem={({ item }) => (
                                 <NoticeItem
                                     item={item}
-                                    isHome={false}
                                     onPress={() => {
                                         props.navigation.navigate('InNotice', {Notice : item})
                                     }}
@@ -184,8 +183,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                                 data={bookmarkItems}
                                 renderItem={({ item }) => (
                                 <NoticeItem
-                                item={item}
-                                    isHome={true}
+                                    item={item}
                                     onPress={() => {
                                         props.navigation.navigate('InNotice', {Notice : item})
                                     }}
