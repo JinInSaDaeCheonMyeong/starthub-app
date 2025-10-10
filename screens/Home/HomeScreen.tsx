@@ -76,9 +76,20 @@ export default function HomeScreen(props : HomeScreenProps) {
                         {
                             navItemList.map(({label, nav}, index) => {
                                 const IconComponent = featureMap[nav];
+                                let screenName :
+                                    | keyof HomeStackParamList
+                                    | keyof RootStackParamList = "Competitor";
+                                switch (index) {
+                                    case 0:
+                                        screenName = "Competitor";
+                                        break;
+                                    default:
+                                        screenName = "Competitor";
+                                        break;
+                                    }
                                 return (
                                     <TouchableOpacity 
-                                        onPress={() => {console.log()}}
+                                        onPress={() => {props.navigation.navigate(screenName)}}
                                         key={index}
                                         style={styles.navIconWrapper}
                                     >
