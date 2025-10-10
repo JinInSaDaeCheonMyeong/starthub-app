@@ -19,14 +19,14 @@ export default function CommonButton(props : CommonButtonProps) {
 const styles = StyleSheet.create({
     container : {
         backgroundColor : Colors.primary,
-        borderRadius : 8,
+        borderRadius : 10,
         alignItems : "center",
         justifyContent : "center",
-        paddingVertical : 20
+        paddingVertical : 18
     },
     text : {
         color : Colors.white1,
-        fontSize : 18,
-        fontFamily : Fonts.bold,
+        fontSize : 16,
+        fontFamily : Fonts.medium,
     }
 })
