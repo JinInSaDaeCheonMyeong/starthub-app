@@ -7,7 +7,7 @@ import { getMe } from "../../api/user";
 import { ErrorResponse } from "../../type/util/response.type";
 import {useFocusEffect} from "@react-navigation/native"
 import { ProfileScreenProps } from "../../screens/system/ProfileScreen";
-import { Linking } from "react-native";
+import { Alert, Linking } from "react-native";
 
 const useProfileScreen = ({navigation} : ProfileScreenProps) => {
     const DEFAULT_DATA = "내용이 없습니다";
@@ -90,10 +90,17 @@ const useProfileScreen = ({navigation} : ProfileScreenProps) => {
     }
 
     const goWeb = async (link : string) => {
-        const canOpen = await Linking.canOpenURL(link);
-        if (canOpen) Linking.openURL(link);
-        else ShowToast("오류 발생", "찾을 수 없는 사이트입니다", ToastType.ERROR);
-
+        Alert.alert(
+            "링크 열기",
+            "외부 사이트로 이동하시겠습니까?",
+            [
+                { text: "취소", style: "cancel" },
+                {
+                    text: "이동",
+                    onPress: () => Linking.openURL(link)
+                }
+            ]
+        );
     }
 
     const goBack = () => {

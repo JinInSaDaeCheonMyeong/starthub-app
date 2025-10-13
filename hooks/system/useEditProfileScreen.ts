@@ -24,19 +24,36 @@ const useEditProfileScreen = ({navigation, route : {params}} : ProfileScreenProp
         if(!user.username.trim() || !year.trim() || !month.trim() || !day.trim()){
             ShowToast(
                 "프로필 수정",
-                "필수 항목을 입력해주세요1",
+                "필수 항목을 입력해주세요",
                 ToastType.ERROR
             );
             return;
         }
-        if(!selectStartupStatus || !user.companyName?.trim() || !numberPerson.trim() || !annualRevenue.trim()){
-            ShowToast(
-                "프로필 수정",
-                "필수 항목을 입력해주세요2",
-                ToastType.ERROR
-            );
-            return;
+        if(selectStartupStatus){
+            if(!user.companyName?.trim() || !numberPerson.trim() || !annualRevenue.trim()){
+                ShowToast(
+                    "프로필 수정",
+                    "필수 항목을 입력해주세요",
+                    ToastType.ERROR
+                );
+                return;
+            }
         }
+        if (selectStartupStatus && !!user.companyWebsite) {
+            // URL 검사식 (HTTP, HTTPS만 허용)
+            const urlRegex =
+                /^(https?:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/;
+                
+            if (!urlRegex.test(user.companyWebsite.trim())) {
+                ShowToast(
+                    "프로필 수정",
+                    "올바른 URL 형식이 아닙니다. (예: https://example.com)",
+                    ToastType.ERROR
+                );
+                return;
+            }
+        }
+        
         try {
             await setProfile({
                 username: user.username.trim(),
@@ -49,7 +66,8 @@ const useEditProfileScreen = ({navigation, route : {params}} : ProfileScreenProp
                 companyWebsite: selectStartupStatus ? user.companyWebsite?.trim() : undefined,
                 annualRevenue: selectStartupStatus ? Number(annualRevenue.trim()) : undefined,
                 startupLocation: user.startupLocation?.trim(),
-                startupFields : params.startupFields
+                startupFields : params.startupFields,
+                startupHistory : params.startupHistory ?? 0 // 창업 업력, 기존 design에는 없던 속성
             })
             ShowToast("프로필 수정", "프로필 수정에 성공하셨습니다", ToastType.SUCCESS)
             navigation.goBack()
