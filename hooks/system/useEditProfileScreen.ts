@@ -13,7 +13,11 @@ const useEditProfileScreen = ({navigation, route : {params}} : ProfileScreenProp
     const [day, setDay] = useState(birthList[2] ?? 11)
     const [numberPerson, setNumberPerson] = useState(String(user.numberOfEmployees) ?? '');
     const [annualRevenue, setAnnualRevenue] = useState(String(user.annualRevenue) ?? '');
-    const [selectGender, setSelectGender] = useState(user.gender === "MALE")
+    const [selectGender, setSelectGender] = useState(
+        user.gender === "MALE" ? "male" :
+            user.gender === "FEMALE" ? "female" :
+                "none"
+    )
     const [selectStartupStatus, setSelectStartupStatus] = useState(user.startupStatus === "EARLY_STAGE")
 
     const sendEditProfile = async () => {
@@ -37,7 +41,7 @@ const useEditProfileScreen = ({navigation, route : {params}} : ProfileScreenProp
             await setProfile({
                 username: user.username.trim(),
                 birth: `${year.trim()}-${month.trim()}-${day.trim()}`,
-                gender: selectGender ? "MALE" : "FEMALE",
+                gender: selectGender == "male"? "MALE" : selectGender == "female" ? "FEMALE": "OTHER",
                 startupStatus: selectStartupStatus ? "EARLY_STAGE" : "PREPARATION",
                 companyName: selectStartupStatus ? user.companyName?.trim() : undefined,
                 companyDescription: selectStartupStatus ? user.companyDescription?.trim() : undefined,

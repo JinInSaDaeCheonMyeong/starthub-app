@@ -73,17 +73,25 @@ export default function EditProfileScreen(props: ProfileScreenProps){
                 <View style={styles.dataInputContainer}>
                     <Text style={styles.titleText}>성별</Text>
                     <View style={styles.genderContainer}>
-                        <TouchableOpacity 
-                            onPress={() => setSelectGender(true)}
-                            style={[styles.genderBox, {borderColor : selectGender ? Colors.primary : Colors.white2 }]}
+                        <TouchableOpacity
+                            onPress={() => setSelectGender("male")}
+                            style={[styles.genderBox, {borderColor : selectGender === "male" ? Colors.primary : Colors.white2 }]}
                         >
-                            <Text style={[styles.selectText, {color : selectGender ? Colors.primary : Colors.gray2 }]}>남</Text>
+                            <Text style={[styles.selectText, {color : selectGender === "male" ? Colors.primary : Colors.gray2 }]}>남</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity 
-                            onPress={() => setSelectGender(false)}
-                            style={[styles.genderBox, {borderColor : !selectGender ? Colors.primary : Colors.white2 }]}
+
+                        <TouchableOpacity
+                            onPress={() => setSelectGender("female")}
+                            style={[styles.genderBox, {borderColor : selectGender === "female" ? Colors.primary : Colors.white2 }]}
                         >
-                            <Text style={[styles.selectText, {color : !selectGender ? Colors.primary : Colors.gray2 }]}>여</Text>
+                            <Text style={[styles.selectText, {color : selectGender === "female" ? Colors.primary : Colors.gray2 }]}>여</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => setSelectGender("other")}
+                            style={[styles.genderBox, {borderColor : selectGender === "other" ? Colors.primary : Colors.white2 }]}
+                        >
+                            <Text style={[styles.selectText, {color : selectGender === "other" ? Colors.primary : Colors.gray2 }]}>선택 안함</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
