@@ -97,7 +97,7 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                                         <View style={styles.flatMargin}/>
                                     }
                                     renderItem={({item}) => (
-                                        <TouchableOpacity>
+                                        <TouchableOpacity onPress={() => navigation.navigation.navigate('InBMC', {BMC:item})}>
                                             <View style={{backgroundColor: Colors.white2, borderRadius: 8, padding:2}}>
                                                 <View style={styles.recentBMCBox}>
                                                     <Image
