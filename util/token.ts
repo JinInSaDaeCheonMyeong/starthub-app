@@ -2,7 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const AuthStorage = {
     ACCESS_TOKEN: "accessToken",
-    REFRESH_TOKEN: "refreshToken"
+    REFRESH_TOKEN: "refreshToken",
+    FCM_TOKEN : "FCMToken"
 } as const;
 
 export async function saveAccToken(accessToken: string): Promise<void> {
@@ -61,5 +62,23 @@ export async function hasValidTokens(): Promise<boolean> {
     } catch (error) {
         console.error('토큰 검증 실패:', error);
         return false;
+    }
+}
+
+export async function saveFCMToken(token : string) : Promise<void> {
+    try {
+        await AsyncStorage.setItem(AuthStorage.FCM_TOKEN, token)
+    } catch (error) {
+        console.error("FCM 토큰 저장 실패:", error);
+        throw error;
+    }
+}
+
+export async function getFCMToken() : Promise<string | null> {
+    try {
+        return await AsyncStorage.getItem(AuthStorage.ACCESS_TOKEN);
+    } catch (error) {
+        console.log("FCM 토큰이 없습니다", error);
+        return null
     }
 }

@@ -8,6 +8,8 @@ import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { useEffect, useRef, useState } from "react";
 import { Platform } from "react-native";
+import { saveFCMToken } from "./util/token";
+import { ShowToast, ToastType } from "./util/ShowToast";
 
 Notifications.setNotificationHandler({
   handleNotification:
@@ -71,38 +73,32 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
   return token;
 }
 
-// -----------------------------
-// App 컴포넌트 (로직 단순화)
-// -----------------------------
 export default function App() {
-  const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
   const notificationListener = useRef<Notifications.Subscription | null>(null);
   const responseListener = useRef<Notifications.Subscription | null>(null);
 
   useEffect(() => {
-    // 앱 초기화 로직을 하나의 async 함수로 정리
     const initializeApp = async () => {
-      // 1. 채널 설정
       await setupNotificationChannels();
 
-      // 2. 권한 요청 및 토큰 발급 (앱 시작 시 1회)
       const token = await registerForPushNotificationsAsync();
       if (token) {
         console.log("📱 FCM Token:", token);
-        setExpoPushToken(token);
-        // 이 곳에서 서버로 토큰을 전송하는 API를 호출할 수 있습니다.
+        try {
+          await saveFCMToken(token)
+        } catch (error) {
+          ShowToast('FCM 토큰', 'FCM 토큰을 저장하는데 실패하였습니다', ToastType.ERROR)
+        }
       }
     };
 
     initializeApp();
 
-    // Foreground 알림 수신
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
         console.log("📩 Notification Received (Foreground):", notification);
       });
 
-    // 알림 클릭 이벤트 (Foreground / Background / Quit)
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log(
@@ -111,7 +107,6 @@ export default function App() {
         );
       });
 
-    // Background / Quit 상태에서 앱이 알림으로 실행된 경우
     Notifications.getLastNotificationResponseAsync().then((response) => {
       if (response) {
         console.log(
@@ -129,7 +124,7 @@ export default function App() {
       if (responseListener.current)
         Notifications.removeNotificationSubscription(responseListener.current);
     };
-  }, []); // 의존성 배열이 비어있어 최초 1회만 실행됩니다.
+  }, []);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

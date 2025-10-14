@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { useError } from "../../util/useError";
 import { SigninFormData, SigninRequest } from "../../../type/user/signin.type";
-import { saveAccToken, saveRefToken } from "../../../util/token";
+import { getFCMToken, saveAccToken, saveRefToken } from "../../../util/token";
 import { useSigninValid } from "./useSigninValid";
 import { useDisabled } from "../../util/useDisabled";
 import { getMe, signin } from "../../../api/user";
 import { SigninScreenProps } from "../../../screens/SigninScreen";
 import { ShowToast, ToastType } from "../../../util/ShowToast";
+import { registerFCMToken } from "../../../api/notification";
+import {getDeviceTypeAsync, DeviceType as ExpoDeviceType} from "expo-device"
+import { Platform } from "react-native";
+import { DeviceType } from "../../../type/notification/notification.type";
 
 export const useSigninScreen = ({navigation} : SigninScreenProps) => {
     const [formData, setFormData] = useState<SigninFormData>({
@@ -66,6 +70,7 @@ export const useSigninScreen = ({navigation} : SigninScreenProps) => {
             const { data } = await signin(loginRequest)
             await saveAccToken(data.access)
             await saveRefToken(data.refresh)
+            await handleFCMToken()
             ShowToast("성공", "로그인에 성공하셨습니다", ToastType.SUCCESS)
             const userData = await (await getMe()).data
             if(!data.isFirstLogin && !!userData.username){
@@ -77,6 +82,36 @@ export const useSigninScreen = ({navigation} : SigninScreenProps) => {
             handleAxiosError(error, (value) => {showError(value)})
         } finally {
             enabledBtn()
+        }
+    }
+
+    const handleFCMToken = async () => {
+        try {
+            const FCMToken = await getFCMToken()
+            if(FCMToken){
+                const device = await getDeviceTypeAsync();
+                const isIOS = Platform.OS === 'ios'
+                const isANDROID = Platform.OS === 'android'
+                const isPhone = device === ExpoDeviceType.PHONE
+                const isTablet = device === ExpoDeviceType.TABLET
+
+                let deviceType : DeviceType = "UNKNOWN";
+                if (isIOS) {
+                    if (isPhone) deviceType = "IOS";
+                    else if (isTablet) deviceType = "IPADOS";
+                } else if(isANDROID) {
+                    if (isPhone) deviceType = "ANDROID";
+                    else if (isTablet) deviceType = "ANDROID_TABLET";
+                }
+                console.log(deviceType, FCMToken)
+
+                await registerFCMToken({
+                    token : FCMToken,
+                    deviceType
+                })
+            }
+        } catch (error) {
+            console.warn("⚠️ FCM 토큰 등록 실패:", error);
         }
     }
 

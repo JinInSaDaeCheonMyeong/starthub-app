@@ -1,7 +1,9 @@
 
+export type DeviceType = "ANDROID" | "IOS" | "ANDROID_TABLET" | "IPADOS" | "UNKNOWN";
+
 export interface BaseFCMTokenType {
     token : string
-    deviceType : string
+    deviceType : DeviceType
 }
 
 export interface MyFCMToken extends BaseFCMTokenType {
