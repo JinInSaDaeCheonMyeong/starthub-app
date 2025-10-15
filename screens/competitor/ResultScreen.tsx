@@ -1,4 +1,4 @@
-import { Alert, ImageBackground, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { Alert, ImageBackground, Linking, Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import { StackScreenProps } from "@react-navigation/stack";
 import { Image } from "react-native";
@@ -17,12 +17,13 @@ import { ShowToast, ToastType } from "../../util/ShowToast";
 import { ErrorResponse } from "../../type/util/response.type";
 import { isAxiosError } from "axios";
 import { competitorAnalysis } from "../../api/competitor";
+import { ScrollView } from "react-native-gesture-handler";
 
 type ResultScreenProps = StackScreenProps<CompoetitorStackParamList>
 
 export default function ResultScreen({navigation, route : {params}} : ResultScreenProps){
     const {width} = useWindowDimensions()
-    const [carouselHeight, setCarouselHeight] = useState(400);
+    const [carouselHeight, setCarouselHeight] = useState<number | 'auto'>('auto');
     const supportList = [0, 1, 2]
     const [loading, setLoading] = useState(false)
     const [form, setForm] = useState<CompetitorResponse['data'] | undefined>(params?.data)
@@ -110,108 +111,120 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
         title: string,
         body: string | string[] | CompetitorComparison[]
     ) => (
-    <View style={styles.dataWrap}>
-        <Text style={styles.boxTitle}>{title}</Text>
-        {typeof body === "string" ? (
-        <GlassView containerStyle={styles.glassView}>{setHighlight(body)}</GlassView>
-        ) : Array.isArray(body) && typeof body[0] === "string" ? (
-        (body as string[]).map((value, index) => (
-            <GlassView key={index} containerStyle={styles.glassView}>
-                {setHighlight(value)}
-            </GlassView>
-        ))
-        ) : (
-            <Carousel
-                style={{overflow : 'visible'}}
-                width={width - 28}
-                height={carouselHeight}
-                data={body as CompetitorComparison[]}
-                renderItem={({index, item}) => {
-                    return (
-                    <View 
-                        style={{marginRight : 8}}
-                        onLayout={(event) => {
-                            const {height} = event.nativeEvent.layout;
-                            if (height > carouselHeight) {
-                                setCarouselHeight(height);
-                            }
-                        }}
-                    >
-                        <GlassView 
-                            containerStyle={{padding : 16, gap : 16, height : carouselHeight}}
-                            key={index}
+        <View style={styles.dataWrap}>
+            <Text style={styles.boxTitle}>{title}</Text>
+            {typeof body === "string" ? (
+                <GlassView containerStyle={styles.glassView}>{setHighlight(body)}</GlassView>
+            ) : Array.isArray(body) && typeof body[0] === "string" ? (
+                (body as string[]).map((value, index) => (
+                    <GlassView key={index} containerStyle={styles.glassView}>
+                        {setHighlight(value)}
+                    </GlassView>
+                ))
+            ) : (
+                <Carousel
+                    style={{overflow : 'visible'}}
+                    width={width - 28}
+                    height={typeof carouselHeight === 'number' ? carouselHeight : 400}
+                    data={body as CompetitorComparison[]}
+                    renderItem={({index, item}) => {
+                        return (
+                        <View 
+                            style={{marginRight : 8}}
+                            onStartShouldSetResponder={() => false}
+                            onMoveShouldSetResponder={() => false}
+                            onLayout={(event) => {
+                                const { height } = event.nativeEvent.layout;
+                                console.log(`layout:${index} : ${height}`);
+                                
+                                setCarouselHeight(prev => {
+                                    // 처음엔 무조건 세팅
+                                    if (prev === 'auto') return height;
+                                    // 더 큰 높이만 갱신
+                                    if (typeof prev === 'number' && height > prev) return height;
+                                    return prev;
+                                });
+                            }}
                         >
-                            <View style={{flexDirection : 'row', gap : 16}}>
-                                <Image style={{height : 88, width : 88, resizeMode : 'center', borderRadius : 8, backgroundColor : Colors.white2}} src={item.logoUrl}/>
-                                <View style={{gap : 8, flex : 1}}>
-                                    <View style={{flexDirection : 'row', justifyContent : 'space-between', gap : 8}}>
-                                        <Text style={{
-                                            color : Colors.black1,
-                                            fontFamily : Fonts.semiBold,
-                                            fontSize : 16,
-                                            flex : 1
-                                        }}>
-                                            {item.name}
-                                        </Text>
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                Alert.alert(
-                                                    "링크 열기",
-                                                    "외부 사이트로 이동하시겠습니까?",
-                                                    [
-                                                        { text: "취소", style: "cancel" },
-                                                        {
-                                                            text: "이동",
-                                                            onPress: () => Linking.openURL(item.websiteUrl)
-                                                        }
-                                                    ]
-                                                );
-                                            }}
-                                        >
+                            <GlassView 
+                                containerStyle={{padding : 16, gap : 16, height : carouselHeight}}
+                                key={index}
+                            >
+                                <View 
+                                    style={{flexDirection : 'row', gap : 16, flexWrap : 'wrap'}}
+                                    onStartShouldSetResponder={() => false}
+                                >
+                                    <Image style={{height : 88, width : 88, resizeMode : 'center', borderRadius : 8, backgroundColor : Colors.white1}} src={item.logoUrl}/>
+                                    <View style={{gap : 8, flex : 1}}>
+                                        <View style={{flexDirection : 'row', justifyContent : 'space-between', gap : 8}}>
                                             <Text style={{
-                                                color : Colors.primary,
-                                                fontSize : 14,
-                                                fontFamily : Fonts.reqular,
-                                                textDecorationLine : 'underline'
+                                                color : Colors.black1,
+                                                fontFamily : Fonts.semiBold,
+                                                fontSize : 16,
+                                                flex : 1
                                             }}>
-                                                바로가기
+                                                {item.name}
                                             </Text>
-                                        </TouchableOpacity>
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    Alert.alert(
+                                                        "링크 열기",
+                                                        "외부 사이트로 이동하시겠습니까?",
+                                                        [
+                                                            { text: "취소", style: "cancel" },
+                                                            {
+                                                                text: "이동",
+                                                                onPress: () => Linking.openURL(item.websiteUrl)
+                                                            }
+                                                        ]
+                                                    );
+                                                }}
+                                            >
+                                                <Text style={{
+                                                    color : Colors.primary,
+                                                    fontSize : 14,
+                                                    fontFamily : Fonts.reqular,
+                                                    textDecorationLine : 'underline'
+                                                }}>
+                                                    바로가기
+                                                </Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                        {setHighlight(item.estimatedScale)}
                                     </View>
-                                    {setHighlight(item.estimatedScale)}
                                 </View>
-                            </View>
-                            <View style={{gap : 24}}>
-                                <View style={{gap : 4}}>
-                                    <Text style={styles.boxTitle}>시장 점유율</Text>
-                                    {setHighlight(item.marketShare)}
-                                </View>
-                                <View style={{gap : 6}}>
-                                    <View style={{flexDirection : 'row', gap : 16}}>
-                                        <Text style={[styles.boxTitle, {flex : 1}]}>공통점</Text>
-                                        <Text style={[styles.boxTitle, {flex : 1}]}>차이점</Text>
+                                <View style={{gap : 24}}>
+                                    <View style={{gap : 4}}>
+                                        <Text style={styles.boxTitle}>시장 점유율</Text>
+                                        {setHighlight(item.marketShare)}
                                     </View>
-                                    <View style={{gap : 12}}>
-                                        {supportList.map((value) => (
-                                            <View style={{flexDirection : 'row', gap : 16}} key={value}>
-                                                <View style={{flex : 1}}>
-                                                    {setHighlight(item.similarities[value] ?? '')}
+                                    <View style={{gap : 6}}>
+                                        <View style={{flexDirection : 'row', gap : 16}}>
+                                            <Text style={[styles.boxTitle, {flex : 1}]}>공통점</Text>
+                                            <Text style={[styles.boxTitle, {flex : 1}]}>차이점</Text>
+                                        </View>
+                                        <View style={{gap : 12}}>
+                                            {supportList.map((value) => (
+                                                <View style={{flexDirection : 'row', gap : 16}} key={value}>
+                                                    <View style={{flex : 1}}>
+                                                        {setHighlight(item.similarities[value] ?? '')}
+                                                    </View>
+                                                    <View style={{flex : 1}}>
+                                                        {setHighlight(item.differences[value] ?? '')}
+                                                    </View>
                                                 </View>
-                                                <View style={{flex : 1}}>
-                                                    {setHighlight(item.differences[value] ?? '')}
-                                                </View>
-                                            </View>
-                                        ))}
+                                            ))}
+                                        </View>
                                     </View>
                                 </View>
-                            </View>
-                        </GlassView>
-                    </View>
-                )}}
-            />
-        )}
+                            </GlassView>
+                        </View>
+                    )}}
+                />
+            )   
+        }
     </View>
-    );
+);
 
 
     const renderUserBMC = () => (
@@ -312,6 +325,7 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
             <ScrollView
                 contentContainerStyle={{gap : 20, paddingVertical : 16}} 
                 showsVerticalScrollIndicator={false}
+                nestedScrollEnabled={true}
             >
                 {renderUserBMC()}
                 {renderUserScale()}
@@ -352,7 +366,7 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                 </View>
                 <TouchableOpacity 
                     style={{
-                        padding : 20,
+                        padding : 16,
                         borderWidth : 2,
                         borderRadius : 8,
                         borderColor : Colors.primary,
