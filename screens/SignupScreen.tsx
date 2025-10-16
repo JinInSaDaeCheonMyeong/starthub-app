@@ -1,7 +1,7 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { AuthStackParamList } from "../navigation/AuthStack";
 import { Colors } from "../constants/Color";
-import {Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {Linking, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import BackButton from "../component/BackButton";
 import AuthTextInput from "../component/auth/AuthTextInput";
 import CommonButton from "../component/CommonButton";
@@ -42,9 +42,9 @@ export default function SignupScreen(props : SignupScreenProps){
     } = useSignupScreen(props)
 
     const selectItem = [
-        {key : 1, value : checked.ONE, title : "[필수] 만 14세 이상입니다", setChecked : setChecked, checkedKey : 'ONE'},
-        {key : 2, value : checked.SECOND, title : "[필수] 스타트허브 이용약관 동의", setChecked : setChecked, checkedKey : 'SECOND'},
-        {key : 3, value : checked.THIRD, title : "[필수] 스타트허브 개인정보 수집 및 이용 동의", setChecked : setChecked, checkedKey : 'THIRD'}
+        {key : 1, value : checked.ONE, title : "[필수] 만 14세 이상입니다", setChecked : setChecked, checkedKey : 'ONE', link : ""},
+        {key : 2, value : checked.SECOND, title : "[필수] 스타트허브 이용약관 동의", setChecked : setChecked, checkedKey : 'SECOND', link : "https://various-bougon-d76.notion.site/27f507c40eaf80acbf4afba41b9964b7?source=copy_link"},
+        {key : 3, value : checked.THIRD, title : "[필수] 스타트허브 개인정보 수집 및 이용 동의", setChecked : setChecked, checkedKey : 'THIRD', link : "https://various-bougon-d76.notion.site/27f507c40eaf80bbb86dfc3db0b06e04?pvs=74"}
     ]
 
     return(
@@ -132,8 +132,11 @@ export default function SignupScreen(props : SignupScreenProps){
                                 key={item.key}
                                 value={item.value}
                                 title={item.title}
+                                touchable={item.key !== 1 ? true : false}
                                 onSelect={(value) => {setChecked(item.checkedKey, value)}}
-                                onClick={() => {}} // 노션 링크 넣을 예정
+                                onClick={() => {
+                                    Linking.openURL(item.link)
+                                }} // 노션 링크 넣을 예정
                             />
                         ))}
                     </View>

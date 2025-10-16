@@ -3,6 +3,7 @@ import { SystemStackParamList } from "../../navigation/SystemStack";
 import {
     Dimensions,
     FlatList,
+    RefreshControl,
     StyleSheet,
     Text,
     View
@@ -18,7 +19,6 @@ import NoticeItem from "../../component/notice/NoticeItem";
 import {CompositeScreenProps} from "@react-navigation/core";
 import {RootStackParamList} from "../../navigation/RootStack";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
-
 
 export type MyLikesScreenProps = CompositeScreenProps<
     StackScreenProps<SystemStackParamList, 'MyLikes'>,
@@ -83,33 +83,58 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
 
     const [allLikes, setAllLikes] = useState<NoticeType[]>([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);  // ✅ 추가
     const [page, setPage] = useState(0);
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+    const [isLast, setIsLast] = useState<boolean>(false);
     const lastRequestTime = useRef<number>(0);
 
-    useEffect(() => {
-        const fetchLikes = async () => {
-            try {
-                const response: GetNoticesResponse = await getLikes(0);
-                const mapped = response.data.content.map((notice: BeforeNoticeType) => {
-                    const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
-                    return {
-                        ...notice,
-                        isLiked: true,
-                        startDate,
-                        endDate,
-                    };
-                });
-                setAllLikes(mapped);
-            } catch (error) {
-                console.error('BMC 데이터 로딩 실패:', error);
-            } finally {
-                setLoading(false);
+    // ✅ fetchLikes를 useCallback으로 변경
+    const fetchLikes = useCallback(async (isRefresh: boolean = false) => {
+        try {
+            if (!isRefresh) {
+                setLoading(true);
+            } else {
+                setRefreshing(true);
             }
-        };
 
-        fetchLikes();
+            setIsLast(false);
+            setPage(0);
+
+            const response: GetNoticesResponse = await getLikes(0);
+            setIsLast(response.data.isLast);
+
+            const mapped = response.data.content.map((notice: BeforeNoticeType) => {
+                const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
+                return {
+                    ...notice,
+                    isLiked: true,
+                    startDate,
+                    endDate,
+                };
+            });
+            setAllLikes(mapped);
+        } catch (error) {
+            console.error('좋아요 데이터 로딩 실패:', error);
+            ShowToast(
+                "문제가 발생하였습니다",
+                "데이터를 불러오지 못하였습니다",
+                ToastType.ERROR
+            );
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchLikes(false);
+    }, [fetchLikes]);
+
+    // ✅ 새로고침 핸들러 추가
+    const handleRefresh = () => {
+        fetchLikes(true);
+    };
 
     const onViewableItemsChanged = ({ viewableItems }: any) => {
         if (!viewableItems || viewableItems.length === 0 || allLikes.length === 0) return;
@@ -119,7 +144,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
 
         const lastIndex = lastVisibleItem.index;
 
-        if (lastIndex >= allLikes.length - 5) {
+        if (lastIndex >= allLikes.length - 5 && !isLast) {
             loadNextPage();
         }
     };
@@ -127,11 +152,11 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
     const loadNextPage = async () => {
         const now = Date.now();
 
-        if (now - lastRequestTime.current < 200) {
+        if (now - lastRequestTime.current < 500) {
             return;
         }
 
-        if (isFetchingNextPage || loading) return;
+        if (isFetchingNextPage || loading || isLast) return;
 
         lastRequestTime.current = now;
         const nextPage = page + 1;
@@ -139,10 +164,13 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
 
         try {
             const response = await getLikes(nextPage);
+            setIsLast(response.data.isLast);
+
             const data = response.data.content.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return {
                     ...notice,
+                    isLiked: true,
                     startDate,
                     endDate,
                 };
@@ -164,32 +192,27 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
     };
 
     const updateNoticeInList = useCallback((noticeId: number, newIsLiked: boolean) => {
-        console.log("=== updateNoticeInList 호출됨 ===");
-        console.log("noticeId:", noticeId);
-        console.log("newIsLiked:", newIsLiked);
-
-        setAllLikes(prevNotices => {
-            console.log("현재 likes 개수:", prevNotices.length);
-            const updatedNotices = prevNotices.map(notice =>
-                notice.id === noticeId
-                    ? { ...notice, isLiked: newIsLiked }
-                    : notice
-            );
-            console.log("업데이트 완료");
-            return updatedNotices;
-        });
+        setAllLikes(prevNotices =>
+            prevNotices.filter(notice => notice.id !== noticeId)  // ✅ 좋아요 해제시 목록에서 제거
+        );
     }, []);
-
-
 
     return (
         <View style={styles.container}>
             <SubHeaderBar
-                title="내 좋아요"
+                title="내 북마크"
                 handleBackPress={navigation.goBack}
             />
             <FlatList
-                data={allLikes}
+                data={refreshing ? [] : allLikes}  // ✅ 새로고침 시 빈 배열
+                refreshControl={
+                    <RefreshControl
+                        refreshing={false}
+                        onRefresh={handleRefresh}
+                        colors={[Colors.white1]}
+                        tintColor={Colors.white1}
+                    />
+                }
                 viewabilityConfig={{
                     itemVisiblePercentThreshold: 50
                 }}
@@ -210,20 +233,33 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
                     </View>
                 )}
                 ListFooterComponent={
-                    loading || isFetchingNextPage?
-                        <View style={[styles.indicatorContainer, {marginTop:height*0.25}]}>
+                    loading || isFetchingNextPage ?
+                        <View style={[styles.indicatorContainer, {marginTop: height*0.25}]}>
                             <Progress.Circle
                                 color={Colors.primary}
-                                size = { 50 } indeterminate = { true }
-                                thickness = {300}
+                                size={50}
+                                indeterminate={true}
+                                thickness={300}
                             />
-                        </View>: <View style={{height:16}}/>
+                        </View> : <View style={{height: 16}}/>
                 }
                 ListEmptyComponent={
-                    !loading || isFetchingNextPage?
-                        <View style={[styles.emptyContainer,{marginTop:height*0.25}]}>
-                            <Text style={styles.emptyContainerText}>존재하는 공고가 없습니다.</Text>
-                        </View>: <View/>
+                    refreshing ? (  // ✅ 새로고침 중
+                        <View style={styles.emptyContainer}>
+                            <Progress.Circle
+                                color={Colors.primary}
+                                size={50}
+                                indeterminate={true}
+                                thickness={300}
+                            />
+                        </View>
+                    ) : !loading && !isFetchingNextPage ? (  // ✅ 데이터 없음
+                        <View style={styles.emptyContainer}>
+                            <Text style={styles.emptyContainerText}>
+                                좋아요한 공고가 없습니다.
+                            </Text>
+                        </View>
+                    ) : null
                 }
             />
         </View>
@@ -231,59 +267,10 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
 }
 
 const styles = StyleSheet.create({
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 20,
-    },
+    // ... 기존 스타일들 유지
     container: {
         flex: 1,
         flexDirection: 'column',
-    },
-    headerTitle: {
-        fontFamily: 'Pretendard-Bold',
-        fontSize: 18,
-        color: Colors.gray1,
-    },
-    headerRight: {
-        width: 24,
-        height: 24,
-        color : Colors.black2
-    },
-    mainContainer : {
-        flex : 1,
-    },
-    scorllContainer : {
-        paddingHorizontal : 16,
-        paddingTop : 16,
-        paddingBottom : 32,
-        flex : 1
-    },
-    labelContainer : {
-        width : "100%",
-        gap : 12
-    },
-    line : {
-        width : "100%",
-        borderBottomWidth : 2,
-        borderColor : Colors.white2
-    },
-    dataContainer : {
-        width : "100%",
-        padding : 16,
-        borderRadius : 8,
-        backgroundColor : Colors.white2
-    },
-    labelText : {
-        fontSize : 16,
-        fontFamily : Fonts.bold,
-        color : Colors.black2
-    },
-    dataText : {
-        fontSize : 14,
-        fontFamily : Fonts.medium,
-        color : Colors.black2
     },
     noticeItemContainer: {
         marginTop: 16,
@@ -295,15 +282,13 @@ const styles = StyleSheet.create({
         flex: 1
     },
     emptyContainer: {
-        flex: 1,
+        height: height * 0.7,  // ✅ 고정 높이로 중앙 정렬
         justifyContent: "center",
         alignItems: "center",
-        height: "100%",
-        width: "100%",
     },
     emptyContainerText: {
         fontSize: 18,
         color: Colors.gray2,
         fontFamily: Fonts.medium
     }
-})
+});

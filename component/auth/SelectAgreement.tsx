@@ -10,6 +10,7 @@ type SelectAgreementProps = {
     title : string
     onSelect : (value : boolean) => void
     onClick : () => void
+    touchable : boolean
 }
 
 export default function SelectAgreement(props : SelectAgreementProps){
@@ -24,9 +25,15 @@ export default function SelectAgreement(props : SelectAgreementProps){
                 style={props.value ? styles.selectCheckBox : styles.unSelectCheckBox}
                 color={props.value ? Colors.primary : undefined}
             />
-            <TouchableOpacity style={styles.clickContainer} onPress={props.onClick}>
+            <TouchableOpacity style={styles.clickContainer}
+                              disabled={!props.touchable}
+                              onPress={props.onClick}>
                 <Text style={styles.clickText}>{props.title}</Text>
-                <RightArrow width={16} height={16} color={Colors.gray3}/>
+                {
+                    props.touchable && (
+                        <RightArrow width={16} height={16} color={Colors.gray3}/>
+                    )
+                }
             </TouchableOpacity>
         </View>
     )

@@ -5,6 +5,7 @@ import { TypeInfo, SignupInputFormData, UserInfo } from "../../../../type/user/s
 import { useDisabled } from "../../../util/useDisabled"
 import StartupStatus from "../../../../constants/StartupStatus"
 import { BackHandler } from "react-native"
+import {StackActions} from "@react-navigation/native";
 
 export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAXPROGRESS: number) => {
     const [formData, setFormData] = useState<SignupInputFormData>({
@@ -43,11 +44,7 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
 
     const goBack = useCallback((): boolean => {
         hideError();
-        if (currentProgress <= 1) {
-            console.log("크아악!2");
-            navigation.goBack();
-        } else {
-            console.log("크아악!1");
+        if (currentProgress > 1) {
             setCurrentProgress((prev) => prev - 1);
         }
         return true;

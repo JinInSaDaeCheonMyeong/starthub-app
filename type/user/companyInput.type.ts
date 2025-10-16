@@ -1,6 +1,10 @@
+export interface StartupField {
+    businessType : string,
+    customField : string
+}
 
 export interface CompanyInputFormData {
-    startupFields : string[];
+    startupFields : StartupField[];
     companyName : string;
     companyDescription : string;
     numberOfEmployees : string;
