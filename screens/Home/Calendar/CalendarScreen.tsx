@@ -165,7 +165,7 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                 />
             </GlassView>
             <FlatList
-                bounces={false}
+                refreshing={loading}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{
                     paddingTop : 8,
@@ -177,7 +177,7 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                 }}
                 keyExtractor={(item : NoticeType) => item.id.toString()}
                 keyboardShouldPersistTaps="handled"
-                data={noticeItemList}
+                data={loading? [] : noticeItemList}
                 renderItem={({item}) => (
                     <NoticeItem
                         item={item}
@@ -185,6 +185,21 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                     />
                 )}
                 ListEmptyComponent={() => (
+                    loading?
+                        <View style={{flex: 1,
+                            alignItems: 'center',
+                            justifyContent : 'center',
+                            paddingTop: 30
+                        }
+                        }>
+                            <Progress.Circle
+                                indeterminate = {true}
+                                color={Colors.second}
+                                size={50}
+                                thickness = {300}
+                                borderWidth={1}
+                            />
+                        </View>:
                     <View style={styles.errorMsgBox}>
                         <XIcon color={Colors.error} width={32} height={32}/>
                         <Text style={styles.errorText}>
@@ -194,17 +209,6 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                 )}
             />
         </View>
-        {loading && (
-            <View style={styles.progressContainer}>
-                <Progress.Circle
-                    color={Colors.second}
-                    size={50}
-                    indeterminate = {true}
-                    thickness = {300}
-                    borderWidth={4}
-                />
-            </View>
-        )}
         </>
     )
 }
@@ -294,7 +298,6 @@ const styles = StyleSheet.create({
         height : '100%',
         alignItems : 'center',
         justifyContent : "center",
-        backgroundColor : "rgba(0, 0, 0, 0.6)",
     },
     errorMsgBox : {
         justifyContent : 'center',
