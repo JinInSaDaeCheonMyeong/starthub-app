@@ -296,13 +296,9 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                     </View>
                     <View style={{marginStart: 16}}>
                         <DropDown
-                            placeholderStyle={
-                                {
-                                    color : Colors.gray2,
-                                    fontSize : 14,
-                                    fontFamily : Fonts.medium
-                                }
-                            }
+                            placeholderStyle={styles.dropDownPlaceHolder}
+                            labelStyle={styles.dropDownLabel}
+                            textStyle={styles.dropDownText}
                             open={regionOpen}
                             value={region}
                             items={RegionItems}
@@ -322,20 +318,16 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                     </View>
                     <View style={{ marginStart: 16}}>
                         <DropDown
-                            placeholderStyle={
-                                {
-                                    color : Colors.gray2,
-                                    fontSize : 14,
-                                    fontFamily : Fonts.medium
-                                }
-                            }
+                            placeholderStyle={styles.dropDownPlaceHolder}
+                            labelStyle={styles.dropDownLabel}
+                            textStyle={styles.dropDownText}
                             open={targetAgeOpen}
                             value={targetAge}
                             items={TargetAgeItems}
                             placeholder={"연령"}
                             setOpen={setTargetAgeOpen}
-                            minWidth={120}
-                            maxWidth={250}
+                            minWidth={150}
+                            maxWidth={3000}
                             setValue={(s) => {
                                 if (s === targetAge) {
                                     setTargetAge("");
@@ -348,13 +340,9 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                     </View>
                     <View style={{marginStart: 16, marginEnd: 16}}>
                         <DropDown
-                            placeholderStyle={
-                                {
-                                    color : Colors.gray2,
-                                    fontSize : 14,
-                                    fontFamily : Fonts.medium
-                                }
-                            }
+                            placeholderStyle={styles.dropDownPlaceHolder}
+                            labelStyle={styles.dropDownLabel}
+                            textStyle={styles.dropDownText}
                             open={businessExperienceOpen}
                             value={businessExperience}
                             items={BusinessExperienceItems}
@@ -475,8 +463,6 @@ const styles = StyleSheet.create({
         color : Colors.black2,
         fontSize : 14,
         fontFamily : Fonts.medium,
-        paddingVertical : 8,
-        paddingHorizontal : 6,
     },
     dropDownLabel : {
         color : Colors.black2,
