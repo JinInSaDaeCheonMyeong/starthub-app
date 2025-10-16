@@ -3,6 +3,7 @@ import {
     View,
     Text,
     StyleSheet, ScrollView, Dimensions, TouchableOpacity,
+    ImageBackground,
 } from 'react-native';
 import { Colors } from '../../../constants/Color';
 import { Fonts } from '../../../constants/Fonts';
@@ -84,7 +85,10 @@ export default function InBMCScreen({navigation, route : {params}} : InBMCScreen
         [SelectBMCValue.revenueStreams]: params.BMC.revenueStreams,
     };
     return (
-        <View style={[styles.container,{paddingTop: insets.top, paddingBottom: insets.bottom}]}>
+        <ImageBackground 
+            style={[styles.container,{paddingTop: insets.top, paddingBottom: insets.bottom}]}
+            source={require("../../../assets/images/glass-background.png")}
+        >
             <SubHeaderBar
                 title={params.BMC.title}
                 handleBackPress={handleBackPress}
@@ -139,7 +143,7 @@ export default function InBMCScreen({navigation, route : {params}} : InBMCScreen
 
                 </View>
             </ScrollView>
-        </View>
+        </ImageBackground>
     );
 }
 

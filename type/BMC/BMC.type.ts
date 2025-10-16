@@ -1,4 +1,3 @@
-import {ImageSourcePropType} from "react-native";
 import {Response} from "../util/response.type";
 
 export interface BMCType {
@@ -14,6 +13,7 @@ export interface BMCType {
     "costStructure": string,
     "revenueStreams": string,
     "isCompleted": boolean,
+    "imageUrl": string,
     "createdAt": string,
     "updatedAt": string,
 }
