@@ -16,6 +16,7 @@ import { competitorAnalysis } from "../../api/competitor";
 import { CompetitorRequest } from "../../type/competitor/competitor.type";
 import { isAxiosError } from "axios";
 import { ErrorResponse } from "../../type/util/response.type";
+import BMCItem from "../../component/home/BMCItem";
 
 type SelectScreenProps = StackScreenProps<CompoetitorStackParamList>
 
@@ -96,64 +97,30 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                     const selected = item.id === selectBMC;
                     
                     const content = (
-                        <View style={{ borderRadius: 8, overflow: 'hidden' }}>
-                            <View style={[styles.myBMCBox, { width: '100%' }]}>
-                                <View
-                                style={{
-                                    backgroundColor: Colors.white2,
-                                    borderTopLeftRadius: 8,
-                                    borderTopRightRadius: 8,
-                                }}
-                                    >
-                                    <Image
-                                        source={require('../../assets/images/bmc-thumbnail-exam.png')}
-                                        style={styles.myBMCThumbnail}
-                                    />
-                                </View>
-                                <View style={[styles.BMCContentContainer, { backgroundColor: Colors.white1 }]}>
-                                    <View style={styles.BMCTextContainer}>
-                                        <Text style={styles.titleText}>{item.title}</Text>
-                                        <Text style={styles.dateText}>
-                                        {formatToDate(item.updatedAt, 'solid')}
-                                        </Text>
-                                    </View>
-                                </View>
-                                {!selected && selectBMC !== undefined && (
-                                <View
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        backgroundColor: 'rgba(255, 255, 255, 0.6)',
-                                        borderRadius: 8,
-                                    }}
-                                />
-                                )}
-                            </View>
-                        </View>
+                        <TouchableOpacity 
+                            onPress={() => 
+                                setSelectBMC(selected ? undefined : item.id)
+                            }
+                            style={[{
+                                    borderRadius : 8,
+                                    position : 'relative',
+                                },
+                                !selected && selectBMC !== undefined && {
+                                    opacity : 0.5
+                                }
+                            ]}>
+                            <BMCItem
+                                title={item.title}
+                                onPress={() => {setSelectBMC(selected ? undefined : item.id);}}
+                                isCompetitor
+                            />
+                        </TouchableOpacity>
                     );
                     
                     return (
-                        <TouchableOpacity
-                        style={{ position: 'relative' }}
-                        onPress={() => {
-                            setSelectBMC(selected ? undefined : item.id)
-                        }}>
-                        {selected ? (
-                            <Shadow
-                                offset={[0, 4]}
-                                distance={16}
-                                startColor="rgba(72, 130, 255, 0.4)"
-                                style={{ width: '100%' }}
-                            >
+                        <View style={{ borderRadius : 8}}>
                             {content}
-                            </Shadow>
-                        ) : (
-                            content
-                        )}
-                        </TouchableOpacity>
+                        </View>
                     );
                 }}
                 ListEmptyComponent={() => (
@@ -247,22 +214,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontFamily: Fonts.reqular,
         color: Colors.gray2,
-    },
-    myBMCBox: {
-        backgroundColor: Colors.white1,
-        borderRadius: 8,
-        flexDirection: 'column',
-        paddingBottom : 16,
-        borderColor: Colors.white2,
-        borderWidth: 2,
-    },
-    myBMCThumbnail: {
-        paddingHorizontal: 8,
-        paddingVertical :8,
-        backgroundColor: Colors.white2,
-        width: '100%',
-        resizeMode: 'cover',
-        height: 200,
     },
     emptyContainerText: {
         fontSize: 18,
