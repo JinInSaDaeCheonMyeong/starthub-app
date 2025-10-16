@@ -77,7 +77,6 @@ const styles = StyleSheet.create({
     itemContainer: {
         paddingTop : 16,
         flexDirection: "column",
-        width: 35,
         alignItems: "center",
     },
     labelText : {
