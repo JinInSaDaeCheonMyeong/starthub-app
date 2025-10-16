@@ -13,7 +13,11 @@ type TypeScreenProps = {
 
 export default function TypeScreen(props : TypeScreenProps) {
 
-    const [selectGender, setSelectGender] = useState(props.gender === "MALE" ? true : false)
+    const [selectGender, setSelectGender] = useState(
+        props.gender === "MALE" ? "male" :
+            props.gender === "FEMALE" ? "female" :
+                "none"
+    )
     const [selectType, setSelectType] = useState(props.startupType === StartupStatus.EARLY_STAGE ? true : false)
 
     return(
@@ -27,20 +31,29 @@ export default function TypeScreen(props : TypeScreenProps) {
                     <TouchableOpacity
                         onPress={() => {
                             props.setGender("MALE")
-                            setSelectGender(true)
+                            setSelectGender("male")
                         }}
-                        style={[styles.genderBox, {borderColor : selectGender ? Colors.primary : Colors.white2 }]}
+                        style={[styles.genderBox, {borderColor : selectGender === "male" ? Colors.primary : Colors.white2 }]}
                     >
-                        <Text style={[styles.selectText, {color : selectGender ? Colors.primary : Colors.gray2 }]}>남</Text>
+                        <Text style={[styles.selectText, {color : selectGender === "male" ? Colors.primary : Colors.gray2 }]}>남</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         onPress={() => {
                             props.setGender("FEMALE")
-                            setSelectGender(false)
+                            setSelectGender("female")
                         }}
-                        style={[styles.genderBox, {borderColor : !selectGender ? Colors.primary : Colors.white2 }]}
+                        style={[styles.genderBox, {borderColor : selectGender === "female" ? Colors.primary : Colors.white2 }]}
                     >
-                        <Text style={[styles.selectText, {color : !selectGender ? Colors.primary : Colors.gray2 }]}>여</Text>
+                        <Text style={[styles.selectText, {color : selectGender === "female" ? Colors.primary : Colors.gray2 }]}>여</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => {
+                            props.setGender("OTHER")
+                            setSelectGender("none")
+                        }}
+                        style={[styles.genderBox, {borderColor : selectGender === "none" ? Colors.primary : Colors.white2 }]}
+                    >
+                        <Text style={[styles.selectText, {color : selectGender === "none" ? Colors.primary : Colors.gray2 }]}>선택안함</Text>
                     </TouchableOpacity>
                 </View>
             </View>

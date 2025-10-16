@@ -46,7 +46,7 @@ export function HomeStack({ navigation }: any) {
             >
                 <Tab.Screen name="Home" component={HomeScreen}/>
                 <Tab.Screen name="Notice" component={NoticeScreen}/>
-                <Tab.Screen name="Calendar" component={CalendarScreen}/>
+                {/* <Tab.Screen name="Calendar" component={CalendarScreen}/> */}
                 <Tab.Screen name="BMC" component={BMCScreen}/>
             </Tab.Navigator>
         </ImageBackground>
