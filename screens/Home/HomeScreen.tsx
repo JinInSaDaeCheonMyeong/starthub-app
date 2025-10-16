@@ -7,18 +7,21 @@ import { HomeStackParamList } from "../../navigation/HomeStack";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { RootStackParamList } from "../../navigation/RootStack";
 import { StackScreenProps } from "@react-navigation/stack";
-import Carousel from "react-native-reanimated-carousel";
 import useHomeScreen from "../../hooks/home/useHomeScreen";
-import Banner from "../../component/home/Banner";
 import { NoticeCategory } from "../../constants/NoticeCategory";
-import BusinessIcon from "../../assets/icons/category/notice/business.svg"
-import EducationIcon from "../../assets/icons/category/notice/education.svg"
-import EventIcon from "../../assets/icons/category/notice/event.svg"
-import FacilityIcon from "../../assets/icons/category/notice/facility.svg"
-import FundingIcon from "../../assets/icons/category/notice/funding.svg"
-import GlobalIcon from "../../assets/icons/category/notice/global.svg"
-import RNDIcon from "../../assets/icons/category/notice/rnd.svg"
-import TalentIcon from "../../assets/icons/category/notice/talent.svg"
+import BusinessIcon from "../../assets/icons/glass/notice/buisness.svg"
+import EducationIcon from "../../assets/icons/glass/notice/education.svg"
+import EventIcon from "../../assets/icons/glass/notice/event.svg"
+import FacilityIcon from "../../assets/icons/glass/notice/facility.svg"
+import FundingIcon from "../../assets/icons/glass/notice/funding.svg"
+import GlobalIcon from "../../assets/icons/glass/notice/global.svg"
+import RNDIcon from "../../assets/icons/glass/notice/rnd.svg"
+import TalentIcon from "../../assets/icons/glass/notice/talent.svg"
+import CompetitorIcon from "../../assets/icons/glass/home/competitor.svg"
+import CompareIcon from "../../assets/icons/glass/home/compare.svg";
+import SuggestionIcon from "../../assets/icons/glass/home/suggestion.svg";
+import CalendarIcon from "../../assets/icons/glass/home/calendar.svg";
+import GlassView from "../../component/GlassView";
 
 export type HomeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Home">,
@@ -29,6 +32,13 @@ export type HomeScreenProps = CompositeScreenProps<
 const {width} = Dimensions.get("window");
 
 export default function HomeScreen(props : HomeScreenProps) {
+    const featureMap = {
+        ['Competitor'] : CompetitorIcon,
+        ['Compare'] : CompareIcon,
+        ['Suggest'] : SuggestionIcon,
+        ['Calendar'] : CalendarIcon
+    }
+
     const categoryMap = {
         [NoticeCategory.BUSINESS] : BusinessIcon,
         [NoticeCategory.EDUCATION] : EducationIcon,
@@ -44,57 +54,54 @@ export default function HomeScreen(props : HomeScreenProps) {
         form : {
             noticeItems,
             bookmarkItems,
-            carouselList,
-            carouselMaxIndex,
             noticeCategoryList,
-            navList
+            userName
         },
         ui : {
-            width : windowWidth,
-            carouselHeight,
+            navItemList
         },
         actions : {
             goNotice,
-            goInNotice
         }
     } = useHomeScreen(props)
 
     return (
         <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.flatListContainer}>
-                <View style={styles.bannerContainer}>
-                    <Carousel
-                        loop
-                        width={windowWidth}
-                        height={carouselHeight}
-                        autoPlay
-                        data={carouselList}
-                        autoPlayInterval={5000}
-                        scrollAnimationDuration={1300}
-                        renderItem={({index, item}) => (
-                            <Banner
-                                item={item}
-                                index={index + 1}
-                                maxIndex={carouselMaxIndex}
-                                height={carouselHeight}
-                                onPress={() => {goInNotice(index)}}
-                            />
-                        )}
-                    />
-                    {/* <View style={styles.navIconContainer}>
-                        {navList.map(({icon, label, navItem}, index) => (
-                            <TouchableOpacity 
-                                onPress={() => {console.log(navItem)}}
-                                key={index} 
-                                style={styles.navIconWrapper}
-                            >
-                                <Image style={styles.navIcon} source={icon}/>
-                                <Text style={styles.navIconText}>
-                                    {label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View> */}
+                <View style={styles.bannerContainer}> 
+                    <Text style={styles.mainText}>
+                        {`좋은 아침이에요,\n${userName}님!`}
+                    </Text>
+                    <View style={styles.navIconContainer}>
+                        {
+                            navItemList.map(({label, nav}, index) => {
+                                const IconComponent = featureMap[nav];
+                                let screenName :
+                                    | keyof HomeStackParamList
+                                    | keyof RootStackParamList = "Competitor";
+                                switch (index) {
+                                    case 0:
+                                        screenName = "Competitor";
+                                        break;
+                                    default:
+                                        screenName = "Competitor";
+                                        break;
+                                    }
+                                return (
+                                    <TouchableOpacity 
+                                        onPress={() => {props.navigation.navigate(screenName)}}
+                                        key={index}
+                                        style={styles.navIconWrapper}
+                                    >
+                                        {IconComponent && <IconComponent width={60} height={60}/>}
+                                        <Text style={styles.navIconText}>
+                                            {label}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )
+                            })
+                        }
+                    </View>
                 </View>
                 <View style={styles.flatListWrapper}>
                     <View style={styles.textWrapper}>
@@ -105,52 +112,61 @@ export default function HomeScreen(props : HomeScreenProps) {
                         {noticeCategoryList.map(({
                             label, 
                             value,
-                            noticeType, 
-                            backgroundColor, 
-                            iconColor
+                            noticeType,
                         }, index) => {
                             const IconComponent = categoryMap[noticeType];
-                            const buttonSide = (width-96)/5
+                            const buttonSide = (width-80)/4
                             return (
-                                <TouchableOpacity 
-                                    onPress={() => {goNotice(value)}}
-                                    key={index} 
+                                <TouchableOpacity
+                                    onPress={() => {
+                                    goNotice(value);
+                                    }}
+                                    key={index}
                                     style={styles.iconWrapper}
                                 >
-                                    <View style={[styles.iconBox, {backgroundColor, width : buttonSide, height : buttonSide}]}>
-                                        {IconComponent && <IconComponent width={30} height={30} color={iconColor} />}
-                                    </View>
-                                    <Text style={styles.iconLabel}>
-                                        {label}
-                                    </Text>
+                                    <GlassView 
+                                        blurPercent={0.5} 
+                                        containerStyle={{
+                                            width : buttonSide, 
+                                            alignItems : 'center', 
+                                            gap : 4, 
+                                            padding : 10, 
+                                            backgroundColor : 'rgba(255, 255, 255, 0.5)'
+                                    }}>
+                                        {IconComponent && (
+                                            <IconComponent width={50} height={50} />
+                                        )}
+                                        <Text style={styles.iconLabel}>{label}</Text>
+                                    </GlassView>
                                 </TouchableOpacity>
-                            )
+                            );
                         })}
                     </View>
                 </View>
-                <View style={styles.flatListWrapper}>
-                    <View style={styles.textWrapper}>
-                        <Text style={styles.titleText}>맞춤 추천 공고</Text>
-                        <Text style={styles.captionText}>사용자님의 관심을 분석하여 제공해 드려요</Text>
-                    </View>
-                    <FlatList
-                        contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
-                        showsHorizontalScrollIndicator={false}
-                        horizontal={true}
-                        onEndReached={() => {}}
-                        style={{ overflow: "visible" }}
-                        data={noticeItems}
-                        renderItem={({ item }) => (
-                        <NoticeItem
-                            item={item}
-                            isHome={true}
-                            onPress={() => {
-                                props.navigation.navigate('InNotice', {Notice : item})
-                            }}
+                {
+                    noticeItems.length !== 0 && 
+                    <View style={styles.flatListWrapper}>
+                        <View style={styles.textWrapper}>
+                            <Text style={styles.titleText}>맞춤 추천 공고</Text>
+                            <Text style={styles.captionText}>사용자님의 관심을 분석하여 제공해 드려요</Text>
+                        </View>
+                        <FlatList
+                            contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
+                            showsHorizontalScrollIndicator={false}
+                            onEndReached={() => {}}
+                            style={{ overflow: "visible" }}
+                            data={noticeItems}
+                            renderItem={({ item }) => (
+                                <NoticeItem
+                                    item={item}
+                                    onPress={() => {
+                                        props.navigation.navigate('InNotice', {Notice : item})
+                                    }}
+                                />
+                            )}
                         />
-                        )}
-                    />
-                </View>
+                    </View>
+                }
                 {
                     bookmarkItems.length !== 0 && (
                         <View style={styles.flatListWrapper}>
@@ -161,14 +177,13 @@ export default function HomeScreen(props : HomeScreenProps) {
                             <FlatList
                                 contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
                                 showsHorizontalScrollIndicator={false}
-                                horizontal={true}
+                                horizontal={false}
                                 onEndReached={() => {}}
                                 style={{ overflow: "visible" }}
                                 data={bookmarkItems}
                                 renderItem={({ item }) => (
                                 <NoticeItem
-                                item={item}
-                                    isHome={true}
+                                    item={item}
                                     onPress={() => {
                                         props.navigation.navigate('InNotice', {Notice : item})
                                     }}
@@ -191,11 +206,10 @@ const styles = StyleSheet.create({
     },
     flatListContainer: {
         gap: 32,
-        paddingVertical: 16,
-        paddingHorizontal: 0,
+        paddingVertical: 20,
     },
     bannerContainer : {
-        gap : 20
+        gap : 24
     },
     flatListWrapper : {
         gap : 12
@@ -212,7 +226,7 @@ const styles = StyleSheet.create({
     captionText: {
         fontSize: 14,
         marginStart: 16,
-        fontFamily: Fonts.semiBold,
+        fontFamily: Fonts.reqular,
         color: Colors.gray2,
     },
     noticeItemListWrapper : {
@@ -233,7 +247,7 @@ const styles = StyleSheet.create({
     iconLabel : {
         fontSize : 14,
         fontFamily : Fonts.medium,
-        color : Colors.black2
+        color : Colors.gray1
     },
     navIconContainer : {
         flexDirection : 'row',
@@ -242,7 +256,7 @@ const styles = StyleSheet.create({
     },
     navIconWrapper : {
         alignItems : 'center',
-        gap : 8,
+        gap : 4,
         flex : 1,
     },
     navIcon : {
@@ -252,6 +266,13 @@ const styles = StyleSheet.create({
     navIconText : {
         textAlign : 'center', 
         fontFamily : Fonts.medium, 
-        fontSize : 14
+        fontSize : 14,
+        color : Colors.black2
+    },
+    mainText : {
+        fontFamily : Fonts.semiBold,
+        color : Colors.black1,
+        fontSize : 28,
+        marginStart : 16
     }
 });

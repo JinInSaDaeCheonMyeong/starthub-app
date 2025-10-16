@@ -1,31 +1,29 @@
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native"
 import { Colors } from "../../constants/Color"
 import { Fonts } from "../../constants/Fonts"
-import BusinessIcon from "../../assets/icons/category/notice/business.svg"
-import EducationIcon from "../../assets/icons/category/notice/education.svg"
-import EventIcon from "../../assets/icons/category/notice/event.svg"
-import FacilityIcon from "../../assets/icons/category/notice/facility.svg"
-import FundingIcon from "../../assets/icons/category/notice/funding.svg"
-import GlobalIcon from "../../assets/icons/category/notice/global.svg"
-import RNDIcon from "../../assets/icons/category/notice/rnd.svg"
-import TalentIcon from "../../assets/icons/category/notice/talent.svg"
+import BusinessIcon from "../../assets/icons/glass/notice/buisness.svg";
+import EducationIcon from "../../assets/icons/glass/notice/education.svg";
+import EventIcon from "../../assets/icons/glass/notice/event.svg";
+import FacilityIcon from "../../assets/icons/glass/notice/facility.svg";
+import FundingIcon from "../../assets/icons/glass/notice/funding.svg";
+import GlobalIcon from "../../assets/icons/glass/notice/global.svg";
+import RNDIcon from "../../assets/icons/glass/notice/rnd.svg";
+import TalentIcon from "../../assets/icons/glass/notice/buisness.svg"
 import { useState, useEffect } from "react"
 import BookMarkFill from "../../assets/icons/bookMark/bookmark.fill.svg"
 import BookMark from "../../assets/icons/bookMark/bookmark.svg"
 import {NoticeType} from "../../type/notice/notice.type";
 import {deleteLikes, postLikes} from "../../api/likes";
+import GlassView from "../GlassView"
 
 interface NoticeItemProps {
     item : NoticeType
-    isHome : boolean,
     onPress : () => void
 }
 export default function NoticeItem({
                                        item,
-                                       isHome,
                                        onPress,
                                    } : NoticeItemProps ){
-    const {width} = useWindowDimensions()
     const [isSelected, setIsSelected] = useState(item.isLiked)
     const [isBookmarkLoading, setIsBookmarkLoading] = useState(false)
 
@@ -78,16 +76,16 @@ export default function NoticeItem({
     const applyTargetDisplay = getApplyTargetDisplay();
 
     const categoryMap = {
-        "사업화" : {label : "사업화", icon : <BusinessIcon width={16} height={16} color={Colors.primary}/>},
-        "멘토링ㆍ컨설팅ㆍ교육" : {label : "교육", icon : <EducationIcon width={16} height={16} color={Colors.primary}/>},
-        "창업교육" : {label : "교육", icon : <EducationIcon width={16} height={16} color={Colors.primary}/>},
-        "행사ㆍ네트워크" : {label : "행사", icon : <EventIcon width={16} height={16} color={Colors.primary}/>},
-        "시설ㆍ공간ㆍ보육" : {label : "시설", icon : <FacilityIcon width={16} height={16} color={Colors.primary}/>},
-        "정책자금" : {label : "자금", icon : <FundingIcon width={16} height={16} color={Colors.primary}/>},
-        "글로벌" : {label : "글로벌", icon : <GlobalIcon width={16} height={16} color={Colors.primary}/>},
-        "기술개발(R&D)" : {label : "R&D", icon : <RNDIcon width={16} height={16} color={Colors.primary}/>},
-        "인력" : {label : "인력", icon : <TalentIcon width={16} height={16} color={Colors.primary}/>},
-        "판로ㆍ해외진출" : {label : "글로벌", icon : <GlobalIcon width={16} height={16} color={Colors.primary}/>},
+        "사업화" : {label : "사업화", icon : <BusinessIcon width={50} height={50} color={Colors.primary}/>},
+        "멘토링ㆍ컨설팅ㆍ교육" : {label : "교육", icon : <EducationIcon width={50} height={50} color={Colors.primary}/>},
+        "창업교육" : {label : "교육", icon : <EducationIcon width={50} height={50} color={Colors.primary}/>},
+        "행사ㆍ네트워크" : {label : "행사", icon : <EventIcon width={50} height={50} color={Colors.primary}/>},
+        "시설ㆍ공간ㆍ보육" : {label : "시설", icon : <FacilityIcon width={50} height={50} color={Colors.primary}/>},
+        "정책자금" : {label : "자금", icon : <FundingIcon width={50} height={50} color={Colors.primary}/>},
+        "글로벌" : {label : "글로벌", icon : <GlobalIcon width={50} height={50} color={Colors.primary}/>},
+        "기술개발(R&D)" : {label : "R&D", icon : <RNDIcon width={50} height={50} color={Colors.primary}/>},
+        "인력" : {label : "인력", icon : <TalentIcon width={50} height={50} color={Colors.primary}/>},
+        "판로ㆍ해외진출" : {label : "글로벌", icon : <GlobalIcon width={50} height={50} color={Colors.primary}/>},
     }
 
     const handleBookmarkToggle = async () => {
@@ -113,104 +111,75 @@ export default function NoticeItem({
         <TouchableOpacity
             onPress={() => {onPress()}}
             key={item.id}
-            style={{
-                width : isHome ? width * 0.52 : "100%"
-            }}
         >
-            <View
-                style={[styles.shadowContainer,{borderColor:Colors.white2, borderWidth:2, borderRadius: 16}]}
+            <GlassView
+                containerStyle={styles.shadowContainer}
             >
-                <View style={styles.mainContainer}>
-                    <View style={styles.categoryContainer}>
-                        {categoryMap[item.supportField as keyof typeof categoryMap]?.icon}
-                        <Text style={styles.categoryText}>
-                            {categoryMap[item.supportField as keyof typeof categoryMap]?.label}
-                        </Text>
-                    </View>
-                    <View style={styles.titleContainer}>
-                        <Text style={[styles.titleText, isHome && {
-                            lineHeight : 20,
-                            height : 44
-                        }]}
-                              numberOfLines={2}
-                              ellipsizeMode="tail"
-                        >
-                            {item.title}
-                        </Text>
-                        <Text style={styles.dateText}>
-                            {`모집 : ${transformDate(item.startDate)}~${transformDate(item.endDate)}`}
-                        </Text>
-                    </View>
+                {categoryMap[item.supportField as keyof typeof categoryMap]?.icon}
+                <View style={styles.titleContainer}>
+                    <Text style={styles.titleText}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                    >
+                        {item.title}
+                    </Text>
+                    <Text style={styles.dateText}>
+                        {`모집 : ${transformDate(item.startDate)}~${transformDate(item.endDate)}`}
+                    </Text>
                     <View style={styles.bookMarkCotainer}>
-                        <View style={[styles.hashTagContainer, {height : isHome ? 34 : 'auto'}]}>
+                        <View style={[styles.hashTagContainer, {height : 'auto'}]}>
                             {[item.region, applyTargetDisplay].map((value, index) => (
                                 <Text key={index} style={styles.hashTagText}>{`#${value}`}</Text>
                             ))}
                         </View>
-                        {!isHome && (
-                            <TouchableOpacity
-                                onPress={handleBookmarkToggle}
-                                disabled={isBookmarkLoading}
-                                activeOpacity={0.7}
-                            >
-                                {isSelected ? (
-                                    <BookMarkFill
-                                        width={24}
-                                        height={24}
-                                        fill={Colors.primary}
-                                        color={Colors.primary}
-                                    />
-                                ) : (
-                                    <BookMark
-                                        width={24}
-                                        height={24}
-                                        color={Colors.primary}
-                                    />
-                                )}
-                            </TouchableOpacity>
-                        )}
+                        <TouchableOpacity
+                            onPress={handleBookmarkToggle}
+                            disabled={isBookmarkLoading}
+                            activeOpacity={0.7}
+                        >
+                            {isSelected ? (
+                                <BookMarkFill
+                                    width={24}
+                                    height={24}
+                                    color={'rgba(36, 102, 244, 0.7)'}
+                                />
+                            ) : (
+                                <BookMark
+                                    width={24}
+                                    height={24}
+                                    color={'rgba(36, 102, 244, 0.7)'}
+                                />
+                            )}
+                        </TouchableOpacity>
                     </View>
                 </View>
-            </View>
+            </GlassView>
         </TouchableOpacity>
     )
 }
 
 const styles = StyleSheet.create({
     shadowContainer: {
-        borderRadius: 16,
-        overflow: 'visible',
-        width: '100%',
-    },
-    mainContainer: {
-        backgroundColor: Colors.white1,
-        padding: 20,
-        borderRadius: 16,
-        gap: 12,
-        width: '100%',
-    },
-    categoryContainer: {
-        flexDirection: 'row',
-        gap: 4,
-        alignItems: 'center'
-    },
-    categoryText: {
-        fontSize: 12,
-        fontFamily: Fonts.semiBold,
-        color: Colors.primary
+        paddingHorizontal : 10,
+        paddingVertical : 20,
+        alignItems : 'center',
+        flexDirection : 'row',
+        gap : 17
     },
     titleContainer: {
         gap: 4,
+        flex : 1,
+        flexShrink : 1
     },
     titleText: {
-        fontSize: 16,
-        fontFamily: Fonts.semiBold,
+        fontSize: 14,
+        fontFamily: Fonts.bold,
         color: Colors.black2,
     },
     dateText: {
-        fontSize: 12,
-        fontFamily: Fonts.medium,
-        color: Colors.black2
+        fontSize: 13,
+        fontFamily: Fonts.reqular,
+        color: Colors.gray2
     },
     hashTagContainer: {
         flexDirection: 'row',
@@ -220,8 +189,7 @@ const styles = StyleSheet.create({
         overflow : "hidden"
     },
     hashTagText: {
-        fontSize: 12,
-        lineHeight : 12,
+        fontSize: 13,
         fontFamily: Fonts.medium,
         color: Colors.primary
     },

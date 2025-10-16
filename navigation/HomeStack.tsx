@@ -4,7 +4,7 @@ import {BottomBar} from "../component/nav/BottomBar";
 import NoticeScreen from "../screens/Home/NoticeScreen";
 import BMCScreen from "../screens/Home/BMCScreen";
 import { Colors } from '../constants/Color';
-import {Easing, StyleSheet, View} from 'react-native';
+import {Easing, ImageBackground, StyleSheet, View} from 'react-native';
 import HeaderBar from '../component/HeaderBar';
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import CalendarScreen from '../screens/Home/Calendar/CalendarScreen';
@@ -23,13 +23,12 @@ export type HomeStackParamList = {
 export function HomeStack({ navigation }: any) {
     const insets = useSafeAreaInsets();
     return (
-        <View style={[styles.container, { paddingTop: insets.top}]}>
+        <ImageBackground source={require("../assets/images/glass-background.png")} style={[styles.container, { paddingTop: insets.top}]}>
             <Tab.Navigator
                 tabBar={(props) => <BottomBar {...props} />}
                 screenOptions={{
                     header : () => (<HeaderBar
-                        onClickBellIcon={() => {}}
-                        onClickSystemIcon={() => navigation.navigate('SystemStack')}
+                        onClickMenu={() => navigation.navigate('SystemStack')}
                     />),
                     animation : 'shift',
                     transitionSpec : {
@@ -40,7 +39,7 @@ export function HomeStack({ navigation }: any) {
                         }
                     },
                     sceneStyle : {
-                        backgroundColor : Colors.white1,
+                        backgroundColor : 'transparent',
                         overflow : "visible"
                     }
                 }}
@@ -50,7 +49,7 @@ export function HomeStack({ navigation }: any) {
                 {/* <Tab.Screen name="Calendar" component={CalendarScreen}/> */}
                 <Tab.Screen name="BMC" component={BMCScreen}/>
             </Tab.Navigator>
-        </View>
+        </ImageBackground>
     )
 }
 const styles = StyleSheet.create({

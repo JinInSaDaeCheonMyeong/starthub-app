@@ -12,7 +12,7 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 
 const StartHubAxios = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_URL,
-    timeout: 5000,
+    timeout: 65000,
 });
 
 // 요청
