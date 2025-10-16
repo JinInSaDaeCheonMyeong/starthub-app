@@ -100,10 +100,6 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                                         <TouchableOpacity onPress={() => navigation.navigation.navigate('InBMC', {BMC:item})}>
                                             <View style={{backgroundColor: Colors.white2, borderRadius: 8, padding:2}}>
                                                 <View style={styles.recentBMCBox}>
-                                                    <Image
-                                                        source={require('../../assets/images/bmc-thumbnail-exam.png')}
-                                                        style={styles.thumbnail}
-                                                    />
                                                     <View style={styles.BMCContentContainer}>
                                                         <View style={styles.BMCTextContainer}>
                                                             <Text style={styles.titleText}>{item.title}</Text>
@@ -128,12 +124,7 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                             })}}>
                                 <View style={{backgroundColor: Colors.white2, borderRadius: 8, padding:2}}>
                                     <View style={[styles.myBMCBox, {width : '100%'}]}>
-                                        <View style={{backgroundColor: Colors.white2, borderTopLeftRadius: 8, borderTopRightRadius: 8}}>
-                                            <Image
-                                                source={require('../../assets/images/bmc-thumbnail-exam.png')}
-                                                style={styles.myBMCThumbnail}
-                                            />
-                                        </View>
+                                        <View style={{backgroundColor: Colors.white2, borderTopLeftRadius: 8, borderTopRightRadius: 8}}/>
                                         <View style={[styles.BMCContentContainer,{backgroundColor:Colors.white1}]}>
                                             <View style={styles.BMCTextContainer}>
                                                 <Text style={styles.titleText}>{item.title}</Text>
@@ -187,7 +178,7 @@ const styles = StyleSheet.create({
     },
     recentBMCBox: {
         width: 189,
-        height: 153,
+        height: 50,
         backgroundColor: Colors.white1,
         borderRadius: 8,
         flexDirection: 'column',
@@ -204,6 +195,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         borderBottomLeftRadius: 8,
         borderBottomRightRadius: 8,
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8,
     },
     BMCTextContainer: {
         flexDirection: 'column',
@@ -229,7 +222,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.white1,
         borderRadius: 8,
         flexDirection: 'column',
-        height: 260,
+        height: 60,
         borderColor: Colors.white2,
         borderWidth: 2,
     },
