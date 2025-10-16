@@ -31,6 +31,7 @@ export default function BMCItem({
 
     return (
         <TouchableOpacity
+            activeOpacity={0.4}
             style={{ width }}
             onPress={onPress}
         >

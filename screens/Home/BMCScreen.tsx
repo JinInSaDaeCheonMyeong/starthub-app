@@ -17,6 +17,8 @@ import {RootStackParamList} from "../../navigation/RootStack";
 import {getBMCs} from "../../api/bmc";
 import {useEffect, useState} from "react";
 import {BMCType, GetBMCsResponse} from "../../type/BMC/BMC.type";
+import { formatToDate } from "../../util/DateFormat";
+import BMCItem from "../../component/home/BMCItem";
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -51,6 +53,7 @@ export default function BMCScreen(navigation: BMCScreenProps) {
         <View style={styles.container}>
             <PaperProvider>
                 <FlatList
+                    showsVerticalScrollIndicator={false}
                     data={allBMCs}
                     ItemSeparatorComponent={() => <View style={{ height: 16 }} />} // 세로 간격
                     ListHeaderComponent={
@@ -65,24 +68,16 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                                     <View style={styles.flatMargin}/>
                                 }
                                 renderItem={({item}) => (
-                                    <TouchableOpacity>
-                                        <View style={{backgroundColor: Colors.white2, borderRadius: 8, padding:2}}>
-                                            <View style={styles.recentBMCBox}>
-                                                <Image
-                                                    source={require('../../assets/images/bmc-thumbnail-exam.png')}
-                                                    style={styles.thumbnail}
-                                                />
-                                                <View style={styles.BMCContentContainer}>
-                                                    <View style={styles.BMCTextContainer}>
-                                                        <Text style={styles.titleText}>{item.title}</Text>
-                                                        <Text style={styles.dateText}>
-                                                            {item.updatedAt}
-                                                        </Text>
-                                                    </View>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
+                                    <BMCItem
+                                        width={189}
+                                        height={120}
+                                        title={item.title}
+                                        subText={formatToDate(item.updatedAt, 'dotted')}
+                                        onPress={() => navigation.navigation.navigate('InBMC', {
+                                            BMC : item
+                                        })}
+                                        isHorizontal
+                                    />
                                 )
                                 }
                             />
@@ -91,28 +86,13 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                     }
                     renderItem={({ item }) => (
                         <View style={{paddingHorizontal:16}}>
-                            <TouchableOpacity onPress={()=>{navigation.navigation.navigate('InBMC', {
-                                BMC:item
-                            })}}>
-                                <View style={{backgroundColor: Colors.white2, borderRadius: 8, padding:2}}>
-                                    <View style={[styles.myBMCBox, {width : '100%'}]}>
-                                        <View style={{backgroundColor: Colors.white2, borderTopLeftRadius: 8, borderTopRightRadius: 8}}>
-                                            <Image
-                                                source={require('../../assets/images/bmc-thumbnail-exam.png')}
-                                                style={styles.myBMCThumbnail}
-                                            />
-                                        </View>
-                                        <View style={[styles.BMCContentContainer,{backgroundColor:Colors.white1}]}>
-                                            <View style={styles.BMCTextContainer}>
-                                                <Text style={styles.titleText}>{item.title}</Text>
-                                                <Text style={styles.dateText}>
-                                                    {item.updatedAt}
-                                                </Text>
-                                            </View>
-                                        </View>
-                                    </View>
-                                </View>
-                            </TouchableOpacity>
+                            <BMCItem
+                                title={item.title}
+                                subText={formatToDate(item.updatedAt, 'dotted')}
+                                onPress={() => navigation.navigation.navigate('InBMC', {
+                                    BMC : item
+                                })}
+                            />
                         </View>
                     )}
                     ListFooterComponent={
@@ -126,7 +106,6 @@ export default function BMCScreen(navigation: BMCScreenProps) {
 }
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: Colors.white1,
         flex: 1,
         flexDirection: 'column',
     },
