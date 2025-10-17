@@ -1,4 +1,4 @@
-import { Alert, ImageBackground, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { Alert, ImageBackground, ImageSourcePropType, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import { StackScreenProps } from "@react-navigation/stack";
 import { Image } from "react-native";
@@ -22,10 +22,12 @@ type ResultScreenProps = StackScreenProps<CompoetitorStackParamList>
 
 export default function ResultScreen({navigation, route : {params}} : ResultScreenProps){
     const {width} = useWindowDimensions()
+    const defaultImage = require("../../assets/images/bmc-thumbnail-exam.png");
     const [carouselHeight, setCarouselHeight] = useState(400);
     const supportList = [0, 1, 2]
     const [loading, setLoading] = useState(false)
     const [form, setForm] = useState<CompetitorResponse['data'] | undefined>(params?.data)
+    const [imageSource, setImageSource] = useState<ImageSourcePropType>(params?.image ?? defaultImage)
 
     const handleCompetitorRequest = async () => {
         setLoading(true)
@@ -217,7 +219,10 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
     const renderUserBMC = () => (
         <>
             <Image 
-                source={require('../../assets/images/bmc-thumbnail-exam.png')}
+                source={imageSource}
+                onError={() => {
+                    setImageSource(defaultImage)
+                }}
                 style={[styles.bmcImage, {
                     height : 245 * width / 361
                 }]} 

@@ -376,7 +376,6 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                     <View style={styles.noticeItemContainer}>
                         <NoticeItem
                             item={item}
-                            isHome={false}
                             onPress={()=>{
                                 navigation.navigate('InNotice', {
                                     Notice: item,
