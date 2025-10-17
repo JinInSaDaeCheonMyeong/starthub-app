@@ -130,15 +130,12 @@ const useCalendarScreen = () => {
 
     const initMarkedDates = async () => {
         try {
-            setLoading(true)
             const schedules = await getMonthSchedules(viewingMonth + '-01');
             console.log(viewingMonth + "-01");
             const dates = buildDeadlineMarks(schedules.data);
             setMarkedDates(dates);
         } catch (error) {
             ShowToast("오류 발생", "일정을 불러올 수 없습니다", ToastType.ERROR)
-        } finally {
-            setLoading(false);
         }
     }
 
