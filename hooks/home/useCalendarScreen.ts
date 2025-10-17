@@ -89,6 +89,7 @@ const useCalendarScreen = () => {
 
     const getNoticeItem = async (date: string): Promise<NoticeType[]> => {
         try {
+            setLoading(true);
             const noticeItems = (await getDateSchedules(date)).data.map((value) => {
                 const { startDate, endDate } = parseReceptionPeriod(value.receptionPeriod);
                 return {
@@ -125,13 +126,14 @@ const useCalendarScreen = () => {
         } catch (error) {
             ShowToast("오류 발생", "일정을 불러올 수 없습니다", ToastType.ERROR);
             return [];
+        } finally {
+            setLoading(false);
         }
     };
 
     const initMarkedDates = async () => {
         try {
             const schedules = await getMonthSchedules(viewingMonth + '-01');
-            console.log(viewingMonth + "-01");
             const dates = buildDeadlineMarks(schedules.data);
             setMarkedDates(dates);
         } catch (error) {
@@ -139,17 +141,15 @@ const useCalendarScreen = () => {
         }
     }
 
-    // viewingMonth가 변경될 때 호출
     useEffect(() => {
         initMarkedDates()
     }, [viewingMonth])
 
-    // 화면에 포커스될 때 마크와 일정 모두 리프레시
     useFocusEffect(
         useCallback(() => {
-            initMarkedDates(); // 마크 리프레시
-            getNoticeItem(currentDate); // 일정 리프레시
-        }, [currentDate, viewingMonth]) // viewingMonth도 의존성에 추가
+            initMarkedDates(); 
+            getNoticeItem(currentDate);
+        }, [currentDate])
     );
 
     return {
