@@ -1,443 +1,207 @@
-import {Dimensions, FlatList, ScrollView, StyleSheet, Text, View} from "react-native";
+import {
+    Dimensions,
+    FlatList,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from "react-native";
 import SearchBar from "../../component/home/SearchBar";
-import DropDown from "../../component/DropDown";
 import { Colors } from "../../constants/Color";
-import {useEffect, useState, useRef, useCallback} from "react";
-import {useFocusEffect} from '@react-navigation/native';
-import {BusinessExperienceItems} from "../../constants/BusinessExperienceItems";
-import {ShowToast, ToastType} from "../../util/ShowToast";
 import NoticeItem from "../../component/notice/NoticeItem";
-import  *  as  Progress  from  'react-native-progress' ;
+import * as Progress from "react-native-progress";
 import { Fonts } from "../../constants/Fonts";
-import {BeforeNoticeType, GetNoticesResponse, NoticeType} from "../../type/notice/notice.type";
-import {getNotices} from "../../api/notice";
-import {CompositeScreenProps} from "@react-navigation/core";
-import {BottomTabScreenProps} from "@react-navigation/bottom-tabs";
-import {HomeStackParamList} from "../../navigation/HomeStack";
-import {StackScreenProps} from "@react-navigation/stack";
-import {RootStackParamList} from "../../navigation/RootStack";
-import {SupportFieldItems} from "../../constants/SupportFieldItems";
-import {RegionItems} from "../../constants/RegionItems";
-import {TargetAgeItems} from "../../constants/TargetAgeItems";
-import {isAxiosError} from "axios";
+import { CompositeScreenProps } from "@react-navigation/core";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { HomeStackParamList } from "../../navigation/HomeStack";
+import { StackScreenProps } from "@react-navigation/stack";
+import { RootStackParamList } from "../../navigation/RootStack";
+import BusinessIcon from "../../assets/icons/glass/notice/buisness.svg";
+import EducationIcon from "../../assets/icons/glass/notice/education.svg";
+import EventIcon from "../../assets/icons/glass/notice/event.svg";
+import FacilityIcon from "../../assets/icons/glass/notice/facility.svg";
+import FundingIcon from "../../assets/icons/glass/notice/funding.svg";
+import GlobalIcon from "../../assets/icons/glass/notice/global.svg";
+import RNDIcon from "../../assets/icons/glass/notice/rnd.svg";
+import TalentIcon from "../../assets/icons/glass/notice/talent.svg";
+import GoIcon from "../../assets/icons/right-arrow-back.svg";
+import { NoticeCategory } from "../../constants/NoticeCategory";
+import GlassView from "../../component/GlassView";
+import { useCallback, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { GetRecommendedNoticeResponse, BeforeNoticeType, NoticeType } from "../../type/notice/notice.type";
+import { getRecommendedNotices } from "../../api/notice";
 
-const {height} = Dimensions.get('window');
+const { height } = Dimensions.get("window");
 
 export type NoticeScreenProps = CompositeScreenProps<
-    BottomTabScreenProps<HomeStackParamList, 'Notice'>,
+    BottomTabScreenProps<HomeStackParamList, "Notice">,
     StackScreenProps<RootStackParamList>
->
+>;
 
+export default function NoticeScreen({ navigation }: NoticeScreenProps) {
+    const [loading, setLoading] = useState(false);
+    const [recommends, setRecommends] = useState<NoticeType[]>([]);
 
-export default function NoticeScreen({navigation, route : {params}}: NoticeScreenProps) {
+    /** 공고 데이터 요청 */
+    const fetchRecommendNotices = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response: GetRecommendedNoticeResponse = await getRecommendedNotices();
+            const mapped = response.data.map((notice: BeforeNoticeType) => {
+                const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
+                return { ...notice, startDate, endDate };
+            });
+            setRecommends(mapped);
+        } catch (error) {
+            console.error("추천 공고 데이터 로딩 실패:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
+    /** 화면 진입 시마다 새로 불러오기 */
+    useFocusEffect(
+        useCallback(() => {
+            fetchRecommendNotices();
+        }, [fetchRecommendNotices])
+    );
+
+    /** 날짜 파싱 함수 */
     const parseReceptionPeriod = (period: string) => {
         try {
-            if (!period || typeof period !== 'string') {
-                return {
-                    startDate: new Date(),
-                    endDate: new Date()
-                };
-            }
+            if (!period || typeof period !== "string") return { startDate: new Date(), endDate: new Date() };
 
             const parts = period.split("~").map(str => str.trim());
-
-            if (parts.length !== 2) {
-                return {
-                    startDate: new Date(),
-                    endDate: new Date()
-                };
-            }
+            if (parts.length !== 2) return { startDate: new Date(), endDate: new Date() };
 
             const [startPart, endPart] = parts;
             const startDateStr = startPart.split(" ")[0];
             const endDateStr = endPart.split(" ")[0];
-
             const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-            if (!dateRegex.test(startDateStr) || !dateRegex.test(endDateStr)) {
-                return {
-                    startDate: new Date(),
-                    endDate: new Date()
-                };
-            }
 
-            const startDate = new Date(startDateStr + 'T00:00:00');
-            const endDate = new Date(endDateStr + 'T00:00:00');
+            if (!dateRegex.test(startDateStr) || !dateRegex.test(endDateStr))
+                return { startDate: new Date(), endDate: new Date() };
 
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                return {
-                    startDate: new Date(),
-                    endDate: new Date()
-                };
-            }
+            const startDate = new Date(startDateStr + "T00:00:00");
+            const endDate = new Date(endDateStr + "T00:00:00");
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()))
+                return { startDate: new Date(), endDate: new Date() };
 
-            return {
-                startDate,
-                endDate
-            };
-        } catch (error) {
-            return {
-                startDate: new Date(),
-                endDate: new Date()
-            };
+            return { startDate, endDate };
+        } catch {
+            return { startDate: new Date(), endDate: new Date() };
         }
     };
 
-    const [title, setTitle] = useState("");
-    const [supportField, setSupportField] = useState("");
-    const [supportFieldOpen, setSupportFieldOpen] = useState(false);
-    const [region, setRegion] = useState("");
-    const [regionOpen, setRegionOpen] = useState(false);
-    const [targetAge, setTargetAge] = useState("");
-    const [targetAgeOpen, setTargetAgeOpen] = useState(false);
-    const [businessExperience, setBusinessExperience] = useState("");
-    const [businessExperienceOpen, setBusinessExperienceOpen] = useState(false);
-
-    const [page, setPage] = useState(0);
-    const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
-    const lastRequestTime = useRef<number>(0);
-    const dropDownMargin = [regionOpen,supportFieldOpen,targetAgeOpen,businessExperienceOpen].some(item => item) ? 200 : 16;
-
-    const [allNotices, setAllNotices] = useState<NoticeType[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [isLast, setIsLast] = useState<boolean>(false);
-
-    const isInitialMount = useRef(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [isFirst, setIsFirst] = useState(false);
-
-    const fetchNotices = useCallback(async (isRefresh: boolean = false) => {
-        try {
-            if (!isRefresh) {
-                setLoading(true);
-                setPage(0);
-            } else {
-                setRefreshing(true);
-            }
-
-            let currentSupportField = supportField;
-            if (!isFirst){
-                if (typeof params?.supportField === "string" && params.supportField !== supportField) {
-                    currentSupportField = params.supportField;
-                    setSupportField(params.supportField);
-                }
-                setIsFirst(true);
-            }
-
-            const response: GetNoticesResponse = await getNotices(title, currentSupportField, region, targetAge, businessExperience, 0);
-            setIsLast(response.data.isLast);
-
-            const mapped = response.data.content.map((notice: BeforeNoticeType) => {
-                const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
-                return {
-                    ...notice,
-                    startDate,
-                    endDate,
-                };
-            });
-
-            setAllNotices(mapped);
-        } catch (error) {
-            if(isAxiosError(error)) {
-                console.log(error.response);
-            }
-            ShowToast(
-                "문제가 발생하였습니다",
-                "데이터를 불러오지 못하였습니다",
-                ToastType.ERROR
-            );
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    }, [title, supportField, region, targetAge, businessExperience, params?.supportField]);
-
-    // 필터 변경 시 API 호출 (초기 마운트 제외)
-    useEffect(() => {
-        if (isInitialMount.current) {
-            return;
-        }
-        fetchNotices(false);
-    }, [title, supportField, region, targetAge, businessExperience]);
-
-    // 화면 포커스시 새로고침 (탭바로 들어올 때)
-    useFocusEffect(
-        useCallback(() => {
-            if (isInitialMount.current) {
-                isInitialMount.current = false;
-            }
-            fetchNotices(true);
-        }, [fetchNotices])
-    );
-
-    // params 변경 처리를 별도로
-    useEffect(() => {
-        if (params?.supportField && params.supportField !== supportField) {
-            setSupportField(params.supportField);
-        }
-    }, [params?.supportField]);
-
-    const loadNextPage = async () => {
-        const now = Date.now();
-
-        // 500ms로 증가하여 중복 요청 방지 강화
-        if (now - lastRequestTime.current < 500) {
-            return;
-        }
-
-        if (isFetchingNextPage || loading || isLast) return;
-
-        lastRequestTime.current = now;
-        const nextPage = page + 1;
-        setIsFetchingNextPage(true);
-
-        try {
-            const response = await getNotices(title, supportField, region, targetAge, businessExperience, nextPage);
-            setIsLast(response.data.isLast);
-
-            const data = response.data.content.map((notice: BeforeNoticeType) => {
-                const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
-                return {
-                    ...notice,
-                    startDate,
-                    endDate,
-                };
-            });
-
-            if (data.length > 0) {
-                setPage(nextPage);
-                setAllNotices(prev => [...prev, ...data]);
-            }
-        } catch (error) {
-            ShowToast(
-                "문제가 발생하였습니다",
-                "데이터를 불러오지 못하였습니다",
-                ToastType.ERROR
-            );
-        } finally {
-            setIsFetchingNextPage(false);
-        }
+    const categoryMap = {
+        [NoticeCategory.BUSINESS]: BusinessIcon,
+        [NoticeCategory.EDUCATION]: EducationIcon,
+        [NoticeCategory.EVENT]: EventIcon,
+        [NoticeCategory.FACILITY]: FacilityIcon,
+        [NoticeCategory.FUNDING]: FundingIcon,
+        [NoticeCategory.GLOBAL]: GlobalIcon,
+        [NoticeCategory.RND]: RNDIcon,
+        [NoticeCategory.TALENT]: TalentIcon,
     };
 
-    const onViewableItemsChanged = ({ viewableItems }: any) => {
-        if (!viewableItems || viewableItems.length === 0 || allNotices.length === 0) return;
+    const noticeCategoryList = [
+        { label: "사업화", value: "사업화", noticeType: NoticeCategory.BUSINESS },
+        { label: "R&D", value: "기술개발", noticeType: NoticeCategory.RND },
+        { label: "시설", value: "시설", noticeType: NoticeCategory.FACILITY },
+        { label: "교육", value: "교육", noticeType: NoticeCategory.EDUCATION },
+        { label: "글로벌", value: "글로벌", noticeType: NoticeCategory.GLOBAL },
+        { label: "인력", value: "인력", noticeType: NoticeCategory.TALENT },
+        { label: "행사", value: "행사", noticeType: NoticeCategory.EVENT },
+        { label: "자금", value: "자금", noticeType: NoticeCategory.FUNDING },
+    ];
 
-        const lastVisibleItem = viewableItems[viewableItems.length - 1];
-        if (!lastVisibleItem) return;
-
-        const lastIndex = lastVisibleItem.index;
-
-        if (lastIndex >= allNotices.length - 5 && !isLast) {
-            loadNextPage();
-        }
-    };
-
-    const updateNoticeInList = useCallback((noticeId: number, newIsLiked: boolean) => {
-        setAllNotices(prevNotices =>
-            prevNotices.map(notice =>
-                notice.id === noticeId
-                    ? { ...notice, isLiked: newIsLiked }
-                    : notice
-            )
-        );
-    }, []);
-
-    const handleRefresh = () => {
-        setRefreshing(true);
-        fetchNotices(true);
-    };
+    function goNotice(supportField?: string, text? :string) {
+        navigation.navigate("NoticeSearch", { text, supportField, });
+    }
 
     return (
         <View style={styles.container}>
-            <View>
-                <View style={styles.searchBar}>
-                    <SearchBar
-                        onPress={(text)=> setTitle(text)}
-                    />
+            {loading ? (
+                <View style={styles.indicatorContainer}>
+                    <Progress.Circle size={40} indeterminate color={Colors.primary} />
                 </View>
-                <View style={
-                    {
-                        marginTop:80,
-                        position: "absolute",
-                        width: '100%',
-                        backgroundColor: Colors.white1,
-                        height: 60,
-                        zIndex: 700
+            ) : (
+                <FlatList
+                    data={recommends}
+                    keyExtractor={(item, index) => String(item.id ?? index)}
+                    ListHeaderComponent={
+                        <>
+                            <Text style={styles.titleText}>공고를{"\n"}검색해보세요</Text>
+
+                            <View style={styles.searchBar}>
+                                <SearchBar onPress={(text) => goNotice(undefined, text)} />
+                            </View>
+
+                            <Text style={styles.smallText}>카테고리별 공고를 확인해보세요!</Text>
+
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                <View style={{ paddingStart: 16 }} />
+                                {noticeCategoryList.map(({ label, value, noticeType }, index) => {
+                                    const IconComponent = categoryMap[noticeType];
+                                    return (
+                                        <TouchableOpacity
+                                            onPress={() => goNotice(value, undefined)}
+                                            key={index}
+                                            style={{ width: 80, height: 100, marginEnd: 10 }}
+                                        >
+                                            <GlassView
+                                                blurPercent={0.5}
+                                                containerStyle={{
+                                                    width: 80,
+                                                    alignItems: "center",
+                                                    gap: 4,
+                                                    padding: 10,
+                                                    backgroundColor: "rgba(255, 255, 255, 0.5)",
+                                                }}
+                                            >
+                                                {IconComponent && <IconComponent width={50} height={50} />}
+                                                <Text>{label}</Text>
+                                            </GlassView>
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </ScrollView>
+
+                            <View style={styles.recommendHeader}>
+                                <Text style={styles.recommendTitle}>AI 추천 공고</Text>
+                                <TouchableOpacity hitSlop={7} style={styles.moreButton}>
+                                    <Text style={styles.moreText}>공고 더보기</Text>
+                                    <GoIcon color={Colors.gray2} width={5} />
+                                </TouchableOpacity>
+                            </View>
+                        </>
                     }
-                }/>
-                <ScrollView
-                    style={{position: "absolute",zIndex: 999, paddingTop: 80}}
-                    keyboardShouldPersistTaps="handled"
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    nestedScrollEnabled={true}
-                >
-                    <View style={{paddingBottom: dropDownMargin, marginStart: 16}}>
-                        <DropDown
-                            placeholderStyle={styles.dropDownPlaceHolder}
-                            labelStyle={styles.dropDownLabel}
-                            textStyle={styles.dropDownText}
-                            open={supportFieldOpen}
-                            value={supportField}
-                            items={SupportFieldItems}
-                            placeholder={"지원분야"}
-                            setOpen={setSupportFieldOpen}
-                            minWidth={90}
-                            maxWidth={150}
-                            setValue={(s) => {
-                                if (s === supportField) {
-                                    setSupportField("");
-                                }
-                                else {
-                                    setSupportField(s);
-                                }
-                            }}
-                        />
-                    </View>
-                    <View style={{marginStart: 16}}>
-                        <DropDown
-                            placeholderStyle={styles.dropDownPlaceHolder}
-                            labelStyle={styles.dropDownLabel}
-                            textStyle={styles.dropDownText}
-                            open={regionOpen}
-                            value={region}
-                            items={RegionItems}
-                            placeholder={"지역"}
-                            setOpen={setRegionOpen}
-                            minWidth={70}
-                            maxWidth={120}
-                            setValue={(s) => {
-                                if (s === region) {
-                                    setRegion("");
-                                }
-                                else {
-                                    setRegion(s);
-                                }
-                            }}
-                        />
-                    </View>
-                    <View style={{ marginStart: 16}}>
-                        <DropDown
-                            placeholderStyle={styles.dropDownPlaceHolder}
-                            labelStyle={styles.dropDownLabel}
-                            textStyle={styles.dropDownText}
-                            open={targetAgeOpen}
-                            value={targetAge}
-                            items={TargetAgeItems}
-                            placeholder={"연령"}
-                            setOpen={setTargetAgeOpen}
-                            minWidth={150}
-                            maxWidth={3000}
-                            setValue={(s) => {
-                                if (s === targetAge) {
-                                    setTargetAge("");
-                                }
-                                else {
-                                    setTargetAge(s);
-                                }
-                            }}
-                        />
-                    </View>
-                    <View style={{marginStart: 16, marginEnd: 16}}>
-                        <DropDown
-                            placeholderStyle={styles.dropDownPlaceHolder}
-                            labelStyle={styles.dropDownLabel}
-                            textStyle={styles.dropDownText}
-                            open={businessExperienceOpen}
-                            value={businessExperience}
-                            items={BusinessExperienceItems}
-                            placeholder={"창업업력"}
-                            setOpen={setBusinessExperienceOpen}
-                            minWidth={90}
-                            maxWidth={150}
-                            setValue={(s) => {
-                                if (s === businessExperience) {
-                                    setBusinessExperience("");
-                                }
-                                else {
-                                    setBusinessExperience(s);
-                                }
-                            }}
-                        />
-                    </View>
-                </ScrollView>
-            </View>
-            <FlatList
-                style={{paddingTop: 50}}
-                data={refreshing ? [] : allNotices}  // ✅ 새로고침 시 빈 배열
-                refreshing={false}  // ✅ 이렇게 변경
-                onRefresh={refreshing ? undefined : handleRefresh}
-                viewabilityConfig={{
-                    itemVisiblePercentThreshold: 50
-                }}
-                keyExtractor={(item) => item.id.toString()}
-                onViewableItemsChanged={onViewableItemsChanged}
-                renderItem={({item}) => (
-                    <View style={styles.noticeItemContainer}>
-                        <NoticeItem
-                            item={item}
-                            isHome={false}
-                            onPress={()=>{
-                                navigation.navigate('InNotice', {
-                                    Notice: item,
-                                    onGoBack: updateNoticeInList
-                                })
-                            }}
-                        />
-                    </View>
-                )}
-                ListFooterComponent={
-                    loading || isFetchingNextPage?
-                        <View style={[styles.indicatorContainer, {marginTop:height*0.25}]}>
-                            <Progress.Circle
-                                color={Colors.primary}
-                                size={50}
-                                indeterminate={true}
-                                thickness={300}
-                            />
-                        </View>: <View style={{height:16}}/>
-                }
-                ListEmptyComponent={
-                    refreshing ? (  // ✅ 새로고침 중일 때 중앙에 인디케이터
-                        <View style={[styles.indicatorContainer, {marginTop:height*0.25}]}>
-                            <Progress.Circle
-                                color={Colors.primary}
-                                size={50}
-                                indeterminate={true}
-                                thickness={300}
-                            />
+                    renderItem={({ item }) => (
+                        <View style={styles.noticeItemContainer}>
+                            <NoticeItem item={item} onPress={() => {
+                                navigation.navigate('InNotice', {Notice : item})
+                            }} />
                         </View>
-                    ) : !loading && !isFetchingNextPage ? (
+                    )}
+                    ListEmptyComponent={
                         <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyContainerText}>존재하는 공고가 없습니다.</Text>
+                            <Text style={styles.emptyContainerText}>추천 공고가 없습니다.</Text>
                         </View>
-                    ) : <View/>
-                }
-            />
+                    }
+                    contentContainerStyle={{ paddingBottom: 30 }}
+                />
+            )}
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        flexDirection: 'column',
-    },
-    searchBar: {
-        marginHorizontal: 16,
-        marginTop: 16,
-        marginBottom: 25,
-        height: 40,
-    },
-    noticeItemContainer: {
-        marginTop: 16,
-        marginHorizontal: 16,
-    },
-    indicatorContainer: {
-        alignItems: "center",
-        justifyContent: "center",
-        flex: 1
-    },
+    container: { flex: 1, flexDirection: "column" },
+    searchBar: { marginHorizontal: 16, marginTop: 21, marginBottom: 22, height: 40 },
+    noticeItemContainer: { marginHorizontal: 16, marginTop: 10 },
+    indicatorContainer: { alignItems: "center", justifyContent: "center", flex: 1 },
     emptyContainer: {
         flex: 1,
         justifyContent: "center",
@@ -447,26 +211,34 @@ const styles = StyleSheet.create({
     emptyContainerText: {
         fontSize: 18,
         color: Colors.gray2,
-        fontFamily: Fonts.medium
+        fontFamily: Fonts.medium,
     },
-    refreshIndicatorContainer: {
+    titleText: {
+        marginTop: 20,
+        paddingStart: 16,
+        fontSize: 28,
+        fontFamily: Fonts.semiBold,
+    },
+    smallText: {
+        paddingStart: 16,
+        fontSize: 16,
+        fontFamily: Fonts.semiBold,
+        paddingBottom: 12,
+    },
+    recommendHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
         alignItems: "center",
-        justifyContent: "center",
-        paddingVertical: 20,
+        paddingHorizontal: 16,
+        marginTop: 8,
+        marginBottom: 12,
     },
-    dropDownPlaceHolder: {
-        color : Colors.gray2,
-        fontSize : 14,
-        fontFamily : Fonts.medium
+    recommendTitle: { fontSize: 16, fontFamily: Fonts.semiBold },
+    moreButton: { flexDirection: "row", alignItems: "center" },
+    moreText: {
+        fontSize: 12,
+        paddingEnd: 7,
+        fontFamily: Fonts.reqular,
+        color: Colors.gray2,
     },
-    dropDownText : {
-        color : Colors.black2,
-        fontSize : 14,
-        fontFamily : Fonts.medium,
-    },
-    dropDownLabel : {
-        color : Colors.black2,
-        fontSize : 14,
-        fontFamily : Fonts.medium,
-    }
-})
+});
