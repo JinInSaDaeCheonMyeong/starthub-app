@@ -3,13 +3,12 @@ import HomeScreen from "../screens/Home/HomeScreen";
 import {BottomBar} from "../component/nav/BottomBar";
 import NoticeScreen from "../screens/Home/NoticeScreen";
 import BMCScreen from "../screens/Home/BMCScreen";
-import { Colors } from '../constants/Color';
 import {Easing, ImageBackground, StyleSheet, View} from 'react-native';
 import HeaderBar from '../component/HeaderBar';
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import CalendarScreen from '../screens/Home/Calendar/CalendarScreen';
 
-const Tab = createBottomTabNavigator();
+
 
 export type HomeStackParamList = {
     Home : undefined,
@@ -19,6 +18,8 @@ export type HomeStackParamList = {
     Calendar : undefined,
     BMC : undefined
 }
+
+const Tab = createBottomTabNavigator<HomeStackParamList>();
 
 export function HomeStack({ navigation }: any) {
     const insets = useSafeAreaInsets();
@@ -46,7 +47,7 @@ export function HomeStack({ navigation }: any) {
             >
                 <Tab.Screen name="Home" component={HomeScreen}/>
                 <Tab.Screen name="Notice" component={NoticeScreen}/>
-                {/* <Tab.Screen name="Calendar" component={CalendarScreen}/> */}
+                <Tab.Screen name="Calendar" component={CalendarScreen}/>
                 <Tab.Screen name="BMC" component={BMCScreen}/>
             </Tab.Navigator>
         </ImageBackground>
