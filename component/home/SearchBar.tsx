@@ -3,6 +3,7 @@ import SearchIcon from "../../assets/icons/search-icon.svg"
 import { Colors } from "../../constants/Color"
 import {useEffect, useState} from "react"
 import { Fonts } from "../../constants/Fonts"
+import GlassView from "../GlassView";
 
 type SearchBarProps = {
     onPress : (text : string) => void
@@ -22,7 +23,7 @@ export default function SearchBar({onPress, value} : SearchBarProps) {  // ✅ v
     }, [value])
     return (
         <View style={[{flexDirection : "row", zIndex: 10000}]}>
-            <View style={[styles.mainContainer]}>
+            <GlassView containerStyle={styles.mainContainer}>
                 <TextInput
                     style={styles.textInput}
                     placeholder={"검색어를 입력해주세요..."}
@@ -33,7 +34,7 @@ export default function SearchBar({onPress, value} : SearchBarProps) {  // ✅ v
                     }
                     autoCapitalize="none"
                 />
-            </View>
+            </GlassView>
             <TouchableOpacity onPress={() => onPress(text)}>
                 <View style={{
                     marginStart: 12,
@@ -60,7 +61,6 @@ const styles = StyleSheet.create({
         width : width - 94,
         flexDirection : "row",
         justifyContent : 'space-between',
-        backgroundColor : Colors.white2,
         alignItems : "center",
         borderRadius : 8,
         ...Platform.select({
