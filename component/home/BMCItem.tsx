@@ -43,7 +43,7 @@ export default function BMCItem({
                     <Image
                         source={
                             imageError || !imageSource
-                                ? require('../../assets/images/bmc-thumbnail-exam.png') // ✅ 더미 이미지
+                                ? defaultImage
                                 : imageSource
                         }
                         resizeMode="contain"

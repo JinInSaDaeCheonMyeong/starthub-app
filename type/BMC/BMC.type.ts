@@ -33,3 +33,7 @@ export enum SelectBMCValue {
     costStructure = "costStructure",
     revenueStreams = "revenueStreams",
 }
+
+export interface GetBMCResponse extends Response {
+    data : BMCType;
+}

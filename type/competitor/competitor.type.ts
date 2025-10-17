@@ -9,7 +9,16 @@ export interface CompetitorResponse extends Response {
     data: CompetitorAnalysisData;
 }
 
+export interface GetCompetitorsResponse extends Response {
+    data : CompetitorAnalysisData[]
+}
+
+export interface CompetitorFormData extends CompetitorAnalysisData {
+    bmcImage : string
+}
+
 export interface CompetitorAnalysisData {
+    bmcId : number;
     userBmc: UserBmc;
     userScale: UserScale;
     strengths: Strengths;

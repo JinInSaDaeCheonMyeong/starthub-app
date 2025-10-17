@@ -98,8 +98,7 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                 data={allBMCs}
                 renderItem={({ item }) => {
                     const selected = item.id === selectBMC;
-                    
-                    const content = (
+                    return (
                         <TouchableOpacity 
                             onPress={() => 
                                 setSelectBMC(selected ? undefined : item.id)
@@ -108,20 +107,18 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                                     borderRadius : 8,
                                     position : 'relative',
                                 },
+                                selected && {
+                                    borderWidth : 2,
+                                    borderColor : Colors.primary
+                                }
                             ]}>
                             <BMCItem
                                 title={item.title}
+                                subText={formatToDate(item.updatedAt, 'dotted')}
                                 imageSource={{uri : item.imageUrl}}
                                 onPress={() => {setSelectBMC(selected ? undefined : item.id);}}
-                                isCompetitor
                             />
                         </TouchableOpacity>
-                    );
-                    
-                    return (
-                        <View style={{ borderRadius : 8}}>
-                            {content}
-                        </View>
                     );
                 }}
                 ListEmptyComponent={() => (
