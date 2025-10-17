@@ -24,8 +24,8 @@ export default function SplashScreen({ navigation }: SplashScreenProps) {
             if (token != null) {
                 try {
                     const response = await (await getMe()).data;
-                    console.log("response", response);
-                    if (response.username) {
+                    const startupFields = response.startupFields ?? [];
+                    if (response.username && startupFields.length > 0) {
                         navigation.replace("HomeStack" as any);
                     } else {
                         navigation.replace("SignupInput");
