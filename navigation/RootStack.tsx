@@ -8,7 +8,7 @@ import {BMCType} from "../type/BMC/BMC.type";
 import InNoticeScreen from "../screens/Home/notice/InNoticeScreen";
 import {NoticeType} from "../type/notice/notice.type";
 import CompetitorStack from "./CompetitorStack";
-import NoticeSearchScreen from "../screens/Home/NoticeSearchScreen";
+import NoticeSearchScreen from "../screens/Home/notice/NoticeSearchScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 

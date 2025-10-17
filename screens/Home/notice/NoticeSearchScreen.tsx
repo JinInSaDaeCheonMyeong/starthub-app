@@ -6,30 +6,30 @@ import {
     Text,
     View,
 } from "react-native";
-import SearchBar from "../../component/home/SearchBar";
-import DropDown from "../../component/DropDown";
-import { Colors } from "../../constants/Color";
+import SearchBar from "../../../component/home/SearchBar";
+import DropDown from "../../../component/DropDown";
+import { Colors } from "../../../constants/Color";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import { BusinessExperienceItems } from "../../constants/BusinessExperienceItems";
-import { ShowToast, ToastType } from "../../util/ShowToast";
-import NoticeItem from "../../component/notice/NoticeItem";
+import { BusinessExperienceItems } from "../../../constants/BusinessExperienceItems";
+import { ShowToast, ToastType } from "../../../util/ShowToast";
+import NoticeItem from "../../../component/notice/NoticeItem";
 import * as Progress from "react-native-progress";
-import { Fonts } from "../../constants/Fonts";
+import { Fonts } from "../../../constants/Fonts";
 import {
   BeforeNoticeType,
   GetNoticesResponse,
   NoticeType,
-} from "../../type/notice/notice.type";
-import { getNotices } from "../../api/notice";
+} from "../../../type/notice/notice.type";
+import { getNotices } from "../../../api/notice";
 import { StackScreenProps } from "@react-navigation/stack";
-import { RootStackParamList } from "../../navigation/RootStack";
-import { SupportFieldItems } from "../../constants/SupportFieldItems";
-import { RegionItems } from "../../constants/RegionItems";
-import { TargetAgeItems } from "../../constants/TargetAgeItems";
+import { RootStackParamList } from "../../../navigation/RootStack";
+import { SupportFieldItems } from "../../../constants/SupportFieldItems";
+import { RegionItems } from "../../../constants/RegionItems";
+import { TargetAgeItems } from "../../../constants/TargetAgeItems";
 import { isAxiosError } from "axios";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
-import SubHeaderBar from "../../component/home/SubHeaderBar";
+import SubHeaderBar from "../../../component/home/SubHeaderBar";
 
 const { height } = Dimensions.get("window");
 
@@ -312,7 +312,7 @@ export default function NoticeSearchScreen({
   };
 
   return (
-    <ImageBackground source={require("../../assets/images/glass-background.png")} style={[styles.container, {paddingTop: insets.top, paddingBottom: insets.bottom}]}>
+    <ImageBackground source={require("../../../assets/images/glass-background.png")} style={[styles.container, {paddingTop: insets.top, paddingBottom: insets.bottom}]}>
       <SubHeaderBar
             title={"공고 검색"}
             handleBackPress={handleBackPress}
