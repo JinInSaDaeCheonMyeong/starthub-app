@@ -1,4 +1,4 @@
-import { Alert, ImageBackground, ImageSourcePropType, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { Alert, ImageBackground, ImageSourcePropType, ImageURISource, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import { StackScreenProps } from "@react-navigation/stack";
 import { Image } from "react-native";
@@ -27,7 +27,7 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
     const supportList = [0, 1, 2]
     const [loading, setLoading] = useState(false)
     const [form, setForm] = useState<CompetitorResponse['data'] | undefined>(params?.data)
-    const [imageSource, setImageSource] = useState<ImageSourcePropType>(params?.image ?? defaultImage)
+    const [imageError, setImageError] = useState<boolean>(!params?.image);
 
     const handleCompetitorRequest = async () => {
         setLoading(true)
@@ -218,15 +218,24 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
 
     const renderUserBMC = () => (
         <>
-            <Image 
-                source={imageSource}
-                onError={() => {
-                    setImageSource(defaultImage)
-                }}
-                style={[styles.bmcImage, {
-                    height : 245 * width / 361
-                }]} 
-            />
+            <View style={[styles.bmcImage, {marginHorizontal : 16}]}>
+                <Image
+                    source={
+                        imageError || !params?.image
+                            ? defaultImage
+                            : params.image
+                    }
+                    resizeMode="contain"
+                    defaultSource={defaultImage}
+                    style={styles.bmcImage}
+                    onError={() => setImageError(true)}
+                />
+                {imageError && (
+                    <View style={styles.dummyOverlay}>
+                        <Text style={styles.dummyText}>이미지가 없습니다</Text>
+                    </View>
+                )}
+            </View>
             {createDataContainer('서비스 개요', 
                 createDataBox(
                     <>
@@ -418,12 +427,10 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
 const styles = StyleSheet.create({
     bmcImage : {
         width: 'auto',
-        resizeMode: 'stretch',
+        height : 250,
         backgroundColor : Colors.white1,
         borderWidth : 1,
         borderColor : Colors.gray4,
-        height: 245,
-        marginHorizontal : 16
     },
     dataContainer : {
         gap : 12,
@@ -457,5 +464,17 @@ const styles = StyleSheet.create({
         borderBottomWidth : 1, 
         borderColor : Colors.gray3,
         marginHorizontal : 16
-    }
+    },
+    dummyOverlay: {
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(255,255,255,0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    dummyText: {
+        color: Colors.gray2,
+        fontSize: 14,
+        fontFamily: Fonts.medium,
+    },
 })
