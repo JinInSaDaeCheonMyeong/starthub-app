@@ -140,6 +140,23 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
 
     const fetchItems = async () => {
         try {
+            const name = await (await getMe()).data.username;
+            setUserName(name);
+            const bookmarkList = await getScheduleList();
+            const resultBookmarkList = await Promise.all(
+                bookmarkList.map(async (value) => {
+                    const result = (await getNotice(value)).data;
+                    const { startDate, endDate } = parseReceptionPeriod(
+                        result.receptionPeriod
+                    );
+                    return {
+                        ...result,
+                        startDate,
+                        endDate,
+                    };
+                })
+            );
+            setBookmarkItems(resultBookmarkList);
             const noticeList : GetRecommendedNoticeResponse = await getRecommendedNotices();
             const mapped = noticeList.data.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
@@ -149,23 +166,7 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
                     endDate,
                 };
             });
-
-            const bookmarkList = await getScheduleList()
-            const resultBookmarkList = await Promise.all(bookmarkList.map(async value => {
-                const result = (await getNotice(value)).data
-                const {startDate, endDate} = parseReceptionPeriod(result.receptionPeriod)
-                return {
-                    ...result,
-                    startDate,
-                    endDate
-                }
-            }))
-
-            const name = await (await getMe()).data.username
-            
-            setUserName(name)
             setNoticeItems(mapped);
-            setBookmarkItems(resultBookmarkList);
         } catch (error: unknown) {
             if (isAxiosError(error)) {
                 const response = error.response;

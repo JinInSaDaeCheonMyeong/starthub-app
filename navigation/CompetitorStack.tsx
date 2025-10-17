@@ -1,5 +1,5 @@
 import { createStackNavigator } from "@react-navigation/stack";
-import { ImageBackground, View } from "react-native";
+import { ImageBackground, ImageSourcePropType, ImageURISource, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import SelectScreen from "../screens/competitor/SelectScreen";
 import ResultScreen from "../screens/competitor/ResultScreen";
@@ -11,7 +11,7 @@ const Stack = createStackNavigator<CompoetitorStackParamList>()
 export type CompoetitorStackParamList = {
     History : undefined;
     Select : undefined;
-    Result : {image : string, bmcId : number, data : CompetitorResponse['data']};
+    Result : {image : ImageURISource, bmcId : number, data : CompetitorResponse['data']};
 };
 
 export default function CompetitorStack() {

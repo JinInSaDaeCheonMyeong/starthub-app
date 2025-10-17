@@ -43,12 +43,17 @@ type InNoticeScreenProps = StackScreenProps<RootStackParamList, 'InNotice'>;
 export default function InNoticeScreen({navigation, route : {params}} : InNoticeScreenProps) {
     const notice = params.Notice
     const insets = useSafeAreaInsets();
+    const cleanedContent = notice.content
+        .replace(/<br>\s*<!--/g, "<!--")
+        .replace(/<br>\s*<\/(.*?)>/gi, "</$1>");
+    
     const source = {
         html: notice.content.replace(
             /(<p class="txt-button">.*?<\/p>)\s*<br\s*\/?>/gi,
             '$1'
         )
     };
+    console.log(source.html)
     const [isSelected, setIsSelected] = useState(notice.isLiked)
     const [isBookmarkLoading, setIsBookmarkLoading] = useState(false)
     const [isSchedules, setIsSchedules] = useState(false)

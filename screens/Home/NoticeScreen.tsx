@@ -3,7 +3,7 @@ import SearchBar from "../../component/home/SearchBar";
 import DropDown from "../../component/DropDown";
 import { Colors } from "../../constants/Color";
 import {useEffect, useState, useRef, useCallback} from "react";
-import {useFocusEffect} from '@react-navigation/native'; // 추가
+import {useFocusEffect} from '@react-navigation/native';
 import {BusinessExperienceItems} from "../../constants/BusinessExperienceItems";
 import {ShowToast, ToastType} from "../../util/ShowToast";
 import NoticeItem from "../../component/notice/NoticeItem";
@@ -19,6 +19,7 @@ import {RootStackParamList} from "../../navigation/RootStack";
 import {SupportFieldItems} from "../../constants/SupportFieldItems";
 import {RegionItems} from "../../constants/RegionItems";
 import {TargetAgeItems} from "../../constants/TargetAgeItems";
+import {isAxiosError} from "axios";
 
 const {height} = Dimensions.get('window');
 
@@ -26,6 +27,7 @@ export type NoticeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, 'Notice'>,
     StackScreenProps<RootStackParamList>
 >
+
 
 export default function NoticeScreen({navigation, route : {params}}: NoticeScreenProps) {
 
@@ -98,24 +100,33 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
 
     const [allNotices, setAllNotices] = useState<NoticeType[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isLast, setIsLast] = useState<boolean>(false);
 
-    // 공고 데이터를 가져오는 함수를 별도로 분리
+    const isInitialMount = useRef(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [isFirst, setIsFirst] = useState(false);
+
     const fetchNotices = useCallback(async (isRefresh: boolean = false) => {
         try {
             if (!isRefresh) {
                 setLoading(true);
                 setPage(0);
+            } else {
+                setRefreshing(true);
             }
 
-            // params에서 supportField 업데이트
             let currentSupportField = supportField;
-            if (typeof params?.supportField === "string" && params.supportField !== supportField) {
-                currentSupportField = params.supportField;
-                setSupportField(params.supportField);
+            if (!isFirst){
+                if (typeof params?.supportField === "string" && params.supportField !== supportField) {
+                    currentSupportField = params.supportField;
+                    setSupportField(params.supportField);
+                }
+                setIsFirst(true);
             }
-
 
             const response: GetNoticesResponse = await getNotices(title, currentSupportField, region, targetAge, businessExperience, 0);
+            setIsLast(response.data.isLast);
+
             const mapped = response.data.content.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return {
@@ -127,38 +138,54 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
 
             setAllNotices(mapped);
         } catch (error) {
+            if(isAxiosError(error)) {
+                console.log(error.response);
+            }
             ShowToast(
                 "문제가 발생하였습니다",
                 "데이터를 불러오지 못하였습니다",
                 ToastType.ERROR
             );
         } finally {
-            if (!isRefresh) {
-                setLoading(false);
-            }
+            setLoading(false);
+            setRefreshing(false);
         }
     }, [title, supportField, region, targetAge, businessExperience, params?.supportField]);
 
-    // 필터 변경 시 API 호출 (기존과 동일)
+    // 필터 변경 시 API 호출 (초기 마운트 제외)
     useEffect(() => {
+        if (isInitialMount.current) {
+            return;
+        }
         fetchNotices(false);
-    }, [fetchNotices]);
+    }, [title, supportField, region, targetAge, businessExperience]);
 
     // 화면 포커스시 새로고침 (탭바로 들어올 때)
     useFocusEffect(
         useCallback(() => {
-            fetchNotices(true); // 새로고침 모드
+            if (isInitialMount.current) {
+                isInitialMount.current = false;
+            }
+            fetchNotices(true);
         }, [fetchNotices])
     );
+
+    // params 변경 처리를 별도로
+    useEffect(() => {
+        if (params?.supportField && params.supportField !== supportField) {
+            setSupportField(params.supportField);
+        }
+    }, [params?.supportField]);
 
     const loadNextPage = async () => {
         const now = Date.now();
 
-        if (now - lastRequestTime.current < 200) {
+        // 500ms로 증가하여 중복 요청 방지 강화
+        if (now - lastRequestTime.current < 500) {
             return;
         }
 
-        if (isFetchingNextPage || loading) return;
+        if (isFetchingNextPage || loading || isLast) return;
 
         lastRequestTime.current = now;
         const nextPage = page + 1;
@@ -166,6 +193,8 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
 
         try {
             const response = await getNotices(title, supportField, region, targetAge, businessExperience, nextPage);
+            setIsLast(response.data.isLast);
+
             const data = response.data.content.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return {
@@ -198,7 +227,7 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
 
         const lastIndex = lastVisibleItem.index;
 
-        if (lastIndex >= allNotices.length - 5) {
+        if (lastIndex >= allNotices.length - 5 && !isLast) {
             loadNextPage();
         }
     };
@@ -212,6 +241,11 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
             )
         );
     }, []);
+
+    const handleRefresh = () => {
+        setRefreshing(true);
+        fetchNotices(true);
+    };
 
     return (
         <View style={styles.container}>
@@ -240,13 +274,9 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                 >
                     <View style={{paddingBottom: dropDownMargin, marginStart: 16}}>
                         <DropDown
-                            placeholderStyle={
-                                {
-                                    color : Colors.gray2,
-                                    fontSize : 14,
-                                    fontFamily : Fonts.medium
-                                }
-                            }
+                            placeholderStyle={styles.dropDownPlaceHolder}
+                            labelStyle={styles.dropDownLabel}
+                            textStyle={styles.dropDownText}
                             open={supportFieldOpen}
                             value={supportField}
                             items={SupportFieldItems}
@@ -266,13 +296,9 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                     </View>
                     <View style={{marginStart: 16}}>
                         <DropDown
-                            placeholderStyle={
-                                {
-                                    color : Colors.gray2,
-                                    fontSize : 14,
-                                    fontFamily : Fonts.medium
-                                }
-                            }
+                            placeholderStyle={styles.dropDownPlaceHolder}
+                            labelStyle={styles.dropDownLabel}
+                            textStyle={styles.dropDownText}
                             open={regionOpen}
                             value={region}
                             items={RegionItems}
@@ -292,20 +318,16 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                     </View>
                     <View style={{ marginStart: 16}}>
                         <DropDown
-                            placeholderStyle={
-                                {
-                                    color : Colors.gray2,
-                                    fontSize : 14,
-                                    fontFamily : Fonts.medium
-                                }
-                            }
+                            placeholderStyle={styles.dropDownPlaceHolder}
+                            labelStyle={styles.dropDownLabel}
+                            textStyle={styles.dropDownText}
                             open={targetAgeOpen}
                             value={targetAge}
                             items={TargetAgeItems}
                             placeholder={"연령"}
                             setOpen={setTargetAgeOpen}
-                            minWidth={120}
-                            maxWidth={250}
+                            minWidth={150}
+                            maxWidth={3000}
                             setValue={(s) => {
                                 if (s === targetAge) {
                                     setTargetAge("");
@@ -318,13 +340,9 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                     </View>
                     <View style={{marginStart: 16, marginEnd: 16}}>
                         <DropDown
-                            placeholderStyle={
-                                {
-                                    color : Colors.gray2,
-                                    fontSize : 14,
-                                    fontFamily : Fonts.medium
-                                }
-                            }
+                            placeholderStyle={styles.dropDownPlaceHolder}
+                            labelStyle={styles.dropDownLabel}
+                            textStyle={styles.dropDownText}
                             open={businessExperienceOpen}
                             value={businessExperience}
                             items={BusinessExperienceItems}
@@ -346,7 +364,9 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
             </View>
             <FlatList
                 style={{paddingTop: 50}}
-                data={allNotices}
+                data={refreshing ? [] : allNotices}  // ✅ 새로고침 시 빈 배열
+                refreshing={false}  // ✅ 이렇게 변경
+                onRefresh={refreshing ? undefined : handleRefresh}
                 viewabilityConfig={{
                     itemVisiblePercentThreshold: 50
                 }}
@@ -356,7 +376,6 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                     <View style={styles.noticeItemContainer}>
                         <NoticeItem
                             item={item}
-                            isHome={false}
                             onPress={()=>{
                                 navigation.navigate('InNotice', {
                                     Notice: item,
@@ -371,16 +390,27 @@ export default function NoticeScreen({navigation, route : {params}}: NoticeScree
                         <View style={[styles.indicatorContainer, {marginTop:height*0.25}]}>
                             <Progress.Circle
                                 color={Colors.primary}
-                                size = { 50 } indeterminate = { true }
-                                thickness = {300}
+                                size={50}
+                                indeterminate={true}
+                                thickness={300}
                             />
                         </View>: <View style={{height:16}}/>
                 }
                 ListEmptyComponent={
-                    !loading || isFetchingNextPage?
-                        <View style={[styles.emptyContainer,{marginTop:height*0.25}]}>
+                    refreshing ? (  // ✅ 새로고침 중일 때 중앙에 인디케이터
+                        <View style={[styles.indicatorContainer, {marginTop:height*0.25}]}>
+                            <Progress.Circle
+                                color={Colors.primary}
+                                size={50}
+                                indeterminate={true}
+                                thickness={300}
+                            />
+                        </View>
+                    ) : !loading && !isFetchingNextPage ? (
+                        <View style={styles.emptyContainer}>
                             <Text style={styles.emptyContainerText}>존재하는 공고가 없습니다.</Text>
-                        </View>: <View/>
+                        </View>
+                    ) : <View/>
                 }
             />
         </View>
@@ -411,12 +441,31 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        height: "100%",
-        width: "100%",
+        marginTop: height * 0.25,
     },
     emptyContainerText: {
         fontSize: 18,
         color: Colors.gray2,
         fontFamily: Fonts.medium
+    },
+    refreshIndicatorContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 20,
+    },
+    dropDownPlaceHolder: {
+        color : Colors.gray2,
+        fontSize : 14,
+        fontFamily : Fonts.medium
+    },
+    dropDownText : {
+        color : Colors.black2,
+        fontSize : 14,
+        fontFamily : Fonts.medium,
+    },
+    dropDownLabel : {
+        color : Colors.black2,
+        fontSize : 14,
+        fontFamily : Fonts.medium,
     }
 })
