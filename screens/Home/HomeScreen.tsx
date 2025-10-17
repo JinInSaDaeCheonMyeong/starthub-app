@@ -151,6 +151,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                             <Text style={styles.captionText}>사용자님의 관심을 분석하여 제공해 드려요</Text>
                         </View>
                         <FlatList
+                            scrollEnabled={false}
                             contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
                             showsHorizontalScrollIndicator={false}
                             onEndReached={() => {}}

@@ -222,7 +222,6 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
                     <View style={styles.noticeItemContainer}>
                         <NoticeItem
                             item={item}
-                            isHome={false}
                             onPress={()=>{
                                 navigation.navigate('InNotice', {
                                     Notice: item,
