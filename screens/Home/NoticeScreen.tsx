@@ -25,7 +25,6 @@ import FundingIcon from "../../assets/icons/glass/notice/funding.svg";
 import GlobalIcon from "../../assets/icons/glass/notice/global.svg";
 import RNDIcon from "../../assets/icons/glass/notice/rnd.svg";
 import TalentIcon from "../../assets/icons/glass/notice/talent.svg";
-import GoIcon from "../../assets/icons/right-arrow-back.svg";
 import { NoticeCategory } from "../../constants/NoticeCategory";
 import GlassView from "../../component/GlassView";
 import { useCallback, useState } from "react";
@@ -33,7 +32,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import { GetRecommendedNoticeResponse, BeforeNoticeType, NoticeType } from "../../type/notice/notice.type";
 import { getRecommendedNotices } from "../../api/notice";
 
-const { height } = Dimensions.get("window");
 
 export type NoticeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Notice">,
@@ -123,72 +121,75 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
 
     return (
         <View style={styles.container}>
-            {loading ? (
-                <View style={styles.indicatorContainer}>
-                    <Progress.Circle size={40} indeterminate color={Colors.primary} />
-                </View>
-            ) : (
-                <FlatList
-                    data={recommends}
-                    keyExtractor={(item, index) => String(item.id ?? index)}
-                    ListHeaderComponent={
-                        <>
-                            <Text style={styles.titleText}>공고를{"\n"}검색해보세요</Text>
+            <FlatList
+                data={recommends}
+                keyExtractor={(item, index) => String(item.id ?? index)}
+                ListHeaderComponent={
+                    <>
+                        <Text style={styles.titleText}>공고를{"\n"}검색해보세요</Text>
 
-                            <View style={styles.searchBar}>
-                                <SearchBar onPress={(text) => goNotice(undefined, text)} />
-                            </View>
-
-                            <Text style={styles.smallText}>카테고리별 공고를 확인해보세요!</Text>
-
-                            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                                <View style={{ paddingStart: 16 }} />
-                                {noticeCategoryList.map(({ label, value, noticeType }, index) => {
-                                    const IconComponent = categoryMap[noticeType];
-                                    return (
-                                        <TouchableOpacity
-                                            onPress={() => goNotice(value, undefined)}
-                                            key={index}
-                                            style={{ width: 80, height: 100, marginEnd: 10 }}
-                                        >
-                                            <GlassView
-                                                blurPercent={0.5}
-                                                containerStyle={{
-                                                    width: 80,
-                                                    alignItems: "center",
-                                                    gap: 4,
-                                                    padding: 10,
-                                                    backgroundColor: "rgba(255, 255, 255, 0.5)",
-                                                }}
-                                            >
-                                                {IconComponent && <IconComponent width={50} height={50} />}
-                                                <Text>{label}</Text>
-                                            </GlassView>
-                                        </TouchableOpacity>
-                                    );
-                                })}
-                            </ScrollView>
-
-                            <View style={styles.recommendHeader}>
-                                <Text style={styles.recommendTitle}>AI 추천 공고</Text>
-                            </View>
-                        </>
-                    }
-                    renderItem={({ item }) => (
-                        <View style={styles.noticeItemContainer}>
-                            <NoticeItem item={item} onPress={() => {
-                                navigation.navigate('InNotice', {Notice : item})
-                            }} />
+                        <View style={styles.searchBar}>
+                            <SearchBar onPress={(text) => goNotice(undefined, text)} />
                         </View>
-                    )}
-                    ListEmptyComponent={
+
+                        <Text style={styles.smallText}>카테고리별 공고를 확인해보세요!</Text>
+
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                            <View style={{ paddingStart: 16 }} />
+                            {noticeCategoryList.map(({ label, value, noticeType }, index) => {
+                                const IconComponent = categoryMap[noticeType];
+                                return (
+                                    <TouchableOpacity
+                                        onPress={() => goNotice(value, undefined)}
+                                        key={index}
+                                        style={{ width: 80, height: 100, marginEnd: 10 }}
+                                    >
+                                        <GlassView
+                                            blurPercent={0.5}
+                                            containerStyle={{
+                                                width: 80,
+                                                alignItems: "center",
+                                                gap: 4,
+                                                padding: 10,
+                                                backgroundColor: "rgba(255, 255, 255, 0.5)",
+                                            }}
+                                        >
+                                            {IconComponent && <IconComponent width={50} height={50} />}
+                                            <Text>{label}</Text>
+                                        </GlassView>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </ScrollView>
+
+                        <View style={styles.recommendHeader}>
+                            <Text style={styles.recommendTitle}>AI 추천 공고</Text>
+                        </View>
+                    </>
+                }
+                renderItem={({ item }) => (
+                    <View style={styles.noticeItemContainer}>
+                        <NoticeItem item={item} onPress={() => {
+                            navigation.navigate('InNotice', {Notice : item})
+                        }} />
+                    </View>
+                )}
+                ListFooterComponent={
+                    loading ? (
+                        <View style={styles.loadingContainer}>
+                            <Progress.Circle size={40} indeterminate color={Colors.primary} />
+                        </View>
+                    ) : null
+                }
+                ListEmptyComponent={
+                    !loading ? (
                         <View style={styles.emptyContainer}>
                             <Text style={styles.emptyContainerText}>추천 공고가 없습니다.</Text>
                         </View>
-                    }
-                    contentContainerStyle={{ paddingBottom: 30 }}
-                />
-            )}
+                    ) : null
+                }
+                contentContainerStyle={{ paddingBottom: 30 }}
+            />
         </View>
     );
 }
@@ -198,11 +199,16 @@ const styles = StyleSheet.create({
     searchBar: { marginHorizontal: 16, marginTop: 21, marginBottom: 22, height: 40 },
     noticeItemContainer: { marginHorizontal: 16, marginTop: 10 },
     indicatorContainer: { alignItems: "center", justifyContent: "center", flex: 1 },
+    loadingContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 40,
+    },
     emptyContainer: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        marginTop: height * 0.25,
+        paddingVertical: 40,
     },
     emptyContainerText: {
         fontSize: 18,
