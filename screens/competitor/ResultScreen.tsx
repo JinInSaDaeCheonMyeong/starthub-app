@@ -1,4 +1,4 @@
-import { Alert, ImageBackground, ImageSourcePropType, ImageURISource, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { Alert, DimensionValue, ImageBackground, ImageSourcePropType, ImageURISource, Linking, Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import { StackScreenProps } from "@react-navigation/stack";
 import { Image } from "react-native";
@@ -24,7 +24,7 @@ type ResultScreenProps = StackScreenProps<CompoetitorStackParamList>
 export default function ResultScreen({navigation, route : {params}} : ResultScreenProps){
     const {width} = useWindowDimensions()
     const defaultImage = require("../../assets/images/bmc-thumbnail-exam.png");
-    const [carouselHeight, setCarouselHeight] = useState(400);
+    const [carouselHeight, setCarouselHeight] = useState<DimensionValue>('auto');
     const supportList = [0, 1, 2]
     const [loading, setLoading] = useState(false)
     const [form, setForm] = useState<CompetitorResponse['data'] | undefined>(params?.data)
@@ -130,6 +130,8 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                     height={typeof carouselHeight === 'number' ? carouselHeight : 400}
                     data={body as CompetitorComparison[]}
                     renderItem={({index, item}) => {
+                        const defaultImage = require('../../assets/images/company-img.png')
+                        const [imageError, setImageError] = useState<boolean>(!item.logoUrl)
                         return (
                         <View 
                             style={{marginRight : 8}}
@@ -137,7 +139,6 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                             onMoveShouldSetResponder={() => false}
                             onLayout={(event) => {
                                 const { height } = event.nativeEvent.layout;
-                                console.log(`layout:${index} : ${height}`);
                                 
                                 setCarouselHeight(prev => {
                                     // 처음엔 무조건 세팅
@@ -156,7 +157,18 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                                     style={{flexDirection : 'row', gap : 16, flexWrap : 'wrap'}}
                                     onStartShouldSetResponder={() => false}
                                 >
-                                    <Image style={{height : 88, width : 88, resizeMode : 'center', borderRadius : 8, backgroundColor : Colors.white1}} src={item.logoUrl}/>
+                                    <Image 
+                                        style={{
+                                            height : 88, 
+                                            width : 88, 
+                                            resizeMode : 'cover', 
+                                            borderRadius : 8, 
+                                            backgroundColor : Colors.white1
+                                        }} 
+                                        source={imageError ? defaultImage : {uri : item.logoUrl}}
+                                        onError={() => setImageError(true)}
+                                        defaultSource={defaultImage}
+                                    />
                                     <View style={{gap : 8, flex : 1}}>
                                         <View style={{flexDirection : 'row', justifyContent : 'space-between', gap : 8}}>
                                             <Text style={{
@@ -378,19 +390,6 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                         disabled={false}
                     />
                 </View>
-                <TouchableOpacity 
-                    style={{
-                        padding : 16,
-                        borderWidth : 2,
-                        borderRadius : 8,
-                        borderColor : Colors.primary,
-                        alignItems : 'center',
-                        justifyContent : 'center'
-                    }} 
-                    onPress={() => {}}
-                >
-                    <DownloadIcon fill={Colors.primary} width={20} height={20}/>
-                </TouchableOpacity>
             </GlassView>
         </ImageBackground>
         {

@@ -4,18 +4,20 @@ import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
 import {useFocusEffect} from "@react-navigation/native"
 import { useCallback, useState } from "react";
-import { GetCompetitorsResponse } from "../../type/competitor/competitor.type";
+import { CompetitorFormData, GetCompetitorsResponse } from "../../type/competitor/competitor.type";
 import { getCompetitors } from "../../api/competitor";
 import { isAxiosError } from "axios";
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import * as Progress from "react-native-progress"
+import BMCItem from "../../component/home/BMCItem";
+import { getBMC } from "../../api/bmc";
 
 type HistoryScreenProps = StackScreenProps<CompoetitorStackParamList>
 
 export function HistoryScreen({navigation} : HistoryScreenProps) {
-    const [competitorList, setCompetitorList] = useState<GetCompetitorsResponse['data']>([])
+    const [competitorList, setCompetitorList] = useState<CompetitorFormData[]>([])
     const [loading, setLoading] = useState(true)
     const errorTitle = '경쟁사 분석'
     useFocusEffect(
@@ -23,9 +25,19 @@ export function HistoryScreen({navigation} : HistoryScreenProps) {
             const initData = async () => {
                 try {
                     setLoading(true);
-                    const data = (await getCompetitors()).data;
+                    const competitorData = (await getCompetitors()).data;
+                    const data: CompetitorFormData[] = await Promise.all(
+                        competitorData.map(async (value) => {
+                            // console.log(value.bmcId)
+                            const bmcImage = (await getBMC(value.bmcId)).data.imageUrl;
+                            return {
+                                ...value,
+                                bmcImage,
+                            };
+                        })
+                    );
                     setCompetitorList(data)
-                } catch (error) {
+                } catch (error : any) {
                     if(isAxiosError(error)){
                         ShowToast(errorTitle, error.message, ToastType.ERROR)
                     }
@@ -56,34 +68,17 @@ export function HistoryScreen({navigation} : HistoryScreenProps) {
                 contentContainerStyle={{gap : 16, paddingVertical : 16}}
                 data={competitorList}
                 renderItem={({item}) => {
-                    console.log(item.bmcId, item.userBmc.title)
                     return (
                         <TouchableOpacity
-                            style={{ position: 'relative' }}
                             onPress={() => {
-                                navigation.navigate('Result', {bmcId : item.bmcId, image : '../../assets/images/bmc-thumbnail-exam.png', data : item})
+                                navigation.navigate('Result', {bmcId : item.bmcId, image : {uri : item.bmcImage}, data : item})
                         }}>
-                            <View style={{ borderRadius: 8, overflow: 'hidden' }}>
-                                <View style={[styles.myBMCBox, { width: '100%' }]}>
-                                    <View
-                                    style={{
-                                        backgroundColor: Colors.white2,
-                                        borderTopLeftRadius: 8,
-                                        borderTopRightRadius: 8,
-                                    }}
-                                        >
-                                        <Image
-                                            source={require('../../assets/images/bmc-thumbnail-exam.png')}
-                                            style={styles.myBMCThumbnail}
-                                        />
-                                    </View>
-                                    <View style={[styles.BMCContentContainer, { backgroundColor: Colors.white1 }]}>
-                                        <View style={styles.BMCTextContainer}>
-                                            <Text style={styles.titleText}>{item.userBmc.title}<Text style={styles.subText}> · 경쟁사 분석</Text></Text>
-                                        </View>
-                                    </View>
-                                </View>
-                            </View>
+                            <BMCItem
+                                title={item.userBmc.title}
+                                onPress={() => 
+                                    navigation.navigate('Result', {bmcId : item.bmcId, image : {uri : item.bmcImage}, data : item})}
+                                isCompetitor
+                            />
                         </TouchableOpacity>
                     )
                 }}
