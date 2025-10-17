@@ -171,10 +171,6 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
 
                             <View style={styles.recommendHeader}>
                                 <Text style={styles.recommendTitle}>AI 추천 공고</Text>
-                                <TouchableOpacity hitSlop={7} style={styles.moreButton}>
-                                    <Text style={styles.moreText}>공고 더보기</Text>
-                                    <GoIcon color={Colors.gray2} width={5} />
-                                </TouchableOpacity>
                             </View>
                         </>
                     }
