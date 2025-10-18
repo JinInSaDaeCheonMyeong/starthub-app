@@ -6,14 +6,12 @@ import { GetMeResponse } from "../type/user/user.type";
 import EditProfileScreen from "../screens/system/EditProfileScreen";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {View} from "react-native";
-import MyLikesScreen from "../screens/system/MyLikesScreen";
 
 const Stack = createStackNavigator<SystemStackParamList>();
 
 export type SystemStackParamList = {
     Profile : undefined,
     EditProfile : GetMeResponse["data"]
-    MyLikes : undefined
 };
 
 export default function SystemStack(){
@@ -31,7 +29,6 @@ export default function SystemStack(){
             >
                 <Stack.Screen name="Profile" component={ProfileScreen}/>
                 <Stack.Screen name="EditProfile" component={EditProfileScreen}/>
-                <Stack.Screen name="MyLikes" component={MyLikesScreen}/>
             </Stack.Navigator>
         </View>
     )
