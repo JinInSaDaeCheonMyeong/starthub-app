@@ -1,5 +1,5 @@
 import { createStackNavigator } from "@react-navigation/stack";
-import SystemScreen from "../screens/system/SystemScreen";
+// import SystemScreen from "../screens/system/SystemScreen";
 import ProfileScreen from "../screens/system/ProfileScreen";
 import { Colors } from "../constants/Color";
 import { GetMeResponse } from "../type/user/user.type";
@@ -11,7 +11,6 @@ import MyLikesScreen from "../screens/system/MyLikesScreen";
 const Stack = createStackNavigator<SystemStackParamList>();
 
 export type SystemStackParamList = {
-    System : undefined,
     Profile : undefined,
     EditProfile : GetMeResponse["data"]
     MyLikes : undefined
@@ -22,7 +21,7 @@ export default function SystemStack(){
     return (
         <View style={{flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom}}>
             <Stack.Navigator
-                initialRouteName={"System"}
+                initialRouteName={"Profile"}
                 screenOptions={{
                     cardStyle : {
                         backgroundColor : Colors.white1
@@ -30,7 +29,6 @@ export default function SystemStack(){
                     headerShown: false,
                 }}
             >
-                <Stack.Screen name="System" component={SystemScreen}/>
                 <Stack.Screen name="Profile" component={ProfileScreen}/>
                 <Stack.Screen name="EditProfile" component={EditProfileScreen}/>
                 <Stack.Screen name="MyLikes" component={MyLikesScreen}/>
