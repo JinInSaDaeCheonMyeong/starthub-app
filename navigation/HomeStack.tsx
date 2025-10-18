@@ -8,6 +8,7 @@ import {
     ImageBackground,
     Keyboard,
     StyleSheet,
+    useWindowDimensions,
 } from "react-native";
 import HeaderBar from "../component/HeaderBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -53,6 +54,7 @@ export function HomeStack({ navigation } : HomeStackProps) {
     const [profileProvider, setProfileProvider] =
         useState<ProfileProvider>("LOCAL");
     const isLocal = profileProvider === "LOCAL";
+    const {width} = useWindowDimensions()
 
     useFocusEffect(
         useCallback(() => {
@@ -184,7 +186,7 @@ export function HomeStack({ navigation } : HomeStackProps) {
             drawerPosition="right"
             drawerType="front"
             drawerStyle={{
-            width: 303,
+                width : 303,
             backgroundColor: "white",
             }}
             overlayStyle={{ backgroundColor: "rgba(0,0,0,0.5)" }}

@@ -38,7 +38,7 @@ export default function SideBar(props : SideBarProps){
         {
             icon : <HeartIcon width={29} height={29}/>,
             label : '북마크',
-            action : () => {props.navigation.navigate('SystemStack')}
+            action : () => {props.navigation.navigate('MyLikes')}
         },
     ]
     const sections = [
