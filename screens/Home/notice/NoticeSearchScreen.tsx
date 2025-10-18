@@ -459,7 +459,7 @@ export default function NoticeSearchScreen({
           )
         }
         ListEmptyComponent={
-          refreshing ? ( // ✅ 새로고침 중일 때 중앙에 인디케이터
+            !isFetchingNextPage&&!loading&&refreshing ? ( // ✅ 새로고침 중일 때 중앙에 인디케이터
             <View
               style={[styles.indicatorContainer, { marginTop: height * 0.25 }]}
             >
