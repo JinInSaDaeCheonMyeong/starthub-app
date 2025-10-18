@@ -59,7 +59,7 @@ const useEditProfileScreen = ({navigation, route : {params}} : ProfileScreenProp
                 username: user.username.trim(),
                 birth: `${year.trim()}-${month.trim()}-${day.trim()}`,
                 gender: selectGender == "male"? "MALE" : selectGender == "female" ? "FEMALE": "OTHER",
-                startupStatus: selectStartupStatus ? "EARLY_STAGE" : "PREPARATION",
+                startupStatus: selectStartupStatus ? "EARLY_STAGE" : "PRE_STARTUP",
                 companyName: selectStartupStatus ? user.companyName?.trim() : undefined,
                 companyDescription: selectStartupStatus ? user.companyDescription?.trim() : undefined,
                 numberOfEmployees: selectStartupStatus ? Number(numberPerson.trim()) : undefined,
