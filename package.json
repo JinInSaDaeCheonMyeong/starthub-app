@@ -26,6 +26,7 @@
     "expo-crypto": "~14.1.5",
     "expo-dev-client": "~5.1.8",
     "expo-device": "~7.1.4",
+    "expo-linear-gradient": "~14.1.5",
     "expo-modules-autolinking": "~2.1.0",
     "expo-modules-core": "~2.4.0",
     "expo-notifications": "~0.31.4",
@@ -34,7 +35,7 @@
     "react": "19.0.0",
     "react-native": "0.79.3",
     "react-native-calendars": "^1.1313.0",
-    "react-native-drawer-layout": "^4.1.12",
+    "react-native-drawer-layout": "^4.1.13",
     "react-native-dropdown-picker": "^5.4.6",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-image-picker": "^8.2.1",
@@ -50,8 +51,7 @@
     "react-native-shadow-2": "^7.1.1",
     "react-native-svg": "^15.11.2",
     "react-native-toast-message": "^2.3.0",
-    "sockjs-client": "^1.6.1",
-    "expo-linear-gradient": "~14.1.5"
+    "sockjs-client": "^1.6.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
