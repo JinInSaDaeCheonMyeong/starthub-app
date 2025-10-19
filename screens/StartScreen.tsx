@@ -60,7 +60,7 @@ export default function StartScreen({ navigation }: StartScreenProps) {
       title: "네이버",
       icon: require("../assets/logos/naver_logo.png"),
       onPress: async () => {
-        ShowToast("안내", "아직 개발 중인 기능입니다.", ToastType.INFO);
+        ShowToast("안내", "아직 개발 중인 기능입니다.", ToastType.WARNING);
       },
       request: true,
     },
@@ -68,7 +68,7 @@ export default function StartScreen({ navigation }: StartScreenProps) {
       title: "Apple",
       icon: require("../assets/logos/apple_logo.png"),
       onPress: async () => {
-        ShowToast("안내", "아직 개발 중인 기능입니다.", ToastType.INFO);
+        ShowToast("안내", "아직 개발 중인 기능입니다.", ToastType.WARNING);
       },
       request: true,
     },
