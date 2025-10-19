@@ -128,7 +128,7 @@ export default function AuthTextInput({
 const styles = StyleSheet.create({
     container: {
         borderWidth: 1,
-        borderRadius: 12,
+        borderRadius: 10,
         backgroundColor: Colors.white1,
         paddingHorizontal: 16,
         paddingVertical: Platform.OS === "ios" ? 20 : 16,
