@@ -13,8 +13,8 @@ const useProfileScreen = ({navigation} : ProfileScreenProps) => {
     const DEFAULT_DATA = "내용이 없습니다";
     const genderMap = new Map<string, string>([['MALE', "남"], ["FEMALE", "여"]])
     const startupStatusMap = new Map<string, string>([
-        ['EARLY_STAGE', '예비 창업'], 
-        ['PRE_STARTUP', '초기 창업']
+        ['EARLY_STAGE', '초기 창업'], 
+        ['PRE_STARTUP', '예비 창업']
     ])
     const [loading, setLoading] = useState(true);
     const [profileData, setProfileData] = useState<GetMeResponse["data"]>({

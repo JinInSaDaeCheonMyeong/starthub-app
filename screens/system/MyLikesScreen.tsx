@@ -6,6 +6,7 @@ import {
     RefreshControl,
     StyleSheet,
     Text,
+    useWindowDimensions,
     View
 } from "react-native";
 import  *  as  Progress  from  'react-native-progress' ;
@@ -19,11 +20,9 @@ import NoticeItem from "../../component/notice/NoticeItem";
 import {CompositeScreenProps} from "@react-navigation/core";
 import {RootStackParamList} from "../../navigation/RootStack";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export type MyLikesScreenProps = CompositeScreenProps<
-    StackScreenProps<SystemStackParamList, 'MyLikes'>,
-    StackScreenProps<RootStackParamList>
->
+export type MyLikesScreenProps = StackScreenProps<RootStackParamList>
 
 
 const { height} = Dimensions.get("window");
@@ -88,6 +87,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
     const [isLast, setIsLast] = useState<boolean>(false);
     const lastRequestTime = useRef<number>(0);
+    const insets = useSafeAreaInsets()
 
     // ✅ fetchLikes를 useCallback으로 변경
     const fetchLikes = useCallback(async (isRefresh: boolean = false) => {
@@ -198,7 +198,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
     }, []);
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {paddingTop : insets.top, paddingBottom : insets.bottom}]}>
             <SubHeaderBar
                 title="내 북마크"
                 handleBackPress={navigation.goBack}
