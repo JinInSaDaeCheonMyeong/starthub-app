@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     navIconWrapper : {
         alignItems : 'center',
         gap : 4,
-        flex : 1,
+        paddingHorizontal : 8
     },
     navIcon : {
         width : 48, 
