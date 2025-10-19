@@ -22,6 +22,7 @@ import CompareIcon from "../../assets/icons/glass/home/compare.svg";
 import SuggestionIcon from "../../assets/icons/glass/home/suggestion.svg";
 import CalendarIcon from "../../assets/icons/glass/home/calendar.svg";
 import GlassView from "../../component/GlassView";
+import * as Progress from 'react-native-progress';
 
 export type HomeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Home">,
@@ -58,7 +59,9 @@ export default function HomeScreen(props : HomeScreenProps) {
             userName
         },
         ui : {
-            navItemList
+            navItemList,
+            recomLoading,
+            scheduleLoading
         },
         actions : {
             goNotice,
@@ -143,31 +146,35 @@ export default function HomeScreen(props : HomeScreenProps) {
                         })}
                     </View>
                 </View>
-                {
-                    noticeItems.length !== 0 && 
-                    <View style={styles.flatListWrapper}>
-                        <View style={styles.textWrapper}>
-                            <Text style={styles.titleText}>맞춤 추천 공고</Text>
-                            <Text style={styles.captionText}>사용자님의 관심을 분석하여 제공해 드려요</Text>
-                        </View>
-                        <FlatList
-                            scrollEnabled={false}
-                            contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
-                            showsHorizontalScrollIndicator={false}
-                            onEndReached={() => {}}
-                            style={{ overflow: "visible" }}
-                            data={noticeItems}
-                            renderItem={({ item }) => (
-                                <NoticeItem
-                                    item={item}
-                                    onPress={() => {
-                                        props.navigation.navigate('InNotice', {Notice : item})
-                                    }}
-                                />
-                            )}
-                        />
+                <View style={styles.flatListWrapper}>
+                    <View style={styles.textWrapper}>
+                        <Text style={styles.titleText}>맞춤 추천 공고</Text>
+                        <Text style={styles.captionText}>사용자님의 관심을 분석하여 제공해 드려요</Text>
                     </View>
-                }
+                    <FlatList
+                        scrollEnabled={false}
+                        contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
+                        showsHorizontalScrollIndicator={false}
+                        onEndReached={() => {}}
+                        style={{ overflow: "visible" }}
+                        data={noticeItems}
+                        renderItem={({ item }) => (
+                            <NoticeItem
+                                item={item}
+                                onPress={() => {
+                                    props.navigation.navigate('InNotice', {Notice : item})
+                                }}
+                            />
+                        )}
+                        ListFooterComponent={
+                            recomLoading ? (
+                                <View style={styles.loadingContainer}>
+                                    <Progress.Circle size={40} indeterminate color={Colors.primary} />
+                                </View>
+                            ) : null
+                        }
+                    />
+                </View>
                 {
                     bookmarkItems.length !== 0 && (
                         <View style={styles.flatListWrapper}>
@@ -258,7 +265,7 @@ const styles = StyleSheet.create({
     navIconWrapper : {
         alignItems : 'center',
         gap : 4,
-        flex : 1,
+        paddingHorizontal : 8
     },
     navIcon : {
         width : 48, 
@@ -275,5 +282,10 @@ const styles = StyleSheet.create({
         color : Colors.black1,
         fontSize : 28,
         marginStart : 16
-    }
+    },
+    loadingContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 40,
+    },
 });

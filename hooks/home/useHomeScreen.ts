@@ -16,6 +16,8 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
     const [bookmarkItems, setBookmarkItems] = useState<NoticeType[]>([]);
     const {width} = useWindowDimensions()
     const [userName, setUserName] = useState('')
+    const [recomLoading, setRecomLoading] = useState(true)
+    const [scheduleLoading, setScheduleLoading] = useState(true);
 
     const noticeCategoryList = [
         {
@@ -65,18 +67,18 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
             label: "경쟁사 분석",
             nav: "Competitor",
         },
-        {
-            label: "공고 비교",
-            nav: "Compare",
-        },
-        {
-            label: "AI 추천 공고",
-            nav: "Suggest",
-        },
-        {
-            label: "일정 추가",
-            nav: "Calendar",
-        },
+        // {
+        //     label: "공고 비교",
+        //     nav: "Compare",
+        // },
+        // {
+        //     label: "AI 추천 공고",
+        //     nav: "Suggest",
+        // },
+        // {
+        //     label: "일정 추가",
+        //     nav: "Calendar",
+        // },
     ];
 
     const parseReceptionPeriod = (period: string) => {
@@ -101,7 +103,6 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
             const endDateStr = endPart.split(" ")[0];
             const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
             if (!dateRegex.test(startDateStr) || !dateRegex.test(endDateStr)) {
-                console.warn('Invalid date format:', { startDateStr, endDateStr, originalPeriod: period });
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -139,24 +140,11 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
     };
 
     const fetchItems = async () => {
+        setRecomLoading(true);
+        setScheduleLoading(true);
         try {
             const name = await (await getMe()).data.username;
             setUserName(name);
-            const bookmarkList = await getScheduleList();
-            const resultBookmarkList = await Promise.all(
-                bookmarkList.map(async (value) => {
-                    const result = (await getNotice(value)).data;
-                    const { startDate, endDate } = parseReceptionPeriod(
-                        result.receptionPeriod
-                    );
-                    return {
-                        ...result,
-                        startDate,
-                        endDate,
-                    };
-                })
-            );
-            setBookmarkItems(resultBookmarkList);
             const noticeList : GetRecommendedNoticeResponse = await getRecommendedNotices();
             const mapped = noticeList.data.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
@@ -167,6 +155,7 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
                 };
             });
             setNoticeItems(mapped);
+            setRecomLoading(false);
         } catch (error: unknown) {
             if (isAxiosError(error)) {
                 const response = error.response;
@@ -201,7 +190,9 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
         },
         ui : {
             width,
-            navItemList
+            navItemList,
+            recomLoading,
+            scheduleLoading
         },
         actions : {
             goNotice,

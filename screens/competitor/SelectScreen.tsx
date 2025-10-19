@@ -134,10 +134,9 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                         }}>
                             <Progress.Circle
                                 color={Colors.primary}
-                                size={50}
+                                size={40}
                                 indeterminate={true}
                                 thickness={300}
-                                borderWidth={4}
                             />
                         </View>
                     )
@@ -166,10 +165,9 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                 }}>
                     <Progress.Circle
                         color={Colors.primary}
-                        size={50}
+                        size={40}
                         indeterminate={true}
                         thickness={300}
-                        borderWidth={4}
                     />
                     <Text style={{ 
                         color: Colors.white1, 
