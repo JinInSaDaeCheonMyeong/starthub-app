@@ -33,7 +33,7 @@ export default function SideBar(props : SideBarProps){
         {
             icon : <BellIcon width={29} height={29}/>,
             label : '알림',
-            action : () => {props.navigation.navigate('SystemStack')}
+            action : () => {props.navigation.navigate("Alarm");}
         },
         {
             icon : <HeartIcon width={29} height={29}/>,
