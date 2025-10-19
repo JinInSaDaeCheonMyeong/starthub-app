@@ -31,11 +31,11 @@ import StartupStatus from "../constants/StartupStatus";
 import {useFocusEffect} from '@react-navigation/native'
 
 export type HomeStackParamList = {
-    Home: undefined;
-    Notice: { supportField?: string };
-    Calendar: undefined;
-    BMC: undefined;
-};
+    Home : undefined,
+    Notice : undefined,
+    Calendar : undefined,
+    BMC : undefined
+}
 
 type HomeStackProps = StackScreenProps<RootStackParamList, 'HomeStack'>;
 

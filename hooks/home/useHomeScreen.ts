@@ -183,7 +183,7 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
     };
 
     function goNotice(supportField : string) {
-        navigation.navigate("Notice", { supportField });
+        navigation.navigate("NoticeSearch", { supportField });
     }
 
     useFocusEffect(
