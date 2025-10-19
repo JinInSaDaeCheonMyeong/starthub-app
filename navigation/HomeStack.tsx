@@ -12,9 +12,7 @@ import CalendarScreen from '../screens/Home/Calendar/CalendarScreen';
 
 export type HomeStackParamList = {
     Home : undefined,
-    Notice : {
-        supportField ?: string
-    },
+    Notice : undefined,
     Calendar : undefined,
     BMC : undefined
 }
