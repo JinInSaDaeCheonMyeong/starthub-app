@@ -97,10 +97,9 @@ export function HistoryScreen({navigation} : HistoryScreenProps) {
                         }}>
                             <Progress.Circle
                                 color={Colors.primary}
-                                size={50}
+                                size={40}
                                 indeterminate={true}
                                 thickness={300}
-                                borderWidth={4}
                             />
                         </View>
                     )
