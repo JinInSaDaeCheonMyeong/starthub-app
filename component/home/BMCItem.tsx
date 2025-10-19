@@ -2,6 +2,7 @@ import { DimensionValue, Image, ImageSourcePropType, StyleSheet, Text, Touchable
 import GlassView from "../GlassView";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
+import { useState } from "react";
 
 type BMCItemProps = {
     width?: DimensionValue
@@ -25,9 +26,8 @@ export default function BMCItem({
     isCompetitor = false
 }: BMCItemProps) {
     const defaultImage = require("../../assets/images/bmc-thumbnail-exam.png");
-    const isDummy = !imageSource;
-    const image = isDummy ? defaultImage : imageSource;
     const contentHeight = height ? height : undefined;
+    const [imageError, setImageError] = useState<boolean>(!imageSource);
 
     return (
         <TouchableOpacity
@@ -41,12 +41,17 @@ export default function BMCItem({
             >
                 <View style={{ position: 'relative', height : contentHeight }}>
                     <Image
-                        source={image}
+                        source={
+                            imageError || !imageSource
+                                ? defaultImage
+                                : imageSource
+                        }
                         resizeMode="contain"
                         defaultSource={defaultImage}
                         style={{ width: '100%', height : contentHeight, padding : 8}}
+                        onError={() => setImageError(true)}
                     />
-                    {isDummy && (
+                    {imageError && (
                         <View style={styles.dummyOverlay}>
                             <Text style={styles.dummyText}>이미지가 없습니다</Text>
                         </View>

@@ -36,7 +36,10 @@ export default function SelectScreen({navigation} : SelectScreenProps){
             }
             const response = (await competitorAnalysis(data)).data
             ShowToast("경쟁사 분석", '경쟁사 분석에 성공했습니다', ToastType.SUCCESS);
-            navigation.navigate('Result', {image : require('../../assets/images/glass-background.png'), bmcId : selectBMC, data : response})
+            const uri = allBMCs.filter((value) => {
+                return value.id === selectBMC
+            })[0].imageUrl
+            navigation.navigate('Result', {image : {uri}, bmcId : selectBMC, data : response})
         } catch (error) {
             if(isAxiosError(error)){
                 const response = error.response
@@ -95,8 +98,7 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                 data={allBMCs}
                 renderItem={({ item }) => {
                     const selected = item.id === selectBMC;
-                    
-                    const content = (
+                    return (
                         <TouchableOpacity 
                             onPress={() => 
                                 setSelectBMC(selected ? undefined : item.id)
@@ -105,22 +107,18 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                                     borderRadius : 8,
                                     position : 'relative',
                                 },
-                                !selected && selectBMC !== undefined && {
-                                    opacity : 0.5
+                                selected && {
+                                    borderWidth : 2,
+                                    borderColor : Colors.primary
                                 }
                             ]}>
                             <BMCItem
                                 title={item.title}
+                                subText={formatToDate(item.updatedAt, 'dotted')}
+                                imageSource={{uri : item.imageUrl}}
                                 onPress={() => {setSelectBMC(selected ? undefined : item.id);}}
-                                isCompetitor
                             />
                         </TouchableOpacity>
-                    );
-                    
-                    return (
-                        <View style={{ borderRadius : 8}}>
-                            {content}
-                        </View>
                     );
                 }}
                 ListEmptyComponent={() => (

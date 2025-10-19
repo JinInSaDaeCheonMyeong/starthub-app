@@ -102,6 +102,7 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                                     <BMCItem
                                         width={189}
                                         height={120}
+                                        imageSource={{uri : item.imageUrl}}
                                         title={item.title}
                                         subText={formatToDate(item.updatedAt, 'dotted')}
                                         onPress={() => navigation.navigation.navigate('InBMC', {
@@ -119,6 +120,7 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                         <View style={{paddingHorizontal:16}}>
                             <BMCItem
                                 title={item.title}
+                                imageSource={{uri : item.imageUrl}}
                                 subText={formatToDate(item.updatedAt, 'dotted')}
                                 onPress={() => navigation.navigation.navigate('InBMC', {
                                     BMC : item
