@@ -10,6 +10,7 @@ import {NoticeType} from "../type/notice/notice.type";
 import CompetitorStack from "./CompetitorStack";
 import MyLikesScreen from "../screens/system/MyLikesScreen";
 import NoticeSearchScreen from "../screens/Home/notice/NoticeSearchScreen";
+import AlarmScreen from "../screens/Home/AlarmScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -30,6 +31,7 @@ export type RootStackParamList = {
         text? : string,
         supportField ?: string
     },
+    Alarm : undefined
 };
 
 export default function RootStack() {
@@ -51,6 +53,7 @@ export default function RootStack() {
             <Stack.Screen name="Competitor" component={CompetitorStack}/>
             <Stack.Screen name="MyLikes" component={MyLikesScreen}/>
             <Stack.Screen name="NoticeSearch" component={NoticeSearchScreen}/>
+            <Stack.Screen name="Alarm" component={AlarmScreen}/>
         </Stack.Navigator>
     )
 };

@@ -67,18 +67,18 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
             label: "경쟁사 분석",
             nav: "Competitor",
         },
-        {
-            label: "공고 비교",
-            nav: "Compare",
-        },
-        {
-            label: "AI 추천 공고",
-            nav: "Suggest",
-        },
-        {
-            label: "일정 추가",
-            nav: "Calendar",
-        },
+        // {
+        //     label: "공고 비교",
+        //     nav: "Compare",
+        // },
+        // {
+        //     label: "AI 추천 공고",
+        //     nav: "Suggest",
+        // },
+        // {
+        //     label: "일정 추가",
+        //     nav: "Calendar",
+        // },
     ];
 
     const parseReceptionPeriod = (period: string) => {
