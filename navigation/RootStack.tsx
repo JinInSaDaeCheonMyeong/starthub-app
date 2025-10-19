@@ -8,6 +8,7 @@ import {BMCType} from "../type/BMC/BMC.type";
 import InNoticeScreen from "../screens/Home/notice/InNoticeScreen";
 import {NoticeType} from "../type/notice/notice.type";
 import CompetitorStack from "./CompetitorStack";
+import MyLikesScreen from "../screens/system/MyLikesScreen";
 import NoticeSearchScreen from "../screens/Home/notice/NoticeSearchScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -24,6 +25,7 @@ export type RootStackParamList = {
         onGoBack?: (noticeId: number, isLiked: boolean) => void;
     },
     Competitor : undefined,
+    MyLikes : undefined
     NoticeSearch : {
         text? : string,
         supportField ?: string
@@ -47,6 +49,7 @@ export default function RootStack() {
             <Stack.Screen name="InBMC" component={InBMCScreen}/>
             <Stack.Screen name="InNotice" component={InNoticeScreen}/>
             <Stack.Screen name="Competitor" component={CompetitorStack}/>
+            <Stack.Screen name="MyLikes" component={MyLikesScreen}/>
             <Stack.Screen name="NoticeSearch" component={NoticeSearchScreen}/>
         </Stack.Navigator>
     )
