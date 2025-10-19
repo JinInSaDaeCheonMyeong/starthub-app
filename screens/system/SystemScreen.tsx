@@ -161,7 +161,7 @@ export default function SystemScreen({ navigation }: SystemScreenProps) {
   };
 
   const onPress = () => {
-    ShowToast("개발", "아직 개발 중인 기능입니다", ToastType.INFO);
+    ShowToast("개발", "아직 개발 중인 기능입니다", ToastType.WARNING);
   };
 
   const navSections: navSectionType[] = [
