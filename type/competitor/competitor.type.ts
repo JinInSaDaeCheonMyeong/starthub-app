@@ -19,6 +19,7 @@ export interface CompetitorFormData extends CompetitorAnalysisData {
 
 export interface CompetitorAnalysisData {
     bmcId : number;
+    createdAt : string
     userBmc: UserBmc;
     userScale: UserScale;
     strengths: Strengths;

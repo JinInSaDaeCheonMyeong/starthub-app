@@ -10,3 +10,6 @@ export const competitorAnalysis = async (
 
 export const getCompetitors = async () : Promise<GetCompetitorsResponse>=> 
     (await StartHubAxios.get(COMPETITOR_ENDPOINT)).data;
+
+export const recompetitorAnalysis = async (id : number) : Promise<CompetitorResponse> => 
+    (await StartHubAxios.post(`${COMPETITOR_ENDPOINT}/bmc/${id}/regenerate`))

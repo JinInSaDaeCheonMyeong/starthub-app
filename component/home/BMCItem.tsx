@@ -63,7 +63,7 @@ export default function BMCItem({
                     {title}
                     {isCompetitor && <Text style={{fontSize : 14, fontFamily : Fonts.reqular, color : Colors.gray2}}> · 경쟁사 분석</Text>}
                 </Text>
-                {!isCompetitor && subText && (
+                {subText && (
                     <Text style={styles.subText}>{subText}</Text>
                 )}
             </View>

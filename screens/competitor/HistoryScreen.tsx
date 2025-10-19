@@ -13,6 +13,7 @@ import { Fonts } from "../../constants/Fonts";
 import * as Progress from "react-native-progress"
 import BMCItem from "../../component/home/BMCItem";
 import { getBMC } from "../../api/bmc";
+import { formatToDate } from "../../util/DateFormat";
 
 type HistoryScreenProps = StackScreenProps<CompoetitorStackParamList>
 
@@ -78,6 +79,7 @@ export function HistoryScreen({navigation} : HistoryScreenProps) {
                                 onPress={() => 
                                     navigation.navigate('Result', {bmcId : item.bmcId, image : {uri : item.bmcImage}, data : item})}
                                 isCompetitor
+                                subText={formatToDate(item.createdAt, 'dotted')}
                             />
                         </TouchableOpacity>
                     )
