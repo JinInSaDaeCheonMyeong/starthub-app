@@ -4,6 +4,7 @@ import {
     Text,
     StyleSheet, ScrollView, Dimensions, TouchableOpacity,
     ImageBackground,
+    Image,
 } from 'react-native';
 import { Colors } from '../../../constants/Color';
 import { Fonts } from '../../../constants/Fonts';
@@ -21,6 +22,7 @@ import KeyResourcesIcon from "../../../assets/icons/bmc/key_resources.svg"
 import RevenueStreamsIcon from "../../../assets/icons/bmc/revenue_streams.svg"
 import ValuePropositionIcon from "../../../assets/icons/bmc/value_proposition.svg"
 import SubHeaderBar from '../../../component/home/SubHeaderBar';
+import GlassView from '../../../component/GlassView';
 
 const {width} = Dimensions.get('window');
 
@@ -84,6 +86,7 @@ export default function InBMCScreen({navigation, route : {params}} : InBMCScreen
         [SelectBMCValue.costStructure]: params.BMC.costStructure,
         [SelectBMCValue.revenueStreams]: params.BMC.revenueStreams,
     };
+    const [imageError, setImageError] = useState<boolean>(!params.BMC.imageUrl);
     return (
         <ImageBackground 
             style={[styles.container,{paddingTop: insets.top, paddingBottom: insets.bottom}]}
@@ -93,55 +96,67 @@ export default function InBMCScreen({navigation, route : {params}} : InBMCScreen
                 title={params.BMC.title}
                 handleBackPress={handleBackPress}
             />
-            <ScrollView>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <View style={{flexWrap: 'wrap', flexDirection: 'row', paddingStart: 16, paddingTop: 20, paddingBottom: 24}}>
-                        {values.map((value, index) => {
-                            const Icon = value.icon;
-                            const isSelected = value.itemValue === selectValue;
-                            const backGroundColor = isSelected ? Colors.primary : Colors.white1;
-                            const iconColor = isSelected ? Colors.white1 : Colors.primary;
-
-                            return (
-                                <TouchableOpacity key={index} onPress={() => setSelectValue(value.itemValue)}>
-                                    <View style={{
-                                        width: buttonSide,
-                                        height: buttonSide,
-                                        backgroundColor: backGroundColor,
-                                        marginEnd: 16,
-                                        marginBottom: 16,
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        borderColor: Colors.primary,
-                                        borderWidth: 2,
-                                        borderRadius: 8
-                                    }}>
-                                        <Icon color={iconColor} width={buttonSide*0.4} height={buttonSide*0.4} />
-                                    </View>
-                                </TouchableOpacity>
-                            );
-                        })}
-                    </View>
-                    <View style={{height: 2, width: width-32, paddingHorizontal: 16, backgroundColor: Colors.white2}}/>
-                    <View style={{width: width - 32, alignItems: 'flex-start'}}>
-                        <Text style={{
-                            paddingTop: 24,
-                            paddingBottom: 12,
-                            fontSize: 18,
-                            fontFamily: Fonts.semiBold,
-                            color: Colors.black1,
-                        }}>
-                            {selectValue}
-                        </Text>
-                        <Text style={{
-                            fontSize: 16,
-                            fontFamily: Fonts.medium,
-                        }}>
-                                {bmcBlockMap[selectValue]}
-                        </Text>
-                    </View>
-
+            <ScrollView contentContainerStyle={{gap : 24, paddingHorizontal : 16, paddingVertical : 16}}>
+                <View style={[styles.bmcImage]}>
+                    <Image
+                        source={
+                            imageError || !params?.BMC.imageUrl
+                                ? require('../../../assets/images/bmc-thumbnail-exam.png')
+                                : params.BMC.imageUrl
+                        }
+                        resizeMode="contain"
+                        defaultSource={require('../../../assets/images/bmc-thumbnail-exam.png')}
+                        style={styles.bmcImage}
+                        onError={() => setImageError(true)}
+                    />
+                    {imageError && (
+                        <View style={styles.dummyOverlay}>
+                            <Text style={styles.dummyText}>이미지가 없습니다</Text>
+                        </View>
+                    )}
                 </View>
+                <View style={{flexWrap: 'wrap', flexDirection: 'row', rowGap : 16, columnGap : 16}}>
+                    {values.map((value, index) => {
+                        const Icon = value.icon;
+                        const isSelected = value.itemValue === selectValue;
+                        const backGroundColor = isSelected ? Colors.primary : Colors.white1;
+                        const iconColor = isSelected ? Colors.white1 : Colors.second;
+                        const borderColor = isSelected ? Colors.primary : Colors.white1
+
+                        return (
+                            <TouchableOpacity key={index} onPress={() => setSelectValue(value.itemValue)}>
+                                <GlassView containerStyle={{
+                                    width: buttonSide,
+                                    height: buttonSide,
+                                    backgroundColor: backGroundColor,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    borderColor: borderColor,
+                                    borderWidth: 1,
+                                    borderRadius: 8
+                                }}>
+                                    <Icon color={iconColor} width={buttonSide*0.4} height={buttonSide*0.4} />
+                                </GlassView>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+                <GlassView containerStyle={{paddingVertical : 20, paddingHorizontal : 16, gap : 12, borderColor : 'rgba(255, 255, 255, 0.5)'}}>
+                    <Text style={{
+                        fontSize: 18,
+                        fontFamily: Fonts.semiBold,
+                        color: Colors.black1,
+                    }}>
+                        {selectValue}
+                    </Text>
+                    <Text style={{
+                        fontSize: 16,
+                        fontFamily: Fonts.medium,
+                        color : Colors.black1
+                    }}>
+                            {bmcBlockMap[selectValue]}
+                    </Text>
+                </GlassView>
             </ScrollView>
         </ImageBackground>
     );
@@ -174,5 +189,24 @@ const styles = StyleSheet.create({
     },
     headerBackPadding: {
         paddingEnd: 56
-    }
+    },
+    dummyOverlay: {
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(255,255,255,0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    bmcImage : {
+        width: 'auto',
+        height : 250,
+        backgroundColor : Colors.white1,
+        borderWidth : 1,
+        borderColor : Colors.gray4,
+    },
+    dummyText: {
+        color: Colors.gray2,
+        fontSize: 14,
+        fontFamily: Fonts.medium,
+    },
 });
