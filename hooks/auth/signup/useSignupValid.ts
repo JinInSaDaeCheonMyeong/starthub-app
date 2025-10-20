@@ -34,7 +34,7 @@ export const useSignupValid = () => {
             return passwordValid
         }
         const checkedValid = isValidChecked(ONE, SECOND, THIRD)
-        if(!checkedValid){
+        if(!checkedValid.isValid){
             return checkedValid
         }
         return {isValid : true}
@@ -42,6 +42,9 @@ export const useSignupValid = () => {
 
     return {
         validSignupForm,
-        isValidEmail
-    }
+        isValidEmail,
+        isValidPassword,
+        isValidVerifyCode,
+        isValidChecked,
+    };
 }

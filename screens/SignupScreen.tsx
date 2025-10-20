@@ -1,15 +1,17 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { AuthStackParamList } from "../navigation/AuthStack";
 import { Colors } from "../constants/Color";
-import {Linking, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {Keyboard, KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, useWindowDimensions, View} from "react-native";
 import BackButton from "../component/BackButton";
 import AuthTextInput from "../component/auth/AuthTextInput";
 import CommonButton from "../component/CommonButton";
 import Checkbox from "expo-checkbox";
 import SelectAgreement from "../component/auth/SelectAgreement";
 import { useSignupScreen } from "../hooks/auth/signup/useSignupScreen";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Fonts } from "../constants/Fonts";
+import { useCallback, useEffect, useState } from "react";
+import * as Progress from 'react-native-progress'
+import { sendcode } from "../api/email";
 
 export type SignupScreenProps = StackScreenProps<AuthStackParamList, 'Signup'>;
 
@@ -31,88 +33,128 @@ export default function SignupScreen(props : SignupScreenProps){
         },
         actions : {
             goBack,
-            requestSignup,
-            requestSendcode
+            handleNextStep,
+            handleSendCode
         },
         ui : {
-            errorText,
-            errorVisible,
-            disabled
+            disabled,
+            width,
+            isCodeSent,
+            progress,
+            MAX_PROGRESS,
+            time
         }
     } = useSignupScreen(props)
 
-    const selectItem = [
-        {key : 1, value : checked.ONE, title : "[필수] 만 14세 이상입니다", setChecked : setChecked, checkedKey : 'ONE', link : ""},
-        {key : 2, value : checked.SECOND, title : "[필수] 스타트허브 이용약관 동의", setChecked : setChecked, checkedKey : 'SECOND', link : "https://various-bougon-d76.notion.site/27f507c40eaf80acbf4afba41b9964b7?source=copy_link"},
-        {key : 3, value : checked.THIRD, title : "[필수] 스타트허브 개인정보 수집 및 이용 동의", setChecked : setChecked, checkedKey : 'THIRD', link : "https://various-bougon-d76.notion.site/27f507c40eaf80bbb86dfc3db0b06e04?pvs=74"}
-    ]
+    
+    const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
-    return(
-        <View style={styles.container}>
-            <KeyboardAwareScrollView
-                contentContainerStyle={{ flexGrow: 1 }}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-            >
-                <View style={styles.backButton}>
-                    <BackButton
-                        width={20}
-                        height={20}
-                        color={Colors.black2}
-                        onClick={() => {goBack()}}
-                    />
+    useEffect(() => {
+        const showSub = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
+        const hideSub = Keyboard.addListener("keyboardDidHide", () => setKeyboardVisible(false));
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, []);
+
+    const formatTime = (t: number) => {
+        const minutes = Math.floor(t / 60);
+        const seconds = t % 60;
+        const pad = (n: number) => n.toString().padStart(2, "0");
+        return `${pad(minutes)}:${pad(seconds)}`;
+    };
+
+    const selectItem: {
+        key: number;
+        value: boolean;
+        title: string;
+        setChecked: (key: "ONE" | "SECOND" | "THIRD", value: boolean) => void;
+        checkedKey: "ONE" | "SECOND" | "THIRD";
+        link: string;
+    }[] = [
+        { key: 1, value: checked.ONE, title: "[필수] 만 14세 이상입니다", setChecked, checkedKey: "ONE", link: "" },
+        { key: 2, value: checked.SECOND, title: "[필수] 스타트허브 이용약관 동의", setChecked, checkedKey: "SECOND", link: "https://..." },
+        { key: 3, value: checked.THIRD, title: "[필수] 스타트허브 개인정보 수집 및 이용 동의", setChecked, checkedKey: "THIRD", link: "https://..." },
+    ];
+
+    const getTitleView = () => {
+        switch(progress) {
+            case 1:
+                return <Text style={styles.containerText}>{'이메일을\n입력해주세요!'}</Text>
+            case 2:
+                return <View>
+                    <Text style={styles.containerText}>{'비밀번호를\n입력해주세요!'}</Text>
+                    <Text style={{fontSize : 12, fontFamily : Fonts.reqular, color : Colors.black1}}>비밀번호는 영문, 숫자, 특수문자를 포함한 8~16자여야 해요</Text>
                 </View>
-                <Text style={styles.titleText}>Start<Text style={styles.accentText}>Hub</Text> 계정 만들기</Text>
-                <View style={styles.interactionContainer}>
-                    <View style={styles.emailContainer}>
-                        <Text style={styles.containerText}>이메일</Text>
-                        <View style={styles.emailInputContainer}>
-                            <View style={styles.emailInputWrapper}>
+            case 3:
+                return <Text style={styles.containerText}>{'스타트허브를 이용하려면\n약관 동의가 필요해요!'}</Text>
+            default:
+                return <Text style={styles.containerText}>{'잘못된 접근입니다'}</Text>
+        }
+    }
+
+    const getInputView = () => {
+        switch(progress) {
+            case 1:
+                return (
+                    <>
+                        <View style={{gap : 6}}>
+                            <AuthTextInput
+                                value={email}
+                                placeHolder="이메일"
+                                isVerify={isCodeSent}
+                                onChangeText={(text) => setEmail(text)}
+                                onSendVerify={async () => {await handleSendCode()}}
+                            />
+                            {
+                                isCodeSent && (
+                                    <Text style={{
+                                        fontFamily : Fonts.reqular,
+                                        fontSize : 14
+                                    }}>
+                                            {`인증 번호가 전송되었습니다. ${formatTime(time) /* 05:00 */}`}
+                                    </Text>
+                                )
+                            }
+                        </View>
+                        {
+                            isCodeSent && (
                                 <AuthTextInput
-                                    value={email}
-                                    placeHolder="이메일"
-                                    placeHolderTextColor={Colors.gray2}
-                                    isPassword={false}
-                                    onChange={(text) => {
-                                        setEmail(text)
+                                    value={verifyCode}
+                                    placeHolder="인증번호"
+                                    inputMode="numeric"
+                                    onChangeText={(text) => {
+                                        setVerifyNumber(text)
                                     }}
                                 />
-                            </View>
-                            <TouchableOpacity disabled={disabled} style={styles.verifyButton} onPress={()=>{requestSendcode()}}>
-                                <Text style={styles.verifyButtonText}>인증번호 전송</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <AuthTextInput
-                            value={verifyCode}
-                            placeHolder="인증번호"
-                            placeHolderTextColor={Colors.gray2}
-                            isPassword={false}
-                            onChange={(text) => {
-                                setVerifyNumber(text)
-                            }}
-                        />
-                    </View>
-                    <View style={styles.passwordContainer}>
-                        <Text style={styles.containerText}>비밀번호</Text>
+                            )
+                        }
+                    </>
+                )
+            case 2: 
+                return (
+                    <>
                         <AuthTextInput
                             value={password}
-                            placeHolder="비밀번호"
-                            placeHolderTextColor={Colors.gray2}
-                            isPassword={true}
-                            onChange={(text) => {
+                            placeHolder="비밀번호를 입력해주세요"
+                            isPassword
+                            onChangeText={(text) => {
                                 setPassword(text)
                             }}
                         />
                         <AuthTextInput
                             value={checkPassword}
-                            placeHolder="비밀번호 확인"
-                            placeHolderTextColor={Colors.gray2}
-                            isPassword={true}
-                            onChange={(text) => {
+                            placeHolder="비밀번호를 다시 입력해주세요"
+                            isPassword
+                            onChangeText={(text) => {
                                 setCheckPassword(text)
                             }}
                         />
-                    </View>
+                    </>
+                )
+            case 3:
+                return (
                     <View style={styles.selectContainer}>
                         <View style={styles.allSelectBox}>
                             <Checkbox
@@ -136,21 +178,80 @@ export default function SignupScreen(props : SignupScreenProps){
                                 onSelect={(value) => {setChecked(item.checkedKey, value)}}
                                 onClick={() => {
                                     Linking.openURL(item.link)
-                                }} // 노션 링크 넣을 예정
+                                }} 
                             />
                         ))}
                     </View>
-                </View>
-            </KeyboardAwareScrollView>
-            <View style={styles.buttonContainer}>
-                {errorVisible && <Text style={styles.errorText}>{errorText}</Text>}
-                <CommonButton
-                    title="회원가입"
-                    onPress={() => {requestSignup()}}
-                    disabled={disabled}
-                />
-            </View>
-        </View>
+                )
+        }
+    }
+    const getButtonText = useCallback(() => {
+        switch(progress){
+            case 1:
+                return isCodeSent ? '인증하기' : '인증번호 전송'
+            case 2:
+                return '다음으로'
+            case 3:
+                return '회원가입 완료'
+            default :
+                return '잘못된 접근입니다'
+        }
+    }, [progress, isCodeSent])
+    return(
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <KeyboardAvoidingView
+                style={styles.container}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 54 : 0}
+            >
+                <ScrollView
+                    contentContainerStyle={styles.scrollContainer}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <View style={{gap : 10}}>
+                        <View style={styles.backButton}>
+                            <BackButton
+                                width={20}
+                                height={20}
+                                color={Colors.black2}
+                                onClick={() => {goBack()}}
+                            />
+                        </View>
+                        <View style={{
+                            width : "100%",
+                            gap : 20
+                        }}>
+                            <View style={styles.progressBarContainer}>
+                                <Text 
+                                    style={styles.progressBarText}
+                                >
+                                    {`${progress} of ${MAX_PROGRESS}`}
+                                </Text>
+                                <Progress.Bar
+                                    width={width - 32}
+                                    progress={progress / MAX_PROGRESS}
+                                    color={Colors.primary}
+                                    borderColor={Colors.white2}
+                                    unfilledColor={Colors.white2}
+                                    borderWidth={0}
+                                    height={8}
+                                />
+                            </View>
+                            {getTitleView()}
+                            {getInputView()}
+                        </View>
+                    </View>
+                    <View style={[Platform.OS === 'android' && isKeyboardVisible ? {paddingBottom : 28} : undefined]}>
+                        <CommonButton
+                            title={getButtonText()}
+                            onPress={() => {handleNextStep()}}
+                            disabled={disabled}
+                        />
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
     )
 }
 
@@ -160,11 +261,15 @@ const styles = StyleSheet.create({
     },
     container : {
         flex : 1,
-        marginHorizontal :16,
-        paddingVertical : 16,
+    },
+    scrollContainer: {
+        flexGrow: 1,
+        justifyContent: "space-between",
+        paddingHorizontal: 16,
+        paddingVertical: 20,
     },
     backButton: {
-        marginTop: 22,
+        paddingVertical : 9
     },
     titleText : {
         width : "100%",
@@ -199,12 +304,8 @@ const styles = StyleSheet.create({
         flex : 1
     },
     passwordContainer : {
-        gap : 16
-    },
-    buttonContainer : {
-        paddingTop : 8,
-        width : "100%",
-        gap : 8,
+        gap : 16,
+        width : '100%'
     },
     signupContainer : {
         flexDirection : "row",
@@ -213,7 +314,9 @@ const styles = StyleSheet.create({
         gap : 12
     },
     containerText : {
-        fontSize : 16,
+        width : '100%',
+        fontSize : 28,
+        textAlign : 'left',
         fontFamily : Fonts.semiBold,
     },
     errorText : {
@@ -286,5 +389,14 @@ const styles = StyleSheet.create({
         borderColor : Colors.gray3,
         borderStyle : "solid",
         borderWidth : 0.5
+    },
+    progressBarContainer : {
+        width : "100%",
+        gap : 8,
+        alignItems : "flex-end",
+    },
+    progressBarText : {
+        color : Colors.black2,
+        fontFamily : Fonts.semiBold
     }
 })

@@ -6,6 +6,8 @@ import { useDisabled } from "../../../util/useDisabled"
 import StartupStatus from "../../../../constants/StartupStatus"
 import { BackHandler } from "react-native"
 import {StackActions} from "@react-navigation/native";
+import { removeTokens } from "../../../../util/token"
+import { resetScheduleList } from "../../../../util/Schedule"
 
 export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAXPROGRESS: number) => {
     const [formData, setFormData] = useState<SignupInputFormData>({
@@ -44,7 +46,22 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
 
     const goBack = useCallback((): boolean => {
         hideError();
-        if (currentProgress > 1) {
+        if (currentProgress <= 1) {       
+            removeTokens();
+            resetScheduleList();     
+            navigation.reset({
+            index: 0,
+            routes: [
+                {
+                    name: "AuthStack" as any,
+                    state: {
+                        routes: [{ name: "Welcome" }],
+                        index: 0,
+                    },
+                },
+            ]
+        })
+        } else {
             setCurrentProgress((prev) => prev - 1);
         }
         return true;
