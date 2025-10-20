@@ -2,6 +2,7 @@ import { isAxiosError } from "axios"
 import { useState } from "react"
 import { DefaultErrorMessage, ErrorType } from "../../type/error/error.type"
 import { ErrorResponse } from "../../type/util/response.type"
+import { ShowToast, ToastType } from "../../util/ShowToast"
 
 export const useError = () => {
     const [errorVisible, setErrorVisible] = useState(false)
@@ -28,16 +29,16 @@ export const useError = () => {
         if(isAxiosError(error)){
             const response = error.response
             if(!response){
-                show('네트워크 오류가 발생하였습니다')
+                ShowToast('에러 발생', '네트워크 오류가 발생했습니다', ToastType.ERROR)
             } else {
                 const message = (response.data as ErrorResponse).message
                 if(message[message.length] === '.') {
-                    show(message.slice(0, -1));
+                    ShowToast('에러 발생', message.slice(0, -1) + '입니다', ToastType.ERROR)
                 }
-                show(message)
+                ShowToast("에러 발생", message, ToastType.ERROR);
             }
         } else {
-            show("예상치 못한 오류가 발생하였습니다")
+            ShowToast("에러 발생", '예상치 못한 오류가 발생했습니다', ToastType.ERROR);
         }
     }
     

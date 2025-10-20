@@ -51,14 +51,13 @@ export default function AuthTextInput({
 
     const labelY = labelAnim.interpolate({
         inputRange: [0, 1],
-        outputRange: [isPassword ? 22 : 20, 10],
+        outputRange: [isPassword ? Platform.OS === 'ios' ? 22 : 20 : 20, 10],
     });
 
     const labelFontSize = labelAnim.interpolate({
         inputRange: [0, 1],
         outputRange: [14, 10],
     });
-
     const labelColor = labelAnim.interpolate({
         inputRange: [0, 1],
         outputRange: [Colors.gray2, Colors.gray2],
@@ -131,7 +130,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         backgroundColor: Colors.white1,
         paddingHorizontal: 16,
-        paddingVertical: Platform.OS === "ios" ? 20 : 16,
+        paddingVertical: Platform.OS === "ios" ? 20 : 20,
         position: "relative",
         flexDirection : 'row',
         gap : 8

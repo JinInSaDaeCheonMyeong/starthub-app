@@ -9,7 +9,7 @@ import Checkbox from "expo-checkbox";
 import SelectAgreement from "../component/auth/SelectAgreement";
 import { useSignupScreen } from "../hooks/auth/signup/useSignupScreen";
 import { Fonts } from "../constants/Fonts";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import * as Progress from 'react-native-progress'
 import { sendcode } from "../api/email";
 
@@ -45,6 +45,18 @@ export default function SignupScreen(props : SignupScreenProps){
             time
         }
     } = useSignupScreen(props)
+
+    
+    const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+    useEffect(() => {
+        const showSub = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
+        const hideSub = Keyboard.addListener("keyboardDidHide", () => setKeyboardVisible(false));
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, []);
 
     const formatTime = (t: number) => {
         const minutes = Math.floor(t / 60);
@@ -230,7 +242,7 @@ export default function SignupScreen(props : SignupScreenProps){
                             {getInputView()}
                         </View>
                     </View>
-                    <View style={styles.buttonContainer}>
+                    <View style={[Platform.OS === 'android' && isKeyboardVisible ? {paddingBottom : 28} : undefined]}>
                         <CommonButton
                             title={getButtonText()}
                             onPress={() => {handleNextStep()}}
@@ -294,10 +306,6 @@ const styles = StyleSheet.create({
     passwordContainer : {
         gap : 16,
         width : '100%'
-    },
-    buttonContainer : {
-        width : "100%",
-        gap : 8,
     },
     signupContainer : {
         flexDirection : "row",
