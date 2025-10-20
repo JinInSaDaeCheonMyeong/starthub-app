@@ -1,9 +1,11 @@
 import Expo
 import React
 import ReactAppDependencyProvider
+import FirebaseCore
+import UserNotifications
 
 @UIApplicationMain
-public class AppDelegate: ExpoAppDelegate {
+public class AppDelegate: ExpoAppDelegate, UNUserNotificationCenterDelegate {
   var window: UIWindow?
 
   var reactNativeDelegate: ExpoReactNativeFactoryDelegate?
@@ -13,6 +15,18 @@ public class AppDelegate: ExpoAppDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
+    if FirebaseApp.app() == nil {
+      FirebaseApp.configure()
+      print("✅ FirebaseApp configured")
+    } else {
+      print("✅ FirebaseApp already configured")
+    }
+
+    // ✅ APNs 등록 추가
+    UNUserNotificationCenter.current().delegate = self
+    application.registerForRemoteNotifications()
+    print("✅ APNs 등록 요청")
+
     let delegate = ReactNativeDelegate()
     let factory = ExpoReactNativeFactory(delegate: delegate)
     delegate.dependencyProvider = RCTAppDependencyProvider()
@@ -49,6 +63,49 @@ public class AppDelegate: ExpoAppDelegate {
   ) -> Bool {
     let result = RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
     return super.application(application, continue: userActivity, restorationHandler: restorationHandler) || result
+  }
+
+  // APNs 토큰 등록 성공
+  public override func application(
+    _ application: UIApplication,
+    didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+  ) {
+    let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
+    let token = tokenParts.joined()
+    print("✅ APNs Device Token: \(token)")
+    
+    // Expo Notifications에 토큰 전달
+    super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
+  }
+
+  // APNs 토큰 등록 실패
+  public override func application(
+    _ application: UIApplication,
+    didFailToRegisterForRemoteNotificationsWithError error: Error
+  ) {
+    print("❌ Failed to register for remote notifications: \(error.localizedDescription)")
+    super.application(application, didFailToRegisterForRemoteNotificationsWithError: error)
+  }
+
+  // 포그라운드에서 알림 수신
+  public func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    willPresent notification: UNNotification,
+    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+  ) {
+    print("✅ Received notification in foreground: \(notification.request.content.userInfo)")
+    // iOS 14+에서 포그라운드에서도 알림 표시
+    completionHandler([.banner, .sound, .badge])
+  }
+
+  // 알림 탭했을 때
+  public func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    didReceive response: UNNotificationResponse,
+    withCompletionHandler completionHandler: @escaping () -> Void
+  ) {
+    print("✅ User tapped notification: \(response.notification.request.content.userInfo)")
+    completionHandler()
   }
 }
 

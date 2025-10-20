@@ -13,6 +13,12 @@ install! 'cocoapods',
 
 prepare_react_native_project!
 
+pod 'Firebase', :modular_headers => true
+pod 'FirebaseCore', :modular_headers => true
+pod 'GoogleUtilities', :modular_headers => true
+$RNFirebaseAsStaticFramework = true
+
+
 target 'startHubapp' do
   use_expo_modules!
 
