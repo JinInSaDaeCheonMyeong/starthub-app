@@ -3,6 +3,7 @@ import { SystemStackParamList } from "../../navigation/SystemStack";
 import {
     Dimensions,
     FlatList,
+    ImageBackground,
     RefreshControl,
     StyleSheet,
     Text,
@@ -198,7 +199,10 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
     }, []);
 
     return (
-        <View style={[styles.container, {paddingTop : insets.top, paddingBottom : insets.bottom}]}>
+        <ImageBackground 
+            source={require('../../assets/images/glass-background.png')}
+            style={[styles.container, {paddingTop : insets.top, paddingBottom : insets.bottom}]}
+        >
             <SubHeaderBar
                 title="내 북마크"
                 handleBackPress={navigation.goBack}
@@ -261,7 +265,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
                     ) : null
                 }
             />
-        </View>
+        </ImageBackground>
     )
 }
 

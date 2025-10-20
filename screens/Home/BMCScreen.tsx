@@ -76,6 +76,7 @@ export default function BMCScreen(navigation: BMCScreenProps) {
     return (
         <View style={styles.container}>
                 <FlatList
+                    showsVerticalScrollIndicator={false}
                     data={refreshing ? [] : allBMCs}
                     ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
                     refreshControl={

@@ -123,6 +123,7 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
         <View style={styles.container}>
             <FlatList
                 data={recommends}
+                showsVerticalScrollIndicator={false}
                 keyExtractor={(item, index) => String(item.id ?? index)}
                 ListHeaderComponent={
                     <>
@@ -133,7 +134,6 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
                         </View>
 
                         <Text style={styles.smallText}>카테고리별 공고를 확인해보세요!</Text>
-
                         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                             <View style={{ paddingStart: 16 }} />
                             {noticeCategoryList.map(({ label, value, noticeType }, index) => {
@@ -142,7 +142,7 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
                                     <TouchableOpacity
                                         onPress={() => goNotice(value, undefined)}
                                         key={index}
-                                        style={{ width: 80, height: 100, marginEnd: 10 }}
+                                        style={{marginEnd: 16 }}
                                     >
                                         <GlassView
                                             blurPercent={0.5}
@@ -196,7 +196,7 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, flexDirection: "column" },
-    searchBar: { marginHorizontal: 16, marginTop: 21, marginBottom: 22, height: 40 },
+    searchBar: { marginHorizontal: 16, marginTop: 21, marginBottom: 22},
     noticeItemContainer: { marginHorizontal: 16, marginTop: 10 },
     indicatorContainer: { alignItems: "center", justifyContent: "center", flex: 1 },
     loadingContainer: {
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         paddingHorizontal: 16,
-        marginTop: 8,
+        marginTop: 28,
         marginBottom: 12,
     },
     recommendTitle: { fontSize: 16, fontFamily: Fonts.semiBold },
