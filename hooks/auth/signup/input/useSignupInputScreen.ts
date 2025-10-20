@@ -44,7 +44,9 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
 
     const goBack = useCallback((): boolean => {
         hideError();
-        if (currentProgress > 1) {
+        if (currentProgress <= 1) {
+            navigation.goBack();
+        } else {
             setCurrentProgress((prev) => prev - 1);
         }
         return true;

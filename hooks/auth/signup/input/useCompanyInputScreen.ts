@@ -68,10 +68,8 @@ export const useCompanyInputScreen = (
     const goBack = useCallback((): boolean => {
         hideError();
         if (currentProgress <= 1) {
-            console.log("크아악!2");
             navigation.goBack();
         } else {
-            console.log("크아악!1");
             setCurrentProgress((prev) => prev - 1);
         }
         return true;
