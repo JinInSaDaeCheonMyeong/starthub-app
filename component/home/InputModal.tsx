@@ -98,9 +98,9 @@ export default function InputModal({
                         style={styles.modalButton}
                         onPress={handleCloseModal}
                     >
-                    <Text style={styles.cancelButton}>아니오</Text>
+                        <Text style={styles.cancelButton}>아니오</Text>
                     </TouchableOpacity>
-                    <View style={styles.modalDivider} />
+                        <View style={styles.modalDivider} />
                     <TouchableOpacity
                         style={styles.modalButton}
                         onPress={async () => {
@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         paddingVertical: 16,
+        backgroundColor : Colors.white1
     },
     modalDivider: {
         width: 1,

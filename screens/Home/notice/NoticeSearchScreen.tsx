@@ -321,7 +321,7 @@ export default function NoticeSearchScreen({
         <View style={styles.searchBar}>
                 <SearchBar
                     onPress={(text) => setTitle(text)}
-                    value={title}  // ✅ 추가
+                    value={title}
                 />
         </View>
         <ScrollView
