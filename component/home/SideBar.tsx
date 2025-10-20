@@ -148,29 +148,31 @@ export default function SideBar(props : SideBarProps){
                     )
                 })}
             </View>
-            {sections.map((props, index) => {
-                return (
-                    <View key={index}>
-                    <View style={{
-                        borderTopWidth : 1,
-                        borderColor : Colors.gray3
-                    }}/>
-                    <TouchableOpacity
-                        onPress={props.action}
-                        style={{
-                            paddingHorizontal : 22,
-                            paddingVertical : 13,
-                            flexDirection : 'row',
-                            alignItems : 'center',
-                            gap : 10,
-                        }}
-                    >
-                        {props.icon}
-                        <Text style={[{color : props.color}]}>{props.label}</Text>
-                    </TouchableOpacity>
-                    </View>
-                )
-            })}
+            <View style={{height : 240}}>
+                {sections.map((props, index) => {
+                    return (
+                        <View key={index}>
+                        <View style={{
+                            borderTopWidth : 1,
+                            borderColor : Colors.gray3
+                        }}/>
+                        <TouchableOpacity
+                            onPress={props.action}
+                            style={{
+                                paddingHorizontal : 22,
+                                paddingVertical : 13,
+                                flexDirection : 'row',
+                                alignItems : 'center',
+                                gap : 10,
+                            }}
+                        >
+                            {props.icon}
+                            <Text style={[{color : props.color}]}>{props.label}</Text>
+                        </TouchableOpacity>
+                        </View>
+                    )
+                })}
+            </View>
         </View>
     )
 }
