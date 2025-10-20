@@ -155,13 +155,12 @@ export default function HomeScreen(props : HomeScreenProps) {
                         scrollEnabled={false}
                         contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
                         showsHorizontalScrollIndicator={false}
-                        onEndReached={() => {}}
                         style={{ overflow: "visible" }}
                         data={noticeItems}
                         renderItem={({ item }) => (
                             <NoticeItem
                                 item={item}
-                                onPress={() => {
+                            onPress={() => {
                                     props.navigation.navigate('InNotice', {Notice : item})
                                 }}
                             />

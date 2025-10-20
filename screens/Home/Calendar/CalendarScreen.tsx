@@ -55,7 +55,10 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
     } = useCalendarScreen()
     return (
         <>
-        <View style={styles.container}>
+        <ScrollView 
+            style={styles.container} 
+            showsVerticalScrollIndicator={false}
+        >
             <GlassView
                 containerStyle={{padding : 20, marginTop : 16}}
             >
@@ -167,9 +170,10 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
             <FlatList
                 refreshing={loading}
                 showsVerticalScrollIndicator={false}
+                scrollEnabled={false}
                 contentContainerStyle={{
-                    paddingTop : 8,
-                    paddingBottom : 16,
+                    paddingTop : 20,
+                    paddingBottom : 20,
                     gap : 12,
                 }}
                 style={{
@@ -208,7 +212,7 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                     </View>
                 )}
             />
-        </View>
+        </ScrollView>
         </>
     )
 }
@@ -218,7 +222,6 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 16,
         position : 'relative',
-        gap : 8
     },
     calendar: {
         gap: 9,
