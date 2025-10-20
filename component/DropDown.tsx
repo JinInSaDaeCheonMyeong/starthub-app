@@ -87,8 +87,8 @@ export default function DropDown(props: DropDownProps) {
     height: 48,
     width: dynamicWidth,
   };
+
   return (
-    <GlassView>
     <DropDownPicker
       open={props.open}
       value={props.value}
@@ -142,16 +142,16 @@ export default function DropDown(props: DropDownProps) {
         />
       )}
     />
-    </GlassView>
   );
 }
 
 const styles = StyleSheet.create({
   mainStyle: {
-    backgroundColor: "transparent",
-    borderWidth: 0,
-    borderRadius: 8,
-    padding: 16,
+    overflow : 'hidden',
+    backgroundColor : 'rgba(255, 255, 255, 0.6)',
+    borderRadius : 10,
+    borderWidth : 1,
+    borderColor : Colors.white1
   },
   placeholderStyle: {
     color: Colors.gray2,
@@ -159,9 +159,10 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.medium,
   },
   dropdownContainerStyle: {
-    backgroundColor: Colors.white2,
-    borderWidth: 0,
-    borderRadius: 8,
+    backgroundColor : Colors.white1,
+    borderRadius : 10,
+    borderWidth : 1,
+    borderColor : Colors.white1,
     maxHeight: 200,
   },
   textStyle: {
@@ -183,6 +184,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   listItemContainerStyle: {
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
     minHeight: 60,
     justifyContent: "center",
     paddingHorizontal: 8,
@@ -191,4 +193,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexWrap: "wrap",
   },
+  container : {
+    overflow : 'hidden',
+    backgroundColor : 'rgba(255, 255, 255, 0.6)',
+    borderRadius : 10,
+    borderWidth : 1,
+    borderColor : Colors.white1
+  }
 });

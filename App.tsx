@@ -6,8 +6,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import toastConfig from "./lib/ToastConfig";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { useEffect, useRef, useState } from "react";
-import { Keyboard, Platform } from "react-native";
+import {useEffect, useRef, useState} from "react";
+import {Keyboard, Platform} from "react-native";
 import { saveFCMToken } from "./util/token";
 import { ShowToast, ToastType } from "./util/ShowToast";
 import {
