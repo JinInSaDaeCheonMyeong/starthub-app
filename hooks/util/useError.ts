@@ -34,7 +34,7 @@ export const useError = () => {
                 if(message[message.length] === '.') {
                     show(message.slice(0, -1));
                 }
-                show(message + "입니다")
+                show(message)
             }
         } else {
             show("예상치 못한 오류가 발생하였습니다")

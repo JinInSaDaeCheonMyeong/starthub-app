@@ -27,7 +27,7 @@ export const useAuthValid = () => {
         }
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%#?&])[A-Za-z\d@$!%*#?&]{8,16}$/;
         if(!passwordRegex.test(password)){
-            return {isValid : false, message : "비밀번호는 대소문자, 숫자, 특수문자(@$!%*?&)가 포함되어야 합니다"}
+            return {isValid : false, message : "비밀번호는 대소문자, 숫자, 특수문자(@$!%*?&)가 \n포함 되어야 합니다"}
         }
         return {isValid : true}
     }
@@ -40,7 +40,7 @@ export const useAuthValid = () => {
     }
 
     const isValidChecked = (one : boolean, second : boolean, third : boolean) : ValidError => {
-        if(!one && !second && !third){
+        if(!one || !second || !third){
             return {isValid : false, message : "필수 항목에 체크해 주세요"}
         }
         return {isValid : true}

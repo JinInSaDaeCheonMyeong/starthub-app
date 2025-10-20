@@ -9,7 +9,7 @@ import Checkbox from "expo-checkbox";
 import SelectAgreement from "../component/auth/SelectAgreement";
 import { useSignupScreen } from "../hooks/auth/signup/useSignupScreen";
 import { Fonts } from "../constants/Fonts";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import * as Progress from 'react-native-progress'
 import { sendcode } from "../api/email";
 
@@ -33,29 +33,41 @@ export default function SignupScreen(props : SignupScreenProps){
         },
         actions : {
             goBack,
-            requestSignup,
-            requestSendcode
+            handleNextStep,
+            handleSendCode
         },
         ui : {
-            errorText,
-            errorVisible,
-            disabled
+            disabled,
+            width,
+            isCodeSent,
+            progress,
+            MAX_PROGRESS,
+            time
         }
     } = useSignupScreen(props)
 
-    const selectItem = [
-        {key : 1, value : checked.ONE, title : "[필수] 만 14세 이상입니다", setChecked : setChecked, checkedKey : 'ONE', link : ""},
-        {key : 2, value : checked.SECOND, title : "[필수] 스타트허브 이용약관 동의", setChecked : setChecked, checkedKey : 'SECOND', link : "https://various-bougon-d76.notion.site/27f507c40eaf80acbf4afba41b9964b7?source=copy_link"},
-        {key : 3, value : checked.THIRD, title : "[필수] 스타트허브 개인정보 수집 및 이용 동의", setChecked : setChecked, checkedKey : 'THIRD', link : "https://various-bougon-d76.notion.site/27f507c40eaf80bbb86dfc3db0b06e04?pvs=74"}
-    ]
+    const formatTime = (t: number) => {
+        const minutes = Math.floor(t / 60);
+        const seconds = t % 60;
+        const pad = (n: number) => n.toString().padStart(2, "0");
+        return `${pad(minutes)}:${pad(seconds)}`;
+    };
 
-    const [buttonText, setButtonText] = useState('인증번호 전송')
-    const {width} = useWindowDimensions()
-    const [currentProgress, setCurrentProgress] = useState(3)
-    const MAXPROGRESS = 3
-    const [isSend, setIsSend] = useState(false)
+    const selectItem: {
+        key: number;
+        value: boolean;
+        title: string;
+        setChecked: (key: "ONE" | "SECOND" | "THIRD", value: boolean) => void;
+        checkedKey: "ONE" | "SECOND" | "THIRD";
+        link: string;
+    }[] = [
+        { key: 1, value: checked.ONE, title: "[필수] 만 14세 이상입니다", setChecked, checkedKey: "ONE", link: "" },
+        { key: 2, value: checked.SECOND, title: "[필수] 스타트허브 이용약관 동의", setChecked, checkedKey: "SECOND", link: "https://..." },
+        { key: 3, value: checked.THIRD, title: "[필수] 스타트허브 개인정보 수집 및 이용 동의", setChecked, checkedKey: "THIRD", link: "https://..." },
+    ];
+
     const getTitleView = () => {
-        switch(currentProgress) {
+        switch(progress) {
             case 1:
                 return <Text style={styles.containerText}>{'이메일을\n입력해주세요!'}</Text>
             case 2:
@@ -71,7 +83,7 @@ export default function SignupScreen(props : SignupScreenProps){
     }
 
     const getInputView = () => {
-        switch(currentProgress) {
+        switch(progress) {
             case 1:
                 return (
                     <>
@@ -79,25 +91,33 @@ export default function SignupScreen(props : SignupScreenProps){
                             <AuthTextInput
                                 value={email}
                                 placeHolder="이메일"
-                                isVerify={isSend}
+                                isVerify={isCodeSent}
                                 onChangeText={(text) => setEmail(text)}
-                                onSendVerify={(text) => {}}
+                                onSendVerify={async () => {await handleSendCode()}}
                             />
-                            <Text style={{
-                                fontFamily : Fonts.reqular,
-                                fontSize : 14
-                            }}>
-                                    {`인증 번호가 전송되었습니다. ${'05:00'}`}
-                            </Text>
+                            {
+                                isCodeSent && (
+                                    <Text style={{
+                                        fontFamily : Fonts.reqular,
+                                        fontSize : 14
+                                    }}>
+                                            {`인증 번호가 전송되었습니다. ${formatTime(time) /* 05:00 */}`}
+                                    </Text>
+                                )
+                            }
                         </View>
-                        <AuthTextInput
-                            value={verifyCode}
-                            placeHolder="인증번호"
-                            inputMode="numeric"
-                            onChangeText={(text) => {
-                                setVerifyNumber(text)
-                            }}
-                        />
+                        {
+                            isCodeSent && (
+                                <AuthTextInput
+                                    value={verifyCode}
+                                    placeHolder="인증번호"
+                                    inputMode="numeric"
+                                    onChangeText={(text) => {
+                                        setVerifyNumber(text)
+                                    }}
+                                />
+                            )
+                        }
                     </>
                 )
             case 2: 
@@ -112,11 +132,11 @@ export default function SignupScreen(props : SignupScreenProps){
                             }}
                         />
                         <AuthTextInput
-                            value={password}
+                            value={checkPassword}
                             placeHolder="비밀번호를 다시 입력해주세요"
                             isPassword
                             onChangeText={(text) => {
-                                setPassword(text)
+                                setCheckPassword(text)
                             }}
                         />
                     </>
@@ -153,7 +173,18 @@ export default function SignupScreen(props : SignupScreenProps){
                 )
         }
     }
-
+    const getButtonText = useCallback(() => {
+        switch(progress){
+            case 1:
+                return isCodeSent ? '인증하기' : '인증번호 전송'
+            case 2:
+                return '다음으로'
+            case 3:
+                return '회원가입 완료'
+            default :
+                return '잘못된 접근입니다'
+        }
+    }, [progress, isCodeSent])
     return(
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <KeyboardAvoidingView
@@ -183,11 +214,11 @@ export default function SignupScreen(props : SignupScreenProps){
                                 <Text 
                                     style={styles.progressBarText}
                                 >
-                                    {`${currentProgress} of ${MAXPROGRESS}`}
+                                    {`${progress} of ${MAX_PROGRESS}`}
                                 </Text>
                                 <Progress.Bar
                                     width={width - 32}
-                                    progress={currentProgress / MAXPROGRESS}
+                                    progress={progress / MAX_PROGRESS}
                                     color={Colors.primary}
                                     borderColor={Colors.white2}
                                     unfilledColor={Colors.white2}
@@ -201,8 +232,8 @@ export default function SignupScreen(props : SignupScreenProps){
                     </View>
                     <View style={styles.buttonContainer}>
                         <CommonButton
-                            title={buttonText}
-                            onPress={() => {requestSignup()}}
+                            title={getButtonText()}
+                            onPress={() => {handleNextStep()}}
                             disabled={disabled}
                         />
                     </View>
