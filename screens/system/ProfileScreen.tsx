@@ -1,6 +1,6 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { SystemStackParamList } from "../../navigation/SystemStack";
-import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ImageBackground, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import StartupStatus from "../../constants/StartupStatus";
@@ -16,8 +16,8 @@ export default function ProfileScreen(props : ProfileScreenProps){
         },
         ui : {
             profileList,
-            earlyStarupList,
-            preStarupList,
+            earlyStartupList,
+            preStartupList,
             isWebLink
         },
         action : {
@@ -27,7 +27,9 @@ export default function ProfileScreen(props : ProfileScreenProps){
         }
     } = useProfileScreen(props)
     return (
-        <View style={styles.mainContainer}>
+        <View
+            style={[styles.mainContainer]}
+        >
             <SubHeaderBar
                 title="프로필"
                 handleBackPress={goBack}
@@ -42,22 +44,29 @@ export default function ProfileScreen(props : ProfileScreenProps){
                 }}
                 showsVerticalScrollIndicator={false}
             >
-                {profileList.map(({label, data}, index) => (
+                <View style={{gap : 4, marginBottom : 8}}>
+                    <Text style={{fontFamily : Fonts.semiBold, fontSize : 16, color : Colors.black1}}>“어제의 꿈은 오늘의 희망이며 내일의 현실이다.”</Text>
+                    <Text style={{fontFamily : Fonts.bold, fontSize : 20, color : Colors.primary}}>오늘도 잘 부탁드립니다!</Text>
+                </View>
+                {profileList.map(({label, data, icon}, index) => (
                     <View style={styles.labelContainer} key={index}>
-                        <Text style={styles.labelText}>{label}</Text>
                         <View style={styles.dataContainer}>
-                            <Text style={styles.dataText}>{data}</Text>
+                            {icon}
+                            <Text style={styles.labelText}>{label}</Text>
                         </View>
+                        <Text style={styles.dataText}>{data}</Text>
                     </View>
                 ))}
                 <View style={styles.line}/>
                 {profileData.startupStatus === StartupStatus.EARLY_STAGE ?
-                    earlyStarupList.map(({label, data}, index) => (
+                    earlyStartupList.map(({label, data, icon}, index) => (
                         <View style={styles.labelContainer} key={index}>
-                            <Text style={styles.labelText}>{label}</Text>
                             <View style={styles.dataContainer}>
+                                {icon}
+                                <Text style={styles.labelText}>{label}</Text>
+                            </View>
                             {
-                                isWebLink(index) ? (
+                                isWebLink(label) ? (
                                     <Text 
                                     onPress={() => {goWeb(data)}} 
                                     style={[
@@ -73,15 +82,12 @@ export default function ProfileScreen(props : ProfileScreenProps){
                                     <Text style={styles.dataText}>{data}</Text>
                                 )
                             }
-                            </View>
                         </View>
                     )) : 
-                    preStarupList.map(({label, data}, index) => (
+                    preStartupList.map(({label, data}, index) => (
                         <View style={styles.labelContainer} key={index}>
                             <Text style={styles.labelText}>{label}</Text>
-                            <View style={styles.dataContainer}>
-                                <Text style={styles.dataText}>{data}</Text>
-                            </View>
+                            <Text style={styles.dataText}>{data}</Text>
                         </View>
                     ))
                 }
@@ -118,18 +124,20 @@ const styles = StyleSheet.create({
     },
     labelContainer : {
         width : "100%",
+        flexDirection : 'row',
+        justifyContent : 'space-between',
+        alignItems : 'center',
         gap : 12
     },
     line : {
         width : "100%",
-        borderBottomWidth : 2,
-        borderColor : Colors.white2
+        borderBottomWidth : 1,
+        borderColor : Colors.gray3
     },
     dataContainer : {
-        width : "100%",
-        padding : 16,
-        borderRadius : 8,
-        backgroundColor : Colors.white2
+        flexDirection : 'row',
+        gap : 8,
+        alignItems : 'center'
     },
     labelText : {
         fontSize : 16,
@@ -138,7 +146,7 @@ const styles = StyleSheet.create({
     },
     dataText : {
         fontSize : 14,
-        fontFamily : Fonts.medium,
-        color : Colors.black2
+        fontFamily : Fonts.reqular,
+        color : Colors.black1
     }
 })
