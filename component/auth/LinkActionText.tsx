@@ -9,7 +9,7 @@ type LinkActionTextProps = {
 
 export default function LinkActionText(props : LinkActionTextProps) {
     return ( 
-        <TouchableOpacity onPress={props.onPress}>
+        <TouchableOpacity onPress={props.onPress} hitSlop={8}>
             <Text style={styles.linkActionText}>
                 {props.title}
             </Text>
@@ -21,6 +21,6 @@ const styles = StyleSheet.create({
     linkActionText : {
         color : Colors.gray2,
         fontSize : 14,
-        fontFamily : Fonts.medium,
+        fontFamily : Fonts.reqular,
     }
 })

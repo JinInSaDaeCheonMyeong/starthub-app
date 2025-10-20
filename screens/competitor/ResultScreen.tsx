@@ -16,7 +16,7 @@ import * as Progress from "react-native-progress"
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import { ErrorResponse } from "../../type/util/response.type";
 import { isAxiosError } from "axios";
-import { competitorAnalysis } from "../../api/competitor";
+import { competitorAnalysis, recompetitorAnalysis } from "../../api/competitor";
 import { ScrollView } from "react-native-gesture-handler";
 
 type ResultScreenProps = StackScreenProps<CompoetitorStackParamList>
@@ -37,11 +37,8 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
             return
         }
         try {
-            const data : CompetitorRequest = {
-                bmcId : params.bmcId,
-                searchKeywords : []
-            }
-            const response = (await competitorAnalysis(data)).data
+            const response = (await recompetitorAnalysis(params.bmcId)).data
+            console.log(JSON.stringify(response.userBmc.title));
             ShowToast("경쟁사 분석", '경쟁사 분석에 성공했습니다', ToastType.SUCCESS);
             setForm(response)
         } catch (error) {

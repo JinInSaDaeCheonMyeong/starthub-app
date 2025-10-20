@@ -54,13 +54,13 @@ export const useSigninScreen = ({navigation} : SigninScreenProps) => {
         const password = formData.password.trim()
         const validResult = validSigninForm({...formData, email : email, password : password})
         if(!validResult.isValid){
-            showError(validResult.message)
+            ShowToast('실패', validResult.message ?? '', ToastType.WARNING)
             enabledBtn()
             return
         }
         const loginRequest : SigninRequest = {
-            email,
-            password
+            email : email,
+            password : password
         }
         try {
             const { data } = await signin(loginRequest)

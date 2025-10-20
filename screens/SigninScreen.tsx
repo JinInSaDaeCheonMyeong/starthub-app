@@ -1,5 +1,14 @@
-import React from "react";
-import { Keyboard, SafeAreaView, StatusBar, StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+    Keyboard,
+    Platform,
+    StyleSheet,
+    Text,
+    TouchableWithoutFeedback,
+    View,
+    KeyboardAvoidingView,
+    ScrollView,
+} from "react-native";
 import { AuthStackParamList } from "../navigation/AuthStack";
 import { StackScreenProps } from "@react-navigation/stack";
 import { Colors } from "../constants/Color";
@@ -8,148 +17,136 @@ import BackButton from "../component/BackButton";
 import CommonButton from "../component/CommonButton";
 import LinkActionText from "../component/auth/LinkActionText";
 import { useSigninScreen } from "../hooks/auth/signin/useSigninScreen";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Fonts } from "../constants/Fonts";
 import { CompositeScreenProps } from "@react-navigation/core";
 import { RootStackParamList } from "../navigation/RootStack";
+import StartHubIcon from "../assets/logos/starthub-logo.svg";
+import StartHubTitleIcon from "../assets/logos/starthub-title-logo.svg";
 
 export type SigninScreenProps = CompositeScreenProps<
-    StackScreenProps<AuthStackParamList, 'Signin'>,
+    StackScreenProps<AuthStackParamList, "Signin">,
     StackScreenProps<RootStackParamList>
 >;
 
 export default function SigninScreen(props: SigninScreenProps) {
-
     const {
-        form : {
-            email,
-            password,
-            setEmail,
-            setPassword
-        },
-        actions : {
-            handleSignin,
-            goSignupScreen,
-            goBack
-        },
-        ui : {
-            disabled,
-            errorVisible,
-            errorText
-        }
-    } = useSigninScreen(props)
+        form: { email, password, setEmail, setPassword },
+        actions: { handleSignin, goSignupScreen, goBack },
+        ui: { disabled },
+    } = useSigninScreen(props);
+
+    const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+    useEffect(() => {
+        const showSub = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
+        const hideSub = Keyboard.addListener("keyboardDidHide", () => setKeyboardVisible(false));
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, []);
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.container}>
-            <KeyboardAwareScrollView
-                contentContainerStyle={{ flexGrow: 1 }}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-            >
-                <View style={styles.backButton}>
-                    <BackButton 
-                    width={20} 
-                    height={20} 
-                    color={Colors.black2} 
-                    onClick={() => {goBack()}}
-                    />
-                </View>
-                <Text style={styles.titleText}>Start<Text style={styles.accentText}>Hub</Text> 계정 로그인</Text>
-                <View style={styles.interactionContainer}>
-                    <View style={styles.textInputContainer}>
-                        <AuthTextInput 
-                            value={email}
-                            placeHolder="이메일"
-                            placeHolderTextColor={Colors.gray2}
-                            isPassword={false}
-                            onChange={(text) => {
-                                setEmail(text)
-                            }}
-                        />
-                        <AuthTextInput 
-                            value={password}
-                            placeHolder="비밀번호" 
-                            placeHolderTextColor={Colors.gray2}
-                            isPassword={true}
-                            onChange={(text) => {
-                                setPassword(text)
-                            }}
-                        />
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 54 : 0}
+        >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContainer}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <View style={styles.contentWrapper}>
+                        <View style={{ gap: 10 }}>
+                            <View style={styles.backButton}>
+                                <BackButton
+                                    width={20}
+                                    height={20}
+                                    color={Colors.black2}
+                                    onClick={goBack}
+                                />
+                            </View>
+
+                            <View style={styles.interactionContainer}>
+                                <View>
+                                    <StartHubIcon width={40} height={38} color={Colors.primary} />
+                                    <StartHubTitleIcon width={122} height={33} />
+                                    <Text style={styles.titleText}>시작하기</Text>
+                                </View>
+
+                                <View style={styles.textInputContainer}>
+                                    <AuthTextInput
+                                        value={email}
+                                        placeHolder="이메일을 입력해주세요"
+                                        onChangeText={setEmail}
+                                    />
+                                    <AuthTextInput
+                                        value={password}
+                                        placeHolder="비밀번호를 입력해주세요"
+                                        isPassword
+                                        onChangeText={setPassword}
+                                    />
+                                </View>
+
+                                <View style={styles.signupContainer}>
+                                    <LinkActionText
+                                        title="회원가입"
+                                        onPress={goSignupScreen}
+                                    />
+                                </View>
+                            </View>
+                        </View>
                     </View>
-                    <View style={styles.buttonContainer}>
-                        {errorVisible && <Text style={styles.errorText}>{errorText}</Text>}
-                        <CommonButton 
-                            title="로그인" 
-                            onPress={() => {handleSignin()}} 
+
+                    {/* 👇 Android에서만 키보드 열릴 때 padding 적용 */}
+                    <View style={Platform.OS === 'android' && isKeyboardVisible ? { paddingBottom: 28 } : undefined}>
+                        <CommonButton
+                            title="로그인"
+                            onPress={handleSignin}
                             disabled={disabled}
                         />
                     </View>
-                    <View style={styles.signupContainer}>
-                        <LinkActionText title="회원가입" onPress={() => {goSignupScreen()}}/>
-                    </View>
-                </View>
-            </KeyboardAwareScrollView>
-        </View>
-        </TouchableWithoutFeedback>
-    )
+                </ScrollView>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+    );
 }
 
 const styles = StyleSheet.create({
-    container : {
-        flex : 1,
-        margin : 16,
-        gap : 68
+    container: {
+        flex: 1,
+        backgroundColor: Colors.white1,
     },
-    backButton : {
-        marginTop : 22,
-        marginBottom : 68
+    scrollContainer: {
+        flexGrow: 1,
+        justifyContent: "space-between",
+        paddingHorizontal: 16,
+        paddingVertical: 20,
     },
-    titleText : {
-        width : "100%",
-        fontSize : 24,
-        fontFamily : Fonts.bold,
-        textAlign : "center"
+    contentWrapper: {
+        flex: 1,
+        justifyContent: "space-between",
     },
-    accentText : {
-        width : "100%",
-        fontSize : 24,
-        fontFamily : Fonts.bold,
-        textAlign : "center",
-        color : Colors.primary
+    backButton: {
+        marginVertical: 8,
     },
-    interactionContainer : {
-        top : 68,
-        alignItems : "center",
-        gap : 24
+    titleText: {
+        color: Colors.black1,
+        fontSize: 24,
+        fontFamily: Fonts.semiBold,
     },
-    textInputContainer : {
-        gap : 16
+    interactionContainer: {
+        gap: 20,
     },
-    buttonContainer : {
-        width : "100%",
-        gap : 8
+    textInputContainer: {
+        gap: 16,
     },
-    signupContainer : {
-        flexDirection : "row",
-        justifyContent : "center",
-        alignItems : "center",
-        gap : 12
+    signupContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 12,
     },
-    errorText : {
-        textAlign : "center",
-        color : Colors.error,
-        fontSize : 12,
-        fontFamily : Fonts.semiBold,
-    },
-    signinButton : {
-        backgroundColor : Colors.primary,
-        borderRadius : 8,
-
-    },
-    contourText : {
-        color : Colors.gray2,
-        fontSize : 16,
-        fontFamily : Fonts.semiBold,
-    }
-})
+});

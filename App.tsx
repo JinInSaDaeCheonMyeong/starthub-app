@@ -230,14 +230,41 @@ export default function App() {
 
 function AppContent() {
   const insets = useSafeAreaInsets();
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      (e) => {
+        setKeyboardHeight(e.endCoordinates.height);
+      }
+    );
+
+    const hideSubscription = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => {
+        setKeyboardHeight(0);
+      }
+    );
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
   return (
-      <NavigationContainer ref={navigationRef}>
-        <RootStack />
-        <Toast
-            config={toastConfig}
-            position="bottom"
-            bottomOffset={insets.bottom + 86}
-        />
-      </NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
+      <RootStack />
+      <Toast
+        config={toastConfig}
+        position="bottom"
+        bottomOffset={
+          keyboardHeight > 0
+            ? (Platform.OS === "ios" ? keyboardHeight + 86 : 92)
+            : insets.bottom + (Platform.OS === "ios" ? 86 : 92)
+        }
+      />
+    </NavigationContainer>
   );
 }
