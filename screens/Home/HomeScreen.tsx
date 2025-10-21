@@ -9,14 +9,6 @@ import { RootStackParamList } from "../../navigation/RootStack";
 import { StackScreenProps } from "@react-navigation/stack";
 import useHomeScreen from "../../hooks/home/useHomeScreen";
 import { NoticeCategory } from "../../constants/NoticeCategory";
-import BusinessIcon from "../../assets/icons/glass/notice/buisness.svg"
-import EducationIcon from "../../assets/icons/glass/notice/education.svg"
-import EventIcon from "../../assets/icons/glass/notice/event.svg"
-import FacilityIcon from "../../assets/icons/glass/notice/facility.svg"
-import FundingIcon from "../../assets/icons/glass/notice/funding.svg"
-import GlobalIcon from "../../assets/icons/glass/notice/global.svg"
-import RNDIcon from "../../assets/icons/glass/notice/rnd.svg"
-import TalentIcon from "../../assets/icons/glass/notice/talent.svg"
 import CompetitorIcon from "../../assets/icons/glass/home/competitor.svg"
 import CompareIcon from "../../assets/icons/glass/home/compare.svg";
 import SuggestionIcon from "../../assets/icons/glass/home/suggestion.svg";
@@ -41,14 +33,14 @@ export default function HomeScreen(props : HomeScreenProps) {
     }
 
     const categoryMap = {
-        [NoticeCategory.BUSINESS] : BusinessIcon,
-        [NoticeCategory.EDUCATION] : EducationIcon,
-        [NoticeCategory.EVENT] : EventIcon,
-        [NoticeCategory.FACILITY] : FacilityIcon,
-        [NoticeCategory.FUNDING] : FundingIcon,
-        [NoticeCategory.GLOBAL] : GlobalIcon,
-        [NoticeCategory.RND] : RNDIcon,
-        [NoticeCategory.TALENT] : TalentIcon
+        [NoticeCategory.BUSINESS] : require( "../../assets/images/notice/business.png"),
+        [NoticeCategory.EDUCATION] : require("../../assets/images/notice/education.png"),
+        [NoticeCategory.EVENT] : require("../../assets/images/notice/event.png"),
+        [NoticeCategory.FACILITY] : require("../../assets/images/notice/facility.png"),
+        [NoticeCategory.FUNDING] : require("../../assets/images/notice/funding.png"),
+        [NoticeCategory.GLOBAL] : require("../../assets/images/notice/global.png"),
+        [NoticeCategory.RND] : require("../../assets/images/notice/rnd.png"),
+        [NoticeCategory.TALENT] : require("../../assets/images/notice/talent.png")
     }
 
     const {
@@ -137,7 +129,7 @@ export default function HomeScreen(props : HomeScreenProps) {
                                             backgroundColor : 'rgba(255, 255, 255, 0.5)'
                                     }}>
                                         {IconComponent && (
-                                            <IconComponent width={50} height={50} />
+                                            <Image style={{width : 50, height : 50}} source={IconComponent}/>
                                         )}
                                         <Text style={styles.iconLabel}>{label}</Text>
                                     </GlassView>
