@@ -1,6 +1,7 @@
 import {
     Dimensions,
     FlatList,
+    Image,
     ScrollView,
     StyleSheet,
     Text,
@@ -94,15 +95,15 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
     };
 
     const categoryMap = {
-        [NoticeCategory.BUSINESS]: BusinessIcon,
-        [NoticeCategory.EDUCATION]: EducationIcon,
-        [NoticeCategory.EVENT]: EventIcon,
-        [NoticeCategory.FACILITY]: FacilityIcon,
-        [NoticeCategory.FUNDING]: FundingIcon,
-        [NoticeCategory.GLOBAL]: GlobalIcon,
-        [NoticeCategory.RND]: RNDIcon,
-        [NoticeCategory.TALENT]: TalentIcon,
-    };
+        [NoticeCategory.BUSINESS] : require( "../../assets/images/notice/business.png"),
+        [NoticeCategory.EDUCATION] : require("../../assets/images/notice/education.png"),
+        [NoticeCategory.EVENT] : require("../../assets/images/notice/event.png"),
+        [NoticeCategory.FACILITY] : require("../../assets/images/notice/facility.png"),
+        [NoticeCategory.FUNDING] : require("../../assets/images/notice/funding.png"),
+        [NoticeCategory.GLOBAL] : require("../../assets/images/notice/global.png"),
+        [NoticeCategory.RND] : require("../../assets/images/notice/rnd.png"),
+        [NoticeCategory.TALENT] : require("../../assets/images/notice/talent.png")
+    }
 
     const noticeCategoryList = [
         { label: "사업화", value: "사업화", noticeType: NoticeCategory.BUSINESS },
@@ -154,7 +155,7 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
                                                 backgroundColor: "rgba(255, 255, 255, 0.5)",
                                             }}
                                         >
-                                            {IconComponent && <IconComponent width={50} height={50} />}
+                                            {IconComponent && <Image style={{width : 50, height : 50}} source={IconComponent}/>}
                                             <Text>{label}</Text>
                                         </GlassView>
                                     </TouchableOpacity>

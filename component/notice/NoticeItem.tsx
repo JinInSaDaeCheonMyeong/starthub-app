@@ -1,14 +1,6 @@
 import { Image, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native"
 import { Colors } from "../../constants/Color"
 import { Fonts } from "../../constants/Fonts"
-import BusinessIcon from "../../assets/icons/glass/notice/buisness.svg";
-import EducationIcon from "../../assets/icons/glass/notice/education.svg";
-import EventIcon from "../../assets/icons/glass/notice/event.svg";
-import FacilityIcon from "../../assets/icons/glass/notice/facility.svg";
-import FundingIcon from "../../assets/icons/glass/notice/funding.svg";
-import GlobalIcon from "../../assets/icons/glass/notice/global.svg";
-import RNDIcon from "../../assets/icons/glass/notice/rnd.svg";
-import TalentIcon from "../../assets/icons/glass/notice/buisness.svg"
 import { useState, useEffect } from "react"
 import BookMarkFill from "../../assets/icons/bookMark/bookmark.fill.svg"
 import BookMark from "../../assets/icons/bookMark/bookmark.svg"
@@ -77,7 +69,7 @@ export default function NoticeItem({
         "사업화" : {label : "사업화", icon : require( "../../assets/images/notice/business.png")},
         "멘토링ㆍ컨설팅ㆍ교육" : {label : "교육", icon : require("../../assets/images/notice/education.png")},
         "창업교육" : {label : "교육", icon : require("../../assets/images/notice/education.png")},
-        "행사ㆍ네트워크" : {label : "행사", icon : "../../assets/images/notice/event.png"},
+        "행사ㆍ네트워크" : {label : "행사", icon : require("../../assets/images/notice/event.png")},
         "시설ㆍ공간ㆍ보육" : {label : "시설", icon : require("../../assets/images/notice/facility.png")},
         "정책자금" : {label : "자금", icon : require("../../assets/images/notice/funding.png")},
         "글로벌" : {label : "글로벌", icon : require("../../assets/images/notice/global.png")},
