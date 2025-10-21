@@ -1,14 +1,6 @@
-import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native"
+import { Image, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native"
 import { Colors } from "../../constants/Color"
 import { Fonts } from "../../constants/Fonts"
-import BusinessIcon from "../../assets/icons/glass/notice/buisness.svg";
-import EducationIcon from "../../assets/icons/glass/notice/education.svg";
-import EventIcon from "../../assets/icons/glass/notice/event.svg";
-import FacilityIcon from "../../assets/icons/glass/notice/facility.svg";
-import FundingIcon from "../../assets/icons/glass/notice/funding.svg";
-import GlobalIcon from "../../assets/icons/glass/notice/global.svg";
-import RNDIcon from "../../assets/icons/glass/notice/rnd.svg";
-import TalentIcon from "../../assets/icons/glass/notice/buisness.svg"
 import { useState, useEffect } from "react"
 import BookMarkFill from "../../assets/icons/bookMark/bookmark.fill.svg"
 import BookMark from "../../assets/icons/bookMark/bookmark.svg"
@@ -73,19 +65,17 @@ export default function NoticeItem({
         return targets.length > 1 ? `${display} 등` : display;
     };
 
-    const applyTargetDisplay = getApplyTargetDisplay();
-
     const categoryMap = {
-        "사업화" : {label : "사업화", icon : <BusinessIcon width={50} height={50} color={Colors.primary}/>},
-        "멘토링ㆍ컨설팅ㆍ교육" : {label : "교육", icon : <EducationIcon width={50} height={50} color={Colors.primary}/>},
-        "창업교육" : {label : "교육", icon : <EducationIcon width={50} height={50} color={Colors.primary}/>},
-        "행사ㆍ네트워크" : {label : "행사", icon : <EventIcon width={50} height={50} color={Colors.primary}/>},
-        "시설ㆍ공간ㆍ보육" : {label : "시설", icon : <FacilityIcon width={50} height={50} color={Colors.primary}/>},
-        "정책자금" : {label : "자금", icon : <FundingIcon width={50} height={50} color={Colors.primary}/>},
-        "글로벌" : {label : "글로벌", icon : <GlobalIcon width={50} height={50} color={Colors.primary}/>},
-        "기술개발(R&D)" : {label : "R&D", icon : <RNDIcon width={50} height={50} color={Colors.primary}/>},
-        "인력" : {label : "인력", icon : <TalentIcon width={50} height={50} color={Colors.primary}/>},
-        "판로ㆍ해외진출" : {label : "글로벌", icon : <GlobalIcon width={50} height={50} color={Colors.primary}/>},
+        "사업화" : {label : "사업화", icon : require( "../../assets/images/notice/business.png")},
+        "멘토링ㆍ컨설팅ㆍ교육" : {label : "교육", icon : require("../../assets/images/notice/education.png")},
+        "창업교육" : {label : "교육", icon : require("../../assets/images/notice/education.png")},
+        "행사ㆍ네트워크" : {label : "행사", icon : require("../../assets/images/notice/event.png")},
+        "시설ㆍ공간ㆍ보육" : {label : "시설", icon : require("../../assets/images/notice/facility.png")},
+        "정책자금" : {label : "자금", icon : require("../../assets/images/notice/funding.png")},
+        "글로벌" : {label : "글로벌", icon : require("../../assets/images/notice/global.png")},
+        "기술개발(R&D)" : {label : "R&D", icon : require("../../assets/images/notice/rnd.png")},
+        "인력" : {label : "인력", icon : require("../../assets/images/notice/talent.png")},
+        "판로ㆍ해외진출" : {label : "글로벌", icon : require("../../assets/images/notice/global.png")},
     }
 
     const handleBookmarkToggle = async () => {
@@ -115,7 +105,7 @@ export default function NoticeItem({
             <GlassView
                 containerStyle={styles.shadowContainer}
             >
-                {categoryMap[item.supportField as keyof typeof categoryMap]?.icon}
+                <Image style={{width : 50, height : 50}} source={categoryMap[item.supportField as keyof typeof categoryMap]?.icon}/>
                 <View style={styles.titleContainer}>
                     <Text style={styles.titleText}
                         numberOfLines={1}
@@ -128,7 +118,7 @@ export default function NoticeItem({
                     </Text>
                     <View style={styles.bookMarkCotainer}>
                         <View style={[styles.hashTagContainer, {height : 'auto'}]}>
-                            {[item.region, applyTargetDisplay].map((value, index) => (
+                            {[item.region].map((value, index) => (
                                 <Text key={index} style={styles.hashTagText}>{`#${value}`}</Text>
                             ))}
                         </View>
