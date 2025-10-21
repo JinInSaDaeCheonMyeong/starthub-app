@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from "react"
 import { useError } from "../../../util/useError"
 import { SignupInputScreenProps } from "../../../../screens/SignupInputScreen"
-import { TypeInfo, SignupInputFormData, UserInfo } from "../../../../type/user/signupInput.type"
+import { SignupInputFormData } from "../../../../type/user/signupInput.type"
 import { useDisabled } from "../../../util/useDisabled"
 import StartupStatus from "../../../../constants/StartupStatus"
 import { BackHandler } from "react-native"
-import {StackActions} from "@react-navigation/native";
 import { removeTokens } from "../../../../util/token"
 import { resetScheduleList } from "../../../../util/Schedule"
 
@@ -26,6 +25,11 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
     } = useError()
     const { disabled, disabledBtn, enabledBtn } = useDisabled()
 
+    // ✅ 유효한 일 계산 함수
+    const getDaysInMonth = useCallback((year: number, month: number) => {
+        return new Date(year, month, 0).getDate()
+    }, [])
+
     const updateFormData = useCallback(<K extends keyof SignupInputFormData>(
         key: K,
         value: SignupInputFormData[K]
@@ -40,31 +44,46 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
     const setName = makeSetter("name")
     const setYear = makeSetter("year")
     const setMonth = makeSetter("month")
-    const setDay = makeSetter("day")
+
+    // ✅ day setter에 유효성 추가
+    const setDay = useCallback((value: string) => {
+        const year = Number(formData.year)
+        const month = Number(formData.month)
+        let day = Number(value)
+
+        if (year && month) {
+            const maxDay = getDaysInMonth(year, month)
+            if (day > maxDay) {
+                day = maxDay // 넘으면 마지막 날짜로 조정
+            }
+        }
+        updateFormData("day", String(day))
+    }, [formData.year, formData.month, getDaysInMonth, updateFormData])
+
     const setGender = makeSetter("gender")
-    const setStartupType = makeSetter("startupType");
+    const setStartupType = makeSetter("startupType")
 
     const goBack = useCallback((): boolean => {
         hideError();
-        if (currentProgress <= 1) {       
+        if (currentProgress <= 1) {
             removeTokens();
-            resetScheduleList();     
+            resetScheduleList();
             navigation.reset({
-            index: 0,
-            routes: [
-                {
-                    name: "AuthStack" as any,
-                    state: {
-                        routes: [{ name: "Welcome" }],
-                        index: 0,
+                index: 0,
+                routes: [
+                    {
+                        name: "AuthStack" as any,
+                        state: {
+                            routes: [{ name: "Welcome" }],
+                            index: 0,
+                        },
                     },
-                },
-            ]
-        })
+                ]
+            })
         } else {
-            setCurrentProgress((prev) => prev - 1);
+            setCurrentProgress(prev => prev - 1)
         }
-        return true;
+        return true
     }, [currentProgress, hideError, navigation])
 
     /** 다음 단계 */
@@ -75,16 +94,17 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
         const year = formData.year.trim()
         const month = formData.month.trim()
         const day = formData.day.trim()
-        const birth = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        const startupType = formData.startupType;
-        if(!username || !year || !month || !day){
-            showError('이름 또는 생년월일을 입력해주세요')
-            enabledBtn();
+        const birth = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+        const startupType = formData.startupType
+
+        if (!username || !year || !month || !day) {
+            showError("이름 또는 생년월일을 입력해주세요")
+            enabledBtn()
             return
         }
+
         if (currentProgress >= MAXPROGRESS) {
             console.log("마지막 단계 도착")
-            // TODO: 서버 연결
             navigation.navigate("CompanyInput", {
                 username,
                 birth,
@@ -94,19 +114,18 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
         } else {
             setCurrentProgress(prev => prev + 1)
         }
-        hideError();
-        enabledBtn();
+
+        hideError()
+        enabledBtn()
     }
 
     useEffect(() => {
         const backHandler = BackHandler.addEventListener(
             "hardwareBackPress",
             goBack
-        );
-        return () => {
-            backHandler.remove();
-        };
-    }, [goBack]);
+        )
+        return () => backHandler.remove()
+    }, [goBack])
 
     return {
         form: {
