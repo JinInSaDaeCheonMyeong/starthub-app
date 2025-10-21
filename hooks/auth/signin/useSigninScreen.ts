@@ -11,8 +11,11 @@ import { getMyFCMTokens, registerFCMToken, removeFCMToken } from "../../../api/n
 import {getDeviceTypeAsync, DeviceType as ExpoDeviceType} from "expo-device"
 import { Platform } from "react-native";
 import { DeviceType } from "../../../type/notification/notification.type";
+import {RootStackParamList} from "../../../navigation/RootStack";
+import { NavigationProp } from "@react-navigation/native";
 
 export const useSigninScreen = ({navigation} : SigninScreenProps) => {
+    const rootNavigation = navigation as unknown as NavigationProp<RootStackParamList>;
     const [formData, setFormData] = useState<SigninFormData>({
         email : '',
         password : ''
@@ -76,7 +79,10 @@ export const useSigninScreen = ({navigation} : SigninScreenProps) => {
             if(!data.isFirstLogin && !!userData.username){
                 successLogin()
             } else {
-                navigation.navigate("SignupInput")
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: "SignupInput" }],
+                });
             }
         } catch (error) { 
             handleAxiosError(error, (value) => {showError(value)})
@@ -131,10 +137,13 @@ export const useSigninScreen = ({navigation} : SigninScreenProps) => {
     }
 
     const successLogin = () => {
-        disabledBtn()
-        navigation.navigate("HomeStack")
-        enabledBtn()
-    }
+        disabledBtn();
+        rootNavigation.reset({
+            index: 0,
+            routes: [{ name: "HomeStack" }],
+        });
+        enabledBtn();
+    };
 
     const goBack = () => {
         disabledBtn()
