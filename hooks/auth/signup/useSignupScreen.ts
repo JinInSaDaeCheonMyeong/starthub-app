@@ -75,7 +75,7 @@ export const useSignupScreen = ({ navigation }: SignupScreenProps) => {
             setTime((prev) => {
                 if (prev <= 1) {
                     clearInterval(timerRef.current!);
-                    ShowToast("인증 코드", "인증 시간이 만료되었습니다. 다시 요청해주세요.", ToastType.WARNING);
+                    ShowToast("인증 코드", "인증 시간이 만료되었습니다", ToastType.WARNING);
                     setIsCodeSent(false);
                     return 0;
                 }
