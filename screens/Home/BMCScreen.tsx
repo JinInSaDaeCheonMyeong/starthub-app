@@ -34,7 +34,6 @@ export default function BMCScreen(navigation: BMCScreenProps) {
     const [refreshing, setRefreshing] = useState(false);
 
     const fetchBMCs = useCallback(async () => {
-        console.log("asdkf")
         setLoading(true);
         try {
             const response: GetBMCsResponse = await getBMCs();

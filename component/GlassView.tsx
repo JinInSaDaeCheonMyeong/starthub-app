@@ -8,7 +8,8 @@ type GlassViewProps = {
     blurStyle ?: StyleProp<ViewStyle>,
     blurPercent ?: number
     blurType ?: 'dark' | 'light' | 'xlight'
-    children ?: React.ReactNode | undefined
+    children ?: React.ReactNode | undefined,
+    overlayColor ?: string | undefined
 }
 
 export default function GlassView({
@@ -16,7 +17,8 @@ export default function GlassView({
     containerStyle,
     blurStyle,
     blurPercent = 0.6,
-    blurType = 'light'
+    blurType = 'light',
+    overlayColor = "rgba(255, 255, 255, 1)"
 } : GlassViewProps){
     const iosMax = 100;
     const androidMax = 25;
@@ -26,9 +28,9 @@ export default function GlassView({
             ? Math.round(androidMax * blurPercent)
             : Math.round(iosMax * blurPercent);
 
-    const overlayColor = 
+    const overlayColors = 
         Platform.OS === 'android'
-            ? "rgba(255, 255, 255, 1)"
+            ? overlayColor
             : undefined
     
     return (
@@ -37,7 +39,7 @@ export default function GlassView({
                 style={[StyleSheet.absoluteFill, blurStyle]}
                 blurType={blurType}
                 blurAmount={blurAmount}
-                overlayColor={overlayColor}
+                overlayColor={overlayColors}
                 reducedTransparencyFallbackColor="transparent"
             />
             {children}

@@ -27,8 +27,9 @@ export default function BMCItem({
 }: BMCItemProps) {
     const defaultImage = require("../../assets/images/bmc-thumbnail-exam.png");
     const contentHeight = height ? height : undefined;
-    const [imageError, setImageError] = useState<boolean>(!imageSource);
-
+    const [imageError, setImageError] = useState<boolean>(
+        !imageSource || (typeof imageSource === 'object' && 'uri' in imageSource && !imageSource.uri)
+    );
     return (
         <TouchableOpacity
             activeOpacity={0.4}
@@ -40,17 +41,13 @@ export default function BMCItem({
                 blurPercent={0.6}
             >
                 <View style={{ position: 'relative', height : contentHeight }}>
-                    <Image
-                        source={
-                            imageError || !imageSource
-                                ? defaultImage
-                                : imageSource
-                        }
-                        resizeMode="contain"
-                        defaultSource={defaultImage}
-                        style={{ width: '100%', height : contentHeight, padding : 8}}
-                        onError={() => setImageError(true)}
-                    />
+                <Image
+                    source={imageError || !imageSource ? defaultImage : imageSource}
+                    resizeMode="contain"
+                    defaultSource={defaultImage}
+                    style={{ width: '100%', height : contentHeight, padding : 8 }}
+                    onError={() => setImageError(true)}
+                />
                     {imageError && (
                         <View style={styles.dummyOverlay}>
                             <Text style={styles.dummyText}>이미지가 없습니다</Text>

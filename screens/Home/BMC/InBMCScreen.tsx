@@ -5,13 +5,14 @@ import {
     StyleSheet, ScrollView, Dimensions, TouchableOpacity,
     ImageBackground,
     Image,
+    Platform,
 } from 'react-native';
 import { Colors } from '../../../constants/Color';
 import { Fonts } from '../../../constants/Fonts';
 import {StackScreenProps} from "@react-navigation/stack";
 import {RootStackParamList} from "../../../navigation/RootStack";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
-import {SelectBMCValue} from "../../../type/BMC/BMC.type";
+import {BMCType, SelectBMCValue} from "../../../type/BMC/BMC.type";
 import ChannelsIcon from "../../../assets/icons/bmc/channels.svg"
 import CostStructureIcon from "../../../assets/icons/bmc/cost_structure.svg"
 import CustomerRelationshipsIcon from "../../../assets/icons/bmc/customer_relationships.svg"
@@ -72,8 +73,10 @@ export default function InBMCScreen({navigation, route : {params}} : InBMCScreen
     const handleBackPress = () => {
         navigation.goBack()
     };
+    const defaultImage = require("../../../assets/images/bmc-thumbnail-exam.png");
     const buttonSide = (width-96)/5
     const [selectValue, setSelectValue] = useState<SelectBMCValue>(SelectBMCValue.keyPartners);
+    const imageSource = params.BMC.imageUrl
     const insets = useSafeAreaInsets();
     const bmcBlockMap: Record<SelectBMCValue, string> = {
         [SelectBMCValue.keyPartners]: params.BMC.keyPartners,
@@ -86,7 +89,8 @@ export default function InBMCScreen({navigation, route : {params}} : InBMCScreen
         [SelectBMCValue.costStructure]: params.BMC.costStructure,
         [SelectBMCValue.revenueStreams]: params.BMC.revenueStreams,
     };
-    const [imageError, setImageError] = useState<boolean>(!params.BMC.imageUrl);
+    
+    const [imageError, setImageError] = useState<boolean>(!imageSource);
     return (
         <ImageBackground 
             style={[styles.container,{paddingTop: insets.top, paddingBottom: insets.bottom}]}
@@ -98,17 +102,15 @@ export default function InBMCScreen({navigation, route : {params}} : InBMCScreen
             />
             <ScrollView contentContainerStyle={{gap : 24, paddingHorizontal : 16, paddingVertical : 16}}>
                 <View style={[styles.bmcImage]}>
-                    <Image
-                        source={
-                            imageError || !params?.BMC.imageUrl
-                                ? require('../../../assets/images/bmc-thumbnail-exam.png')
-                                : params.BMC.imageUrl
-                        }
-                        resizeMode="contain"
-                        defaultSource={require('../../../assets/images/bmc-thumbnail-exam.png')}
-                        style={styles.bmcImage}
-                        onError={() => setImageError(true)}
-                    />
+                <Image
+                    source={imageError || !imageSource ? defaultImage : {uri : imageSource}}
+                    resizeMode="contain"
+                    defaultSource={defaultImage}
+                    style={styles.bmcImage}
+                    onError={() => {
+                        setImageError(true)
+                    }}
+                />
                     {imageError && (
                         <View style={styles.dummyOverlay}>
                             <Text style={styles.dummyText}>이미지가 없습니다</Text>
@@ -119,22 +121,24 @@ export default function InBMCScreen({navigation, route : {params}} : InBMCScreen
                     {values.map((value, index) => {
                         const Icon = value.icon;
                         const isSelected = value.itemValue === selectValue;
-                        const backGroundColor = isSelected ? Colors.primary : Colors.white1;
+                        const backgroundColor = isSelected ? 'rgba(36, 102, 244, 0.6)' : Colors.white1;
                         const iconColor = isSelected ? Colors.white1 : Colors.second;
                         const borderColor = isSelected ? Colors.primary : Colors.white1
-
+                        const overlayColor = Platform.OS === 'android' ? isSelected ? 'rgba(255, 255, 255, 0)' : undefined : undefined
                         return (
                             <TouchableOpacity key={index} onPress={() => setSelectValue(value.itemValue)}>
                                 <GlassView containerStyle={{
-                                    width: buttonSide,
-                                    height: buttonSide,
-                                    backgroundColor: backGroundColor,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    borderColor: borderColor,
-                                    borderWidth: 1,
-                                    borderRadius: 8
-                                }}>
+                                        width: buttonSide,
+                                        height: buttonSide,
+                                        backgroundColor: backgroundColor,
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        borderColor: borderColor,
+                                        borderWidth: 1,
+                                        borderRadius: 8
+                                    }} 
+                                    overlayColor={overlayColor}
+                                >
                                     <Icon color={iconColor} width={buttonSide*0.4} height={buttonSide*0.4} />
                                 </GlassView>
                             </TouchableOpacity>
