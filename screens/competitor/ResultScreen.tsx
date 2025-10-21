@@ -125,6 +125,7 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                 <Carousel
                     style={{overflow : 'visible'}}
                     width={width - 28}
+                    loop={false}   // ← 무한 스크롤 방지
                     height={typeof carouselHeight === 'number' ? carouselHeight : 400}
                     data={body as CompetitorComparison[]}
                     renderItem={({index, item}) => {
