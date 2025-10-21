@@ -184,8 +184,8 @@ export default function NoticeSearchScreen({
           console.log(error.response);
         }
         ShowToast(
-          "문제가 발생하였습니다",
-          "데이터를 불러오지 못하였습니다",
+          "문제가 발생했습니다",
+          "데이터를 불러오지 못 했습니다",
           ToastType.ERROR
         );
       } finally {
@@ -272,8 +272,8 @@ export default function NoticeSearchScreen({
       }
     } catch (error) {
       ShowToast(
-        "문제가 발생하였습니다",
-        "데이터를 불러오지 못하였습니다",
+        "문제가 발생했습니다",
+        "데이터를 불러오지 못 했습니다",
         ToastType.ERROR
       );
     } finally {

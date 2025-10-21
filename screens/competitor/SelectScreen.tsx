@@ -44,7 +44,7 @@ export default function SelectScreen({navigation} : SelectScreenProps){
             if(isAxiosError(error)){
                 const response = error.response
                 if(!response){
-                    ShowToast("경쟁사 분석", '네트워크 오류가 발생하였습니다', ToastType.ERROR);
+                    ShowToast("경쟁사 분석", '네트워크 오류가 발생헀습니다', ToastType.ERROR);
                 } else {
                     const message = (response.data as ErrorResponse).message
                     if(message[message.length] === '.') {

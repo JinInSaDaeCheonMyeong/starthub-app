@@ -33,7 +33,6 @@ export default function AlarmScreen({navigation} : AlarmScreenProps) {
     const parseReceptionPeriod = (period: string) => {
         try {
             if (!period || typeof period !== 'string') {
-                console.warn('Invalid reception period:', period);
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -41,7 +40,6 @@ export default function AlarmScreen({navigation} : AlarmScreenProps) {
             }
             const parts = period.split("~").map(str => str.trim());
             if (parts.length !== 2) {
-                console.warn('Invalid period format - no ~ separator:', period);
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -52,7 +50,6 @@ export default function AlarmScreen({navigation} : AlarmScreenProps) {
             const endDateStr = endPart.split(" ")[0];
             const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
             if (!dateRegex.test(startDateStr) || !dateRegex.test(endDateStr)) {
-                console.warn('Invalid date format:', { startDateStr, endDateStr, originalPeriod: period });
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -81,7 +78,6 @@ export default function AlarmScreen({navigation} : AlarmScreenProps) {
                 endDate
             };
         } catch (error) {
-            console.error('Error parsing reception period:', error, 'Period:', period);
             return {
                 startDate: new Date(),
                 endDate: new Date()
@@ -113,7 +109,7 @@ export default function AlarmScreen({navigation} : AlarmScreenProps) {
                 startDate,
                 endDate
             }
-            ShowToast("알람", '공고를 불러오는데 성공하셨습니다', ToastType.SUCCESS);
+            ShowToast("알람", '공고를 불러오는데 성공했습니다', ToastType.SUCCESS);
             navigation.navigate("InNotice", { Notice: data });
         } catch (error) {
             if(isAxiosError(error)){
