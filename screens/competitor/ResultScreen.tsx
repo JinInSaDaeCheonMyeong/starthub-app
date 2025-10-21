@@ -50,11 +50,12 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                     const message = (response.data as ErrorResponse).message
                     if(message[message.length] === '.') {
                         const errorMsg = message.slice(0, -1);
-                        ShowToast("경쟁사 분석", errorMsg, ToastType.ERROR);
+                        ShowToast("경쟁사 분석", errorMsg + '입니다', ToastType.ERROR);
                     }
-                    ShowToast("경쟁사 분석", message + '입니다', ToastType.ERROR);
+                    ShowToast("경쟁사 분석", message, ToastType.ERROR);
                 }
             }
+            ShowToast("경쟁사 분석", '알 수 없는 오류가 발생했습니다', ToastType.ERROR);
         } finally {
             setLoading(false)
         }
