@@ -18,7 +18,7 @@ import { useEffect, useState, useCallback } from "react";
 import SideBar from "../component/home/SideBar";
 import { Colors } from "../constants/Color";
 import { Fonts } from "../constants/Fonts";
-import { removeTokens } from "../util/token";
+import { getFCMToken, removeTokens } from "../util/token";
 import { resetScheduleList } from "../util/Schedule";
 import { ShowToast, ToastType } from "../util/ShowToast";
 import { deleteUser, getMe } from "../api/user";
@@ -29,6 +29,7 @@ import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "./RootStack";
 import StartupStatus from "../constants/StartupStatus";
 import {useFocusEffect} from '@react-navigation/native'
+import { removeFCMToken } from "../api/notification";
 
 export type HomeStackParamList = {
     Home : undefined,
@@ -104,6 +105,8 @@ export function HomeStack({ navigation } : HomeStackProps) {
         try {
             await removeTokens();
             await resetScheduleList();
+            const fcmToken : string | null = await getFCMToken()
+            await (await removeFCMToken(fcmToken ?? '')).data
             setDrawerOpen(false);
             ShowToast("로그아웃", "로그아웃에 성공하셨습니다", ToastType.SUCCESS)
             navigation.reset({
@@ -119,7 +122,7 @@ export function HomeStack({ navigation } : HomeStackProps) {
                 ]
             })
         } catch (error) {
-        ShowToast("로그아웃", "로그아웃에 실패했습니다", ToastType.ERROR);
+            ShowToast("로그아웃", "로그아웃에 실패했습니다", ToastType.ERROR);
         } finally {
             handleCloseModal();
         }
@@ -135,6 +138,8 @@ export function HomeStack({ navigation } : HomeStackProps) {
             (await deleteUser(deleteUserData)).data;
             await removeTokens();
             await resetScheduleList();
+            const fcmToken : string | null = await getFCMToken()
+            await (await removeFCMToken(fcmToken ?? '')).data
             setDrawerOpen(false);
             ShowToast("회원 탈퇴", "회원 탈퇴에 성공하셨습니다", ToastType.SUCCESS);
             navigation.reset({
