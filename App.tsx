@@ -132,18 +132,8 @@ export default function App() {
         console.log("📱 FCM Token:", token);
         try {
           await saveFCMToken(token);
-          ShowToast(
-              "FCM 토큰",
-              "푸시 알림이 성공적으로 설정되었습니다",
-              ToastType.SUCCESS
-          );
         } catch (error) {
           console.error('FCM 토큰 저장 실패:', error);
-          ShowToast(
-              "FCM 토큰",
-              "FCM 토큰을 저장하는데 실패하였습니다",
-              ToastType.ERROR
-          );
         }
       }
     };
