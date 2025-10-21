@@ -6,13 +6,16 @@ import { Fonts } from "../../constants/Fonts";
 import StartupStatus from "../../constants/StartupStatus";
 import useProfileScreen from "../../hooks/system/useProfileScreen";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
+import * as Progress from 'react-native-progress';
+
 
 export type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'Profile'>
 
 export default function ProfileScreen(props : ProfileScreenProps){
     const {
         form : {
-            profileData
+            profileData,
+            loading
         },
         ui : {
             profileList,
@@ -26,20 +29,31 @@ export default function ProfileScreen(props : ProfileScreenProps){
             goWeb
         }
     } = useProfileScreen(props)
+
+    if (loading) {
+        return (
+            <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
+                <Progress.Circle
+                    size={40}
+                    indeterminate
+                    color={Colors.primary}
+                />
+            </View>
+        );
+    }
+
     return (
-        <View
-            style={[styles.mainContainer]}
-        >
+        <View style={[styles.mainContainer]}>
             <SubHeaderBar
                 title="프로필"
                 handleBackPress={goBack}
                 subIcon='Profile'
                 handleSubPress={goEditProfile}
             />
-            <ScrollView 
+            <ScrollView
                 style={styles.scorllContainer}
                 contentContainerStyle={{
-                    gap : 24, 
+                    gap : 24,
                     paddingBottom : Platform.select({ios : 16, android : 32})
                 }}
                 showsVerticalScrollIndicator={false}
@@ -67,23 +81,23 @@ export default function ProfileScreen(props : ProfileScreenProps){
                             </View>
                             {
                                 isWebLink(label) ? (
-                                    <Text 
-                                    onPress={() => {goWeb(data)}} 
-                                    style={[
-                                        styles.dataText, 
-                                        !data.includes("내용이 없습니다") && { 
-                                            color : Colors.info, 
-                                            textDecorationLine : "underline" 
-                                        }]}
+                                    <Text
+                                        onPress={() => {goWeb(data)}}
+                                        style={[
+                                            styles.dataText,
+                                            !data.includes("내용이 없습니다") && {
+                                                color : Colors.info,
+                                                textDecorationLine : "underline"
+                                            }]}
                                     >
-                                    {data}
+                                        {data}
                                     </Text>
                                 ) : (
                                     <Text style={styles.dataText}>{data}</Text>
                                 )
                             }
                         </View>
-                    )) : 
+                    )) :
                     preStartupList.map(({label, data}, index) => (
                         <View style={styles.labelContainer} key={index}>
                             <Text style={styles.labelText}>{label}</Text>

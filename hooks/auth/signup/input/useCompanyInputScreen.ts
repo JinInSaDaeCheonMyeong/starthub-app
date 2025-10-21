@@ -7,7 +7,8 @@ import { CompanyInputFormData } from "../../../../type/user/companyInput.type";
 import { ShowToast, ToastType } from "../../../../util/ShowToast";
 import { setProfile } from "../../../../api/user";
 import { BackHandler } from "react-native";
-import {useFocusEffect} from "@react-navigation/native"
+import {NavigationProp, useFocusEffect} from "@react-navigation/native"
+import {RootStackParamList} from "../../../../navigation/RootStack";
 
 export const useCompanyInputScreen = (
     {
@@ -24,6 +25,7 @@ export const useCompanyInputScreen = (
     earlyScreenNumber : number,
     preScreenNumber : number
 ) => {
+    const rootNavigation = navigation as unknown as NavigationProp<RootStackParamList>;
     const isEarlyStartup = startupType === StartupStatus.EARLY_STAGE; 
     const MAXPROGRESS = isEarlyStartup ? earlyScreenNumber : preScreenNumber
     const [currentProgress, setCurrentProgress] = useState(1)
@@ -149,7 +151,10 @@ export const useCompanyInputScreen = (
                     startupFields
                 })
                 ShowToast("프로필 등록", "프로필 등록에 성공하셨습니다", ToastType.SUCCESS)
-                navigation.navigate('HomeStack')
+                rootNavigation.reset({
+                    index: 0,
+                    routes: [{ name: "HomeStack" }],
+                });
             } catch (error : any) {
                 if(error.isAxiosError){
                     ShowToast("프로필 등록", "프로필 등록에 실패하셨습니다", ToastType.ERROR)

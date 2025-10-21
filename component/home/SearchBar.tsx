@@ -25,9 +25,11 @@ export default function SearchBar({onPress, value} : SearchBarProps) {  // ✅ v
         <View style={[{flexDirection : "row", zIndex: 10000}]}>
             <GlassView containerStyle={styles.mainContainer}>
                 <TextInput
+                    inputMode={"search"}
                     style={styles.textInput}
                     placeholder={"검색어를 입력해주세요..."}
                     placeholderTextColor={Colors.gray2}
+                    onSubmitEditing={() => onPress(text)}
                     value={text}
                     onChangeText={
                         (text) => setText(text)
