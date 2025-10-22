@@ -27,9 +27,9 @@ const {width} = Dimensions.get("window");
 export default function HomeScreen(props : HomeScreenProps) {
     const featureMap = {
         ['Competitor'] : CompetitorIcon,
-        ['Compare'] : CompareIcon,
-        ['Suggest'] : SuggestionIcon,
-        ['Calendar'] : CalendarIcon
+        ['MyLikes'] : CompareIcon,
+        ['NoticeSearch'] : SuggestionIcon,
+        ['Alarm'] : CalendarIcon
     }
 
     const categoryMap = {
@@ -73,18 +73,28 @@ export default function HomeScreen(props : HomeScreenProps) {
                                 const IconComponent = featureMap[nav];
                                 let screenName :
                                     | keyof HomeStackParamList
-                                    | keyof RootStackParamList = "Competitor";
+                                    | keyof RootStackParamList ;
                                 switch (index) {
                                     case 0:
                                         screenName = "Competitor";
+                                        break;
+                                    case 1:
+                                        screenName = "MyLikes";
+                                        break;
+                                    case 2:
+                                        screenName = "NoticeSearch";
+                                        break;
+                                    case 3:
+                                        screenName = "Alarm";
                                         break;
                                     default:
                                         screenName = "Competitor";
                                         break;
                                     }
                                 return (
-                                    <TouchableOpacity 
-                                        onPress={() => {props.navigation.navigate(screenName)}}
+                                    <TouchableOpacity
+                                        onPress={() => props.navigation.navigate(screenName as never)}
+
                                         key={index}
                                         style={styles.navIconWrapper}
                                     >
@@ -250,8 +260,10 @@ const styles = StyleSheet.create({
     },
     navIconContainer : {
         flexDirection : 'row',
-        paddingHorizontal : 16,
-        gap : 16
+        flex : 1,
+        alignItems: "center",
+        justifyContent : "center",
+        gap : 12
     },
     navIconWrapper : {
         alignItems : 'center',

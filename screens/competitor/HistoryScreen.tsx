@@ -15,7 +15,7 @@ import BMCItem from "../../component/home/BMCItem";
 import { getBMC } from "../../api/bmc";
 import { formatToDate } from "../../util/DateFormat";
 
-type HistoryScreenProps = StackScreenProps<CompoetitorStackParamList>
+type HistoryScreenProps = StackScreenProps<CompoetitorStackParamList, 'History'>
 
 export function HistoryScreen({navigation} : HistoryScreenProps) {
     const [competitorList, setCompetitorList] = useState<CompetitorFormData[]>([])
@@ -79,6 +79,7 @@ export function HistoryScreen({navigation} : HistoryScreenProps) {
                                 onPress={() => 
                                     navigation.navigate('Result', {bmcId : item.bmcId, image : {uri : item.bmcImage}, data : item})}
                                 isCompetitor
+                                imageSource={{uri : item.bmcImage}}
                                 subText={formatToDate(item.createdAt, 'dotted')}
                             />
                         </TouchableOpacity>

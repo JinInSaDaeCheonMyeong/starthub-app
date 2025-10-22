@@ -19,7 +19,7 @@ import { isAxiosError } from "axios";
 import { competitorAnalysis, recompetitorAnalysis } from "../../api/competitor";
 import { ScrollView } from "react-native-gesture-handler";
 
-type ResultScreenProps = StackScreenProps<CompoetitorStackParamList>
+type ResultScreenProps = StackScreenProps<CompoetitorStackParamList, 'Result'>
 
 export default function ResultScreen({navigation, route : {params}} : ResultScreenProps){
     const {width} = useWindowDimensions()
@@ -42,6 +42,7 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
             ShowToast("경쟁사 분석", '경쟁사 분석에 성공했습니다', ToastType.SUCCESS);
             setForm(response)
         } catch (error) {
+            console.log(error)
             if(isAxiosError(error)){
                 const response = error.response
                 if(!response){
