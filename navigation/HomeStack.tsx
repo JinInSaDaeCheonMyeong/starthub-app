@@ -30,6 +30,7 @@ import { RootStackParamList } from "./RootStack";
 import StartupStatus from "../constants/StartupStatus";
 import {useFocusEffect} from '@react-navigation/native'
 import { removeFCMToken } from "../api/notification";
+import { DefaultImage } from "../constants/AppImages";
 
 export type HomeStackParamList = {
     Home : undefined,
@@ -41,6 +42,7 @@ export type HomeStackParamList = {
 type HomeStackProps = StackScreenProps<RootStackParamList, 'HomeStack'>;
 
 const Tab = createBottomTabNavigator<HomeStackParamList>();
+const backgroundImage = DefaultImage.background
 
 export function HomeStack({ navigation } : HomeStackProps) {
     const insets = useSafeAreaInsets();
@@ -57,16 +59,18 @@ export function HomeStack({ navigation } : HomeStackProps) {
     const isLocal = profileProvider === "LOCAL";
     const {width} = useWindowDimensions()
 
+    const fetchData = async () => {
+        try {
+            const data = (await getMe()).data;
+            setProfileData(data)
+            setProfileProvider(data.provider);
+        } catch (error) {
+            ShowToast('', '알 수 없는 오류가 발생했습니다', ToastType.ERROR)
+        }
+    };
+
     useFocusEffect(
         useCallback(() => {
-            const fetchData = async () => {
-                try {
-                    const data = (await getMe()).data;
-                    setProfileData(data)
-                    setProfileProvider(data.provider);
-                } catch (error) {
-                }
-            };
             fetchData();
         }, [])
     );
@@ -162,7 +166,7 @@ export function HomeStack({ navigation } : HomeStackProps) {
 
     return (
         <ImageBackground
-        source={require("../assets/images/glass-background.png")}
+        source={backgroundImage}
         style={[styles.container, { paddingTop: insets.top }]}
         >
         <Drawer

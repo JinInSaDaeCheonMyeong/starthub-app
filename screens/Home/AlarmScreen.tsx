@@ -19,11 +19,13 @@ import NoticeIcon from "../../assets/icons/alarm/Iconly/Regular/Bulk/Work.svg"
 import CalendarIcon from "../../assets/icons/alarm/Iconly/Regular/Bulk/Calendar.svg"
 import { getNotice } from "../../api/notice";
 import { NoticeType } from "../../type/notice/notice.type";
+import { DefaultImage } from "../../constants/AppImages";
 
 export type AlarmScreenProps = StackScreenProps<
     RootStackParamList,
     "Alarm"
 >;
+const backgroundImage = DefaultImage.background
 
 export default function AlarmScreen({navigation} : AlarmScreenProps) {
     const insets = useSafeAreaInsets()
@@ -160,7 +162,7 @@ export default function AlarmScreen({navigation} : AlarmScreenProps) {
         )
     }, [handleNotice])
     return (
-        <ImageBackground source={require("../../assets/images/glass-background.png")} style={{paddingTop: insets.top, paddingBottom: insets.bottom, flex : 1}}>
+        <ImageBackground source={backgroundImage} style={{paddingTop: insets.top, paddingBottom: insets.bottom, flex : 1}}>
             <SubHeaderBar
                 title="내 알림"
                 handleBackPress={navigation.goBack}

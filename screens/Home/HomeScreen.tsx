@@ -21,6 +21,7 @@ import * as Progress from "react-native-progress";
 import { useCallback, useMemo } from "react";
 import { NoticeType } from "../../type/notice/notice.type";
 import NoticeItem from "../../component/notice/NoticeItem";
+import { NavImages, NoticeImages } from "../../constants/AppImages";
 
 export type HomeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Home">,
@@ -28,26 +29,27 @@ export type HomeScreenProps = CompositeScreenProps<
 >;
 
 const { width } = Dimensions.get("window");
+// 네비게이션 관련 이미지 매핑
+const featureMap = {
+    Competitor: NavImages.competitor,
+    MyLikes: NavImages.compare,
+    NoticeSearch: NavImages.suggestion,
+    Alarm: NavImages.calendar,
+};
+
+// 공고 카테고리 이미지 매핑
+const categoryMap = {
+    [NoticeCategory.BUSINESS]: NoticeImages.business,
+    [NoticeCategory.EDUCATION]: NoticeImages.education,
+    [NoticeCategory.EVENT]: NoticeImages.event,
+    [NoticeCategory.FACILITY]: NoticeImages.facility,
+    [NoticeCategory.FUNDING]: NoticeImages.funding,
+    [NoticeCategory.GLOBAL]: NoticeImages.global,
+    [NoticeCategory.RND]: NoticeImages.rnd,
+    [NoticeCategory.TALENT]: NoticeImages.talent,
+};
 
 export default function HomeScreen(props: HomeScreenProps) {
-    const featureMap = {
-        Competitor: require("../../assets/images/nav/competitor.png"),
-        MyLikes: require("../../assets/images/nav/compare.png"),
-        NoticeSearch: require("../../assets/images/nav/suggestion.png"),
-        Alarm: require("../../assets/images/nav/calendar.png"),
-    };
-
-    const categoryMap = {
-        [NoticeCategory.BUSINESS]: require("../../assets/images/notice/business.png"),
-        [NoticeCategory.EDUCATION]: require("../../assets/images/notice/education.png"),
-        [NoticeCategory.EVENT]: require("../../assets/images/notice/event.png"),
-        [NoticeCategory.FACILITY]: require("../../assets/images/notice/facility.png"),
-        [NoticeCategory.FUNDING]: require("../../assets/images/notice/funding.png"),
-        [NoticeCategory.GLOBAL]: require("../../assets/images/notice/global.png"),
-        [NoticeCategory.RND]: require("../../assets/images/notice/rnd.png"),
-        [NoticeCategory.TALENT]: require("../../assets/images/notice/talent.png"),
-    };
-
     const {
         form: { noticeItems, noticeCategoryList, userName },
         ui: { navItemList, recomLoading },

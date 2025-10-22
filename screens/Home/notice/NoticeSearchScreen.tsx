@@ -30,6 +30,7 @@ import { TargetAgeItems } from "../../../constants/TargetAgeItems";
 import { isAxiosError } from "axios";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import SubHeaderBar from "../../../component/home/SubHeaderBar";
+import { DefaultImage } from "../../../constants/AppImages";
 
 const { height } = Dimensions.get("window");
 
@@ -39,6 +40,8 @@ export type NoticeScreenProps = StackScreenProps<
   RootStackParamList,
   "NoticeSearch"
 >;
+
+const backgroundImage = DefaultImage.background
 
 export default function NoticeSearchScreen({
   navigation,
@@ -328,7 +331,7 @@ export default function NoticeSearchScreen({
 
   return (
     <ImageBackground
-      source={require("../../../assets/images/glass-background.png")}
+      source={backgroundImage}
       style={[
         styles.container,
         { paddingTop: insets.top, paddingBottom: insets.bottom },

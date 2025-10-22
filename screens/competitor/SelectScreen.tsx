@@ -17,8 +17,10 @@ import { CompetitorRequest } from "../../type/competitor/competitor.type";
 import { isAxiosError } from "axios";
 import { ErrorResponse } from "../../type/util/response.type";
 import BMCItem from "../../component/home/BMCItem";
+import { DefaultImage } from "../../constants/AppImages";
 
 type SelectScreenProps = StackScreenProps<CompoetitorStackParamList, 'Select'>
+const backgroundImage = DefaultImage.background
 
 export default function SelectScreen({navigation} : SelectScreenProps){
     const [allBMCs, setAllBMCs] = useState<BMCType[]>([]);
@@ -104,7 +106,7 @@ export default function SelectScreen({navigation} : SelectScreenProps){
         <>
         <ImageBackground 
             style={{flex : 1, position : 'relative'}} 
-            source={require("../../assets/images/glass-background.png")}
+            source={backgroundImage}
         >
             <SubHeaderBar
                 handleBackPress={navigation.goBack}

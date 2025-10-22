@@ -20,7 +20,6 @@ const useCalendarScreen = () => {
     const parseReceptionPeriod = (period: string) => {
         try {
             if (!period || typeof period !== 'string') {
-                console.warn('Invalid reception period:', period);
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -31,7 +30,6 @@ const useCalendarScreen = () => {
             const parts = period.split("~").map(str => str.trim());
 
             if (parts.length !== 2) {
-                console.warn('Invalid period format - no ~ separator:', period);
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -50,7 +48,6 @@ const useCalendarScreen = () => {
             // YYYY-MM-DD 형식인지 검증
             const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
             if (!dateRegex.test(startDateStr) || !dateRegex.test(endDateStr)) {
-                console.warn('Invalid date format:', { startDateStr, endDateStr, originalPeriod: period });
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -63,11 +60,6 @@ const useCalendarScreen = () => {
 
             // 유효한 날짜인지 확인
             if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                console.warn('Invalid date created from:', {
-                    startDateStr,
-                    endDateStr,
-                    originalPeriod: period
-                });
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -79,7 +71,6 @@ const useCalendarScreen = () => {
                 endDate
             };
         } catch (error) {
-            console.error('Error parsing reception period:', error, 'Period:', period);
             return {
                 startDate: new Date(),
                 endDate: new Date()
@@ -149,6 +140,9 @@ const useCalendarScreen = () => {
         useCallback(() => {
             initMarkedDates(); 
             getNoticeItem(currentDate);
+            return () => {
+                setNoticeItemList([])
+            }
         }, [currentDate])
     );
 

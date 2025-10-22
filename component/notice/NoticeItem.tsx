@@ -7,6 +7,7 @@ import BookMark from "../../assets/icons/bookMark/bookmark.svg"
 import {NoticeType} from "../../type/notice/notice.type";
 import {deleteLikes, postLikes} from "../../api/likes";
 import GlassView from "../GlassView"
+import { NoticeImages } from "../../constants/AppImages"
 
 interface NoticeItemProps {
     item : NoticeType
@@ -14,17 +15,17 @@ interface NoticeItemProps {
 }
 
 const categoryMap = {
-    "사업화" : {label : "사업화", icon : require( "../../assets/images/notice/business.png")},
-    "멘토링ㆍ컨설팅ㆍ교육" : {label : "교육", icon : require("../../assets/images/notice/education.png")},
-    "창업교육" : {label : "교육", icon : require("../../assets/images/notice/education.png")},
-    "행사ㆍ네트워크" : {label : "행사", icon : require("../../assets/images/notice/event.png")},
-    "시설ㆍ공간ㆍ보육" : {label : "시설", icon : require("../../assets/images/notice/facility.png")},
-    "정책자금" : {label : "자금", icon : require("../../assets/images/notice/funding.png")},
-    "글로벌" : {label : "글로벌", icon : require("../../assets/images/notice/global.png")},
-    "기술개발(R&D)" : {label : "R&D", icon : require("../../assets/images/notice/rnd.png")},
-    "인력" : {label : "인력", icon : require("../../assets/images/notice/talent.png")},
-    "판로ㆍ해외진출" : {label : "글로벌", icon : require("../../assets/images/notice/global.png")},
-    "융자" : {label : "자금", icon : require("../../assets/images/notice/funding.png")},
+    "사업화" : {label : "사업화", icon : NoticeImages.business},
+    "멘토링ㆍ컨설팅ㆍ교육" : {label : "교육", icon : NoticeImages.education},
+    "창업교육" : {label : "교육", icon : NoticeImages.education},
+    "행사ㆍ네트워크" : {label : "행사", icon : NoticeImages.event},
+    "시설ㆍ공간ㆍ보육" : {label : "시설", icon : NoticeImages.facility},
+    "정책자금" : {label : "자금", icon : NoticeImages.funding},
+    "글로벌" : {label : "글로벌", icon : NoticeImages.funding},
+    "기술개발(R&D)" : {label : "R&D", icon : NoticeImages.rnd},
+    "인력" : {label : "인력", icon : NoticeImages.talent},
+    "판로ㆍ해외진출" : {label : "글로벌", icon : NoticeImages.global},
+    "융자" : {label : "자금", icon : NoticeImages.funding},
 } as const
 
 export default function NoticeItem({

@@ -22,11 +22,14 @@ import {CompositeScreenProps} from "@react-navigation/core";
 import {RootStackParamList} from "../../navigation/RootStack";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { DefaultImage } from "../../constants/AppImages";
 
 export type MyLikesScreenProps = StackScreenProps<RootStackParamList>
 
 
 const { height} = Dimensions.get("window");
+
+const backgroundImage = DefaultImage.background
 
 export default function MyLikesScreen({navigation, route : {params}}: MyLikesScreenProps){
     const parseReceptionPeriod = (period: string) => {
@@ -213,7 +216,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
 
     return (
         <ImageBackground 
-            source={require('../../assets/images/glass-background.png')}
+            source={backgroundImage}
             style={[styles.container, {paddingTop : insets.top, paddingBottom : insets.bottom}]}
         >
             <SubHeaderBar
@@ -231,6 +234,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
                         tintColor={Colors.white1}
                     />
                 }
+                showsVerticalScrollIndicator={false}
                 viewabilityConfig={{
                     itemVisiblePercentThreshold: 50
                 }}

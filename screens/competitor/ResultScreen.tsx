@@ -18,12 +18,15 @@ import { ErrorResponse } from "../../type/util/response.type";
 import { isAxiosError } from "axios";
 import { competitorAnalysis, recompetitorAnalysis } from "../../api/competitor";
 import { ScrollView } from "react-native-gesture-handler";
+import { DefaultImage } from "../../constants/AppImages";
 
 type ResultScreenProps = StackScreenProps<CompoetitorStackParamList, 'Result'>
+const defaultBMCImage = DefaultImage.bmc
+const defaultImage = DefaultImage.company
+const backgroundImage = DefaultImage.background
 
 export default function ResultScreen({navigation, route : {params}} : ResultScreenProps){
     const {width} = useWindowDimensions()
-    const defaultImage = require("../../assets/images/bmc-thumbnail-exam.png");
     const [carouselHeight, setCarouselHeight] = useState<DimensionValue>('auto');
     const supportList = [0, 1, 2]
     const [loading, setLoading] = useState(false)
@@ -123,7 +126,6 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                     height={typeof carouselHeight === 'number' ? carouselHeight : 400}
                     data={body as CompetitorComparison[]}
                     renderItem={({index, item}) => {
-                        const defaultImage = require('../../assets/images/company-img.png')
                         const [imageError, setImageError] = useState<boolean>(!item.logoUrl)
                         return (
                         <View 
@@ -240,11 +242,11 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                 <Image
                     source={
                         imageError || !params?.image
-                            ? defaultImage
+                            ? defaultBMCImage
                             : params.image
                     }
                     resizeMode="contain"
-                    defaultSource={defaultImage}
+                    defaultSource={defaultBMCImage}
                     style={styles.bmcImage}
                     onError={() => setImageError(true)}
                 />
@@ -341,7 +343,7 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
         <>
         <ImageBackground
             style={{flex : 1, position : 'relative'}} 
-            source={require("../../assets/images/glass-background.png")}
+            source={backgroundImage}
         >
             <SubHeaderBar
                 handleBackPress={navigation.goBack}

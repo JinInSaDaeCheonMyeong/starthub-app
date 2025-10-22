@@ -23,11 +23,34 @@ import { useFocusEffect } from "@react-navigation/native";
 import { getRecommendedNotices } from "../../api/notice";
 import { GetRecommendedNoticeResponse, BeforeNoticeType, NoticeType } from "../../type/notice/notice.type";
 import { NoticeCategory } from "../../constants/NoticeCategory";
+import { NoticeImages } from "../../constants/AppImages";
 
 export type NoticeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Notice">,
     StackScreenProps<RootStackParamList>
 >;
+
+const categoryMap = {
+    [NoticeCategory.BUSINESS]: NoticeImages.business,
+    [NoticeCategory.EDUCATION]: NoticeImages.education,
+    [NoticeCategory.EVENT]: NoticeImages.event,
+    [NoticeCategory.FACILITY]: NoticeImages.facility,
+    [NoticeCategory.FUNDING]: NoticeImages.funding,
+    [NoticeCategory.GLOBAL]: NoticeImages.global,
+    [NoticeCategory.RND]: NoticeImages.rnd,
+    [NoticeCategory.TALENT]: NoticeImages.talent,
+} as const
+
+const noticeCategoryList = [
+    { label: "사업화", value: "사업화", noticeType: NoticeCategory.BUSINESS },
+    { label: "R&D", value: "기술개발", noticeType: NoticeCategory.RND },
+    { label: "시설", value: "시설", noticeType: NoticeCategory.FACILITY },
+    { label: "교육", value: "교육", noticeType: NoticeCategory.EDUCATION },
+    { label: "글로벌", value: "글로벌", noticeType: NoticeCategory.GLOBAL },
+    { label: "인력", value: "인력", noticeType: NoticeCategory.TALENT },
+    { label: "행사", value: "행사", noticeType: NoticeCategory.EVENT },
+    { label: "자금", value: "자금", noticeType: NoticeCategory.FUNDING },
+]
 
 export default function NoticeScreen({ navigation }: NoticeScreenProps) {
     const [loading, setLoading] = useState(false);
@@ -49,13 +72,6 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
         }
     }, []);
 
-    /** 화면 진입 시 새로 불러오기 */
-    useFocusEffect(
-        useCallback(() => {
-            fetchRecommendNotices();
-        }, [fetchRecommendNotices])
-    );
-
     /** 날짜 파싱 */
     const parseReceptionPeriod = (period: string) => {
         try {
@@ -68,34 +84,6 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
             return { startDate: new Date(), endDate: new Date() };
         }
     };
-
-    const categoryMap = useMemo(
-        () => ({
-            [NoticeCategory.BUSINESS]: require("../../assets/images/notice/business.png"),
-            [NoticeCategory.EDUCATION]: require("../../assets/images/notice/education.png"),
-            [NoticeCategory.EVENT]: require("../../assets/images/notice/event.png"),
-            [NoticeCategory.FACILITY]: require("../../assets/images/notice/facility.png"),
-            [NoticeCategory.FUNDING]: require("../../assets/images/notice/funding.png"),
-            [NoticeCategory.GLOBAL]: require("../../assets/images/notice/global.png"),
-            [NoticeCategory.RND]: require("../../assets/images/notice/rnd.png"),
-            [NoticeCategory.TALENT]: require("../../assets/images/notice/talent.png"),
-        }),
-        []
-    );
-
-    const noticeCategoryList = useMemo(
-        () => [
-            { label: "사업화", value: "사업화", noticeType: NoticeCategory.BUSINESS },
-            { label: "R&D", value: "기술개발", noticeType: NoticeCategory.RND },
-            { label: "시설", value: "시설", noticeType: NoticeCategory.FACILITY },
-            { label: "교육", value: "교육", noticeType: NoticeCategory.EDUCATION },
-            { label: "글로벌", value: "글로벌", noticeType: NoticeCategory.GLOBAL },
-            { label: "인력", value: "인력", noticeType: NoticeCategory.TALENT },
-            { label: "행사", value: "행사", noticeType: NoticeCategory.EVENT },
-            { label: "자금", value: "자금", noticeType: NoticeCategory.FUNDING },
-        ],
-        []
-    );
 
     const goNotice = useCallback((supportField?: string, text?: string) => {
         navigation.navigate("NoticeSearch", { text, supportField });
@@ -117,16 +105,15 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
                 </GlassView>
             </TouchableOpacity>
         ),
-        [categoryMap, goNotice]
+        [goNotice]
     );
-
+    
     useFocusEffect(
         useCallback(() => {
-            return () => {
-                setRecommends([])
-            }
-        }, [])
-    )
+            fetchRecommendNotices();
+            return () => setRecommends([]);
+        }, [fetchRecommendNotices])
+    );
 
     return (
         <FlatList
