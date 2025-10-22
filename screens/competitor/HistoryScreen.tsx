@@ -84,6 +84,9 @@ export function HistoryScreen({navigation} : HistoryScreenProps) {
                 }
             }
             initData()
+            return () => {
+                setCompetitorList([])
+            }
         }, [])
     )
     return (

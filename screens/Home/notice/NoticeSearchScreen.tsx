@@ -218,6 +218,9 @@ export default function NoticeSearchScreen({
         isInitialMount.current = false;
       }
       fetchNotices(true);
+      return () => {
+        setAllNotices([]);
+      }
     }, [fetchNotices])
   );
 

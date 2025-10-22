@@ -104,7 +104,7 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
     /** 카테고리 렌더 (FlatList로 변경) */
     const renderCategory = useCallback(
         ({ item }: { item: (typeof noticeCategoryList)[0] }) => (
-            <TouchableOpacity onPress={() => goNotice(item.value)} style={{ marginEnd: 16 }}>
+            <TouchableOpacity onPress={() => goNotice(item.value)}>
                 <GlassView
                     blurPercent={0.4}
                     containerStyle={styles.categoryCard}
@@ -119,6 +119,14 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
         ),
         [categoryMap, goNotice]
     );
+
+    useFocusEffect(
+        useCallback(() => {
+            return () => {
+                setRecommends([])
+            }
+        }, [])
+    )
 
     return (
         <FlatList
@@ -173,7 +181,7 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
                     </View>
                 ) : null
             }
-            contentContainerStyle={{ paddingBottom: 40 }}
+            contentContainerStyle={{ paddingBottom: 16 }}
         />
     );
 }
@@ -184,7 +192,7 @@ const styles = StyleSheet.create({
     noticeItemContainer: { marginHorizontal: 16, marginTop: 10 },
     titleText: { marginTop: 20, paddingStart: 16, fontSize: 28, fontFamily: Fonts.semiBold },
     smallText: { paddingStart: 16, fontSize: 16, fontFamily: Fonts.semiBold, paddingBottom: 12 },
-    categoryList: { paddingHorizontal: 16, paddingBottom: 8 },
+    categoryList: { paddingHorizontal: 16, paddingBottom: 8, gap : 16 },
     categoryCard: {
         width: 80,
         alignItems: "center",

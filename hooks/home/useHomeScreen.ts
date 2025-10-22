@@ -135,11 +135,11 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
         setRecomLoading(true);
         setScheduleLoading(true);
         try {
-            const [meResponse, noticeList] = await Promise.all([getMe(), getRecommendedNotices()]);
-            const name = meResponse.data.username;
+            const meResponse = (await getMe()).data;
+            const name = meResponse.username;
             setUserName(name)
-            const spliced = noticeList.data.splice(0, 7)
-            const mapped = spliced.map((notice: BeforeNoticeType) => {
+            const noticeItems = (await getRecommendedNotices()).data
+            const mapped = noticeItems.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return {
                     ...notice,
@@ -171,6 +171,13 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
     useFocusEffect(
         useCallback(() => {
             fetchItems();
+            return () => {
+                setNoticeItems([]);
+                setBookmarkItems([]);
+                setUserName('');
+                setRecomLoading(true);
+                setScheduleLoading(true);
+            };
         }, [])
     );
 

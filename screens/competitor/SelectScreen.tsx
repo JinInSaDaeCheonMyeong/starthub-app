@@ -70,6 +70,9 @@ export default function SelectScreen({navigation} : SelectScreenProps){
             }
         };
         fetchBMCs();
+        return () => {
+            setAllBMCs([])
+        };
     }, []);
 
     const renderItem = useCallback(

@@ -48,6 +48,9 @@ export default function BMCScreen({navigation}: BMCScreenProps) {
     useFocusEffect(
         useCallback(() => {
             fetchBMCs();
+            return () => {
+                setAllBMCs([])
+            }
         }, [fetchBMCs])
     );
     

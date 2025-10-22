@@ -4,10 +4,7 @@ import XIcon from "../../assets/icons/xmark.svg"
 import ProfileIcon from "../../assets/icons/header/person.svg"
 import BellIcon from "../../assets/icons/header/bell.svg"
 import HeartIcon from "../../assets/icons/header/heart.svg"
-import TimeIcon from "../../assets/icons/section/time.svg"
 import InfoIcon from "../../assets/icons/section/information.svg";
-import ServiceIcon from "../../assets/icons/section/service.svg";
-import PremiumIcon from "../../assets/icons/section/premium.svg";
 import LogoutIcon from "../../assets/icons/section/logout.svg";
 import DeleteIcon from "../../assets/icons/section/delete.svg"
 import { Colors } from "../../constants/Color"
