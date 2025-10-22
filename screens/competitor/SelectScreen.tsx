@@ -18,7 +18,7 @@ import { isAxiosError } from "axios";
 import { ErrorResponse } from "../../type/util/response.type";
 import BMCItem from "../../component/home/BMCItem";
 
-type SelectScreenProps = StackScreenProps<CompoetitorStackParamList>
+type SelectScreenProps = StackScreenProps<CompoetitorStackParamList, 'Select'>
 
 export default function SelectScreen({navigation} : SelectScreenProps){
     const [allBMCs, setAllBMCs] = useState<BMCType[]>([]);
@@ -39,7 +39,7 @@ export default function SelectScreen({navigation} : SelectScreenProps){
             const uri = allBMCs.filter((value) => {
                 return value.id === selectBMC
             })[0].imageUrl
-            navigation.navigate('Result', {image : {uri}, bmcId : selectBMC, data : response})
+            navigation.navigate('Result', {image : {uri : uri}, bmcId : selectBMC, data : response})
         } catch (error) {
             if(isAxiosError(error)){
                 const response = error.response
