@@ -109,7 +109,6 @@ export default function AlarmScreen({navigation} : AlarmScreenProps) {
                 startDate,
                 endDate
             }
-            ShowToast("알람", '공고를 불러오는데 성공했습니다', ToastType.SUCCESS);
             navigation.navigate("InNotice", { Notice: data });
         } catch (error) {
             if(isAxiosError(error)){

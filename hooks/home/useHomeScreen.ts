@@ -62,23 +62,23 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
         }
     ]
 
-    const navItemList : {label : string, nav : 'Competitor' | 'Compare' | 'Suggest' | 'Calendar'}[] = [
+    const navItemList : {label : string, nav : 'Competitor' | 'MyLikes' | 'NoticeSearch' | 'Alarm'}[] = [
         {
             label: "경쟁사 분석",
             nav: "Competitor",
         },
-        // {
-        //     label: "공고 비교",
-        //     nav: "Compare",
-        // },
-        // {
-        //     label: "AI 추천 공고",
-        //     nav: "Suggest",
-        // },
-        // {
-        //     label: "일정 추가",
-        //     nav: "Calendar",
-        // },
+        {
+            label: "내 북마크",
+            nav: "MyLikes",
+        },
+        {
+            label: "공고 검색",
+            nav: "NoticeSearch",
+        },
+        {
+            label: "내 알람",
+            nav: "Alarm",
+        },
     ];
 
     const parseReceptionPeriod = (period: string) => {
