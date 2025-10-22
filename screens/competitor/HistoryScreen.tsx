@@ -14,6 +14,7 @@ import * as Progress from "react-native-progress"
 import BMCItem from "../../component/home/BMCItem";
 import { getBMC } from "../../api/bmc";
 import { formatToDate } from "../../util/DateFormat";
+import { ErrorResponse } from "../../type/util/response.type";
 
 type HistoryScreenProps = StackScreenProps<CompoetitorStackParamList, 'History'>
 
@@ -21,6 +22,33 @@ export function HistoryScreen({navigation} : HistoryScreenProps) {
     const [competitorList, setCompetitorList] = useState<CompetitorFormData[]>([])
     const [loading, setLoading] = useState(true)
     const errorTitle = '경쟁사 분석'
+    const renderItem = useCallback(
+        ({ item }: { item: CompetitorFormData }) => (
+            <TouchableOpacity
+                onPress={() =>
+                    navigation.navigate('Result', {
+                        bmcId: item.bmcId,
+                        image: { uri: item.bmcImage, cache: 'force-cache' },
+                        data: item,
+                    })
+                }>
+                <BMCItem
+                    title={item.userBmc.title}
+                    imageSource={{ uri: item.bmcImage, cache: 'force-cache'}}
+                    onPress={() =>
+                        navigation.navigate('Result', {
+                        bmcId: item.bmcId,
+                        image: { uri: item.bmcImage, cache: 'force-cache'},
+                        data: item,
+                        })
+                    }
+                    isCompetitor
+                    subText={formatToDate(item.createdAt, 'dotted')}
+                />
+            </TouchableOpacity>
+        ), []
+    );
+
     useFocusEffect(
         useCallback(() => {
             const initData = async () => {
@@ -29,7 +57,6 @@ export function HistoryScreen({navigation} : HistoryScreenProps) {
                     const competitorData = (await getCompetitors()).data;
                     const data: CompetitorFormData[] = await Promise.all(
                         competitorData.map(async (value) => {
-                            // console.log(value.bmcId)
                             const bmcImage = (await getBMC(value.bmcId)).data.imageUrl;
                             return {
                                 ...value,
@@ -40,9 +67,18 @@ export function HistoryScreen({navigation} : HistoryScreenProps) {
                     setCompetitorList(data)
                 } catch (error : any) {
                     if(isAxiosError(error)){
-                        ShowToast(errorTitle, error.message, ToastType.ERROR)
+                        const response = error.response
+                        if(!response){
+                            ShowToast("경쟁사 분석", '네트워크 오류가 발생헀습니다', ToastType.ERROR);
+                        } else {
+                            const message = (response.data as ErrorResponse).message
+                            if(message[message.length] === '.') {
+                                const errorMsg = message.slice(0, -1);
+                                ShowToast("경쟁사 분석", errorMsg, ToastType.ERROR);
+                            }
+                            ShowToast("경쟁사 분석", message, ToastType.ERROR);
+                        }
                     }
-                    ShowToast(errorTitle, '알 수 없는 오류가 발생했습니다', ToastType.ERROR)
                 } finally {
                     setLoading(false)
                 }
@@ -64,27 +100,12 @@ export function HistoryScreen({navigation} : HistoryScreenProps) {
                 subIcon='Profile'
             />
             <FlatList
+                removeClippedSubviews={true}
                 showsVerticalScrollIndicator={false}
                 style={{paddingHorizontal : 16}}
                 contentContainerStyle={{gap : 16, paddingVertical : 16}}
                 data={competitorList}
-                renderItem={({item}) => {
-                    return (
-                        <TouchableOpacity
-                            onPress={() => {
-                                navigation.navigate('Result', {bmcId : item.bmcId, image : {uri : item.bmcImage}, data : item})
-                        }}>
-                            <BMCItem
-                                title={item.userBmc.title}
-                                onPress={() => 
-                                    navigation.navigate('Result', {bmcId : item.bmcId, image : {uri : item.bmcImage}, data : item})}
-                                isCompetitor
-                                imageSource={{uri : item.bmcImage}}
-                                subText={formatToDate(item.createdAt, 'dotted')}
-                            />
-                        </TouchableOpacity>
-                    )
-                }}
+                renderItem={(item) => renderItem(item)}
                 ListEmptyComponent={() => (
                     !loading ? (
                         <View style={styles.emptyContainer}>

@@ -19,7 +19,6 @@ export const useError = () => {
     }
 
     const toastErrorMessage = () => {
-        console.log(errorText)
     }
 
     const handleAxiosError = (
@@ -32,10 +31,7 @@ export const useError = () => {
                 ShowToast('에러 발생', '네트워크 오류가 발생했습니다', ToastType.ERROR)
             } else {
                 const message = (response.data as ErrorResponse).message
-                if(message[message.length] === '.') {
-                    ShowToast('에러 발생', message.slice(0, -1), ToastType.ERROR)
-                }
-                ShowToast("에러 발생", message + '입니다', ToastType.ERROR);
+                ShowToast("에러 발생", message, ToastType.ERROR);
             }
         } else {
             ShowToast("에러 발생", '예상치 못한 오류가 발생했습니다', ToastType.ERROR);

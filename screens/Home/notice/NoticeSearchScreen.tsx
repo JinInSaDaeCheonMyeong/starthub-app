@@ -164,7 +164,6 @@ export default function NoticeSearchScreen({
                     businessExperience,
                     0
                 );
-        console.log("isLast", response.data.isLast);
         setIsLast(response.data.isLast);
 
         const mapped = response.data.content.map((notice: BeforeNoticeType) => {
@@ -181,7 +180,6 @@ export default function NoticeSearchScreen({
         setAllNotices(mapped);
       } catch (error) {
         if (isAxiosError(error)) {
-          console.log(error.response);
         }
         ShowToast(
           "문제가 발생했습니다",
@@ -311,21 +309,35 @@ export default function NoticeSearchScreen({
     fetchNotices(true);
   };
 
-  return (
-    <ImageBackground source={require("../../../assets/images/glass-background.png")} style={[styles.container, {paddingTop: insets.top, paddingBottom: insets.bottom}]}>
-      <SubHeaderBar
-            title={"공고 검색"}
-            handleBackPress={handleBackPress}
+  const renderItem = useCallback(({item} : {item : NoticeType}) => (
+    <View style={styles.noticeItemContainer}>
+      <NoticeItem
+        item={item}
+        onPress={() => {
+          navigation.navigate("InNotice", {
+            Notice: item,
+            onGoBack: updateNoticeInList,
+          });
+        }}
       />
+    </View>
+  ), [navigation, updateNoticeInList])
+
+  return (
+    <ImageBackground
+      source={require("../../../assets/images/glass-background.png")}
+      style={[
+        styles.container,
+        { paddingTop: insets.top, paddingBottom: insets.bottom },
+      ]}
+    >
+      <SubHeaderBar title={"공고 검색"} handleBackPress={handleBackPress} />
       <View>
         <View style={styles.searchBar}>
-                <SearchBar
-                    onPress={(text) => setTitle(text)}
-                    value={title}
-                />
+          <SearchBar onPress={(text) => setTitle(text)} value={title} />
         </View>
         <ScrollView
-          style={{ position: "absolute", zIndex: 999, paddingTop: 60}}
+          style={{ position: "absolute", zIndex: 999, paddingTop: 60 }}
           keyboardShouldPersistTaps="handled"
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -418,6 +430,7 @@ export default function NoticeSearchScreen({
         </ScrollView>
       </View>
       <FlatList
+        removeClippedSubviews={true}
         style={{ marginTop: 70 }}
         contentContainerStyle={{ gap: 16 }}
         showsVerticalScrollIndicator={false}
@@ -429,19 +442,7 @@ export default function NoticeSearchScreen({
         }}
         keyExtractor={(item) => item.id.toString()}
         onViewableItemsChanged={onViewableItemsChanged}
-        renderItem={({ item }) => (
-          <View style={styles.noticeItemContainer}>
-            <NoticeItem
-              item={item}
-              onPress={() => {
-                navigation.navigate("InNotice", {
-                  Notice: item,
-                  onGoBack: updateNoticeInList,
-                });
-              }}
-            />
-          </View>
-        )}
+        renderItem={(item) => renderItem(item)}
         ListFooterComponent={
           loading || isFetchingNextPage ? (
             <View
@@ -459,7 +460,7 @@ export default function NoticeSearchScreen({
           )
         }
         ListEmptyComponent={
-            !isFetchingNextPage&&!loading&&refreshing ? ( // ✅ 새로고침 중일 때 중앙에 인디케이터
+          !isFetchingNextPage && !loading && refreshing ? ( // ✅ 새로고침 중일 때 중앙에 인디케이터
             <View
               style={[styles.indicatorContainer, { marginTop: height * 0.25 }]}
             >
@@ -481,7 +482,7 @@ export default function NoticeSearchScreen({
           )
         }
       />
-      </ImageBackground>
+    </ImageBackground>
   );
 }
 

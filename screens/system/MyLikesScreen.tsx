@@ -116,7 +116,6 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
             });
             setAllLikes(mapped);
         } catch (error) {
-            console.error('좋아요 데이터 로딩 실패:', error);
             ShowToast(
                 "문제가 발생하였습니다",
                 "데이터를 불러오지 못하였습니다",
@@ -198,6 +197,20 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
         );
     }, []);
 
+    const renderItem = useCallback((item : NoticeType) => (
+        <View style={styles.noticeItemContainer}>
+            <NoticeItem
+                item={item}
+                onPress={()=>{
+                    navigation.navigate('InNotice', {
+                        Notice: item,
+                        onGoBack: updateNoticeInList
+                    })
+                }}
+            />
+        </View>
+    ), [])
+
     return (
         <ImageBackground 
             source={require('../../assets/images/glass-background.png')}
@@ -208,6 +221,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
                 handleBackPress={navigation.goBack}
             />
             <FlatList
+                removeClippedSubviews={true}
                 data={refreshing ? [] : allLikes}  // ✅ 새로고침 시 빈 배열
                 refreshControl={
                     <RefreshControl
@@ -223,17 +237,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
                 keyExtractor={(item) => item.id.toString()}
                 onViewableItemsChanged={onViewableItemsChanged}
                 renderItem={({item}) => (
-                    <View style={styles.noticeItemContainer}>
-                        <NoticeItem
-                            item={item}
-                            onPress={()=>{
-                                navigation.navigate('InNotice', {
-                                    Notice: item,
-                                    onGoBack: updateNoticeInList
-                                })
-                            }}
-                        />
-                    </View>
+                    renderItem(item)
                 )}
                 ListFooterComponent={
                     loading || isFetchingNextPage ?

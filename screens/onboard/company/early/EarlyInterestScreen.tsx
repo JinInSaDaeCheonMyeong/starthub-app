@@ -21,6 +21,7 @@ export default function EarlyInterestScreen(props : EarlyInterestScreenProps){
             <FlatList
                 scrollEnabled={false}
                 data={InterestTypeList}
+                removeClippedSubviews={true}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle = {styles.listContentContainer}
                 renderItem={({item : {id, color, text, icon}}) => {

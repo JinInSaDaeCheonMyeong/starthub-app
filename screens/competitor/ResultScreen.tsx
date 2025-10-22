@@ -1,4 +1,4 @@
-import { Alert, DimensionValue, ImageBackground, ImageSourcePropType, ImageURISource, Linking, Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { Alert, DimensionValue, FlatList, ImageBackground, ImageSourcePropType, ImageURISource, Linking, Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import { StackScreenProps } from "@react-navigation/stack";
 import { Image } from "react-native";
@@ -38,22 +38,15 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
         }
         try {
             const response = (await recompetitorAnalysis(params.bmcId)).data
-            console.log(JSON.stringify(response.userBmc.title));
             ShowToast("경쟁사 분석", '경쟁사 분석에 성공했습니다', ToastType.SUCCESS);
             setForm(response)
         } catch (error) {
-            console.log(error)
             if(isAxiosError(error)){
                 const response = error.response
                 if(!response){
                     ShowToast("경쟁사 분석", '네트워크 오류가 발생했습니다', ToastType.ERROR);
                 } else {
-                    const message = (response.data as ErrorResponse).message
-                    if(message[message.length] === '.') {
-                        const errorMsg = message.slice(0, -1);
-                        ShowToast("경쟁사 분석", errorMsg , ToastType.ERROR);
-                    }
-                    ShowToast("경쟁사 분석", message + '입니다', ToastType.ERROR);
+                    ShowToast("경쟁사 분석", response.data, ToastType.ERROR);
                 }
             }
             ShowToast("경쟁사 분석", '알 수 없는 오류가 발생했습니다', ToastType.ERROR);
@@ -165,7 +158,7 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                                             borderRadius : 8, 
                                             backgroundColor : Colors.white1
                                         }} 
-                                        source={imageError ? defaultImage : {uri : item.logoUrl}}
+                                        source={imageError ? defaultImage : {uri : item.logoUrl, cache: 'force-cache'}}
                                         onError={() => setImageError(true)}
                                         defaultSource={defaultImage}
                                     />
@@ -337,7 +330,13 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
             )}
         </>
     )
-
+    const sections = [
+        { key: 'bmc', render: renderUserBMC },
+        { key: 'userScale', render: renderUserScale },
+        { key: 'strength', render: renderStrength },
+        { key: 'weakness', render: renderWeakeness },
+        { key: 'globalExpansion', render: renderGlobalExpansionStrategy },
+    ];
     return (
         <>
         <ImageBackground
@@ -348,17 +347,14 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                 handleBackPress={navigation.goBack}
                 title="경쟁사 분석 결과"
             />
-            <ScrollView
-                contentContainerStyle={{gap : 20, paddingVertical : 16}} 
+            <FlatList
+                data={sections}
+                keyExtractor={(item) => item.key}
+                renderItem={({ item }) => item.render()}
+                contentContainerStyle={{ gap: 20, paddingVertical: 16 }}
                 showsVerticalScrollIndicator={false}
                 nestedScrollEnabled={true}
-            >
-                {renderUserBMC()}
-                {renderUserScale()}
-                {renderStrength()}
-                {renderWeakeness()}
-                {renderGlobalExpansionStrategy()}
-            </ScrollView>
+            />
             <GlassView
                 blurPercent={0.06}
                 containerStyle={{
@@ -415,10 +411,9 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                 }}>
                     <Progress.Circle
                         color={Colors.primary}
-                        size={50}
+                        size={40}
                         indeterminate={true}
                         thickness={300}
-                        borderWidth={4}
                     />
                     <Text style={{ 
                         color: Colors.white1, 
@@ -444,6 +439,7 @@ const styles = StyleSheet.create({
         backgroundColor : Colors.white1,
         borderWidth : 1,
         borderColor : Colors.gray4,
+        marginBottom : 16
     },
     dataContainer : {
         gap : 12,
@@ -476,7 +472,8 @@ const styles = StyleSheet.create({
     divider : {
         borderBottomWidth : 1, 
         borderColor : Colors.gray3,
-        marginHorizontal : 16
+        marginHorizontal : 16,
+        marginTop : 24
     },
     dummyOverlay: {
         position: 'absolute',

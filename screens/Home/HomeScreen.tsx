@@ -1,291 +1,223 @@
-import {Dimensions, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import { Colors } from "../../constants/Color";
+import {
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    Image,
+    Dimensions,
+} from "react-native";
+import { FlatList } from "react-native-gesture-handler";
 import { Fonts } from "../../constants/Fonts";
-import NoticeItem from "../../component/notice/NoticeItem";
+import { Colors } from "../../constants/Color";
 import { CompositeScreenProps } from "@react-navigation/core";
-import { HomeStackParamList } from "../../navigation/HomeStack";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { RootStackParamList } from "../../navigation/RootStack";
+import { HomeStackParamList } from "../../navigation/HomeStack";
 import { StackScreenProps } from "@react-navigation/stack";
+import { RootStackParamList } from "../../navigation/RootStack";
 import useHomeScreen from "../../hooks/home/useHomeScreen";
 import { NoticeCategory } from "../../constants/NoticeCategory";
-import CompetitorIcon from "../../assets/icons/glass/home/competitor.svg"
-import CompareIcon from "../../assets/icons/glass/home/compare.svg";
-import SuggestionIcon from "../../assets/icons/glass/home/suggestion.svg";
-import CalendarIcon from "../../assets/icons/glass/home/calendar.svg";
 import GlassView from "../../component/GlassView";
-import * as Progress from 'react-native-progress';
+import * as Progress from "react-native-progress";
+import { useCallback, useMemo } from "react";
+import { NoticeType } from "../../type/notice/notice.type";
+import NoticeItem from "../../component/notice/NoticeItem";
 
 export type HomeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Home">,
     StackScreenProps<RootStackParamList>
 >;
 
+const { width } = Dimensions.get("window");
 
-const {width} = Dimensions.get("window");
-
-export default function HomeScreen(props : HomeScreenProps) {
+export default function HomeScreen(props: HomeScreenProps) {
     const featureMap = {
-        ['Competitor'] : CompetitorIcon,
-        ['MyLikes'] : CompareIcon,
-        ['NoticeSearch'] : SuggestionIcon,
-        ['Alarm'] : CalendarIcon
-    }
+        Competitor: require("../../assets/images/nav/competitor.png"),
+        MyLikes: require("../../assets/images/nav/compare.png"),
+        NoticeSearch: require("../../assets/images/nav/suggestion.png"),
+        Alarm: require("../../assets/images/nav/calendar.png"),
+    };
 
     const categoryMap = {
-        [NoticeCategory.BUSINESS] : require( "../../assets/images/notice/business.png"),
-        [NoticeCategory.EDUCATION] : require("../../assets/images/notice/education.png"),
-        [NoticeCategory.EVENT] : require("../../assets/images/notice/event.png"),
-        [NoticeCategory.FACILITY] : require("../../assets/images/notice/facility.png"),
-        [NoticeCategory.FUNDING] : require("../../assets/images/notice/funding.png"),
-        [NoticeCategory.GLOBAL] : require("../../assets/images/notice/global.png"),
-        [NoticeCategory.RND] : require("../../assets/images/notice/rnd.png"),
-        [NoticeCategory.TALENT] : require("../../assets/images/notice/talent.png")
-    }
+        [NoticeCategory.BUSINESS]: require("../../assets/images/notice/business.png"),
+        [NoticeCategory.EDUCATION]: require("../../assets/images/notice/education.png"),
+        [NoticeCategory.EVENT]: require("../../assets/images/notice/event.png"),
+        [NoticeCategory.FACILITY]: require("../../assets/images/notice/facility.png"),
+        [NoticeCategory.FUNDING]: require("../../assets/images/notice/funding.png"),
+        [NoticeCategory.GLOBAL]: require("../../assets/images/notice/global.png"),
+        [NoticeCategory.RND]: require("../../assets/images/notice/rnd.png"),
+        [NoticeCategory.TALENT]: require("../../assets/images/notice/talent.png"),
+    };
 
     const {
-        form : {
-            noticeItems,
-            bookmarkItems,
-            noticeCategoryList,
-            userName
-        },
-        ui : {
-            navItemList,
-            recomLoading,
-            scheduleLoading
-        },
-        actions : {
-            goNotice,
-        }
-    } = useHomeScreen(props)
+        form: { noticeItems, noticeCategoryList, userName },
+        ui: { navItemList, recomLoading },
+        actions: { goNotice },
+    } = useHomeScreen(props);
+
+    const renderNoticeItem = useCallback(
+        (item: NoticeType) => (
+            <NoticeItem
+                item={item}
+                onPress={() => props.navigation.navigate("InNotice", { Notice: item })}
+            />
+        ),
+        [props.navigation]
+    );
+
+    const listHeader = useMemo(() => {
+        // 배너
+        const banner = (
+            <View style={styles.bannerContainer}>
+                <Text style={styles.mainText}>{`좋은 아침이에요,\n${userName}님!`}</Text>
+                <View style={styles.navIconContainer}>
+                    {navItemList.map(({ label, nav }, index) => {
+                        const IconComponent = featureMap[nav];
+                        let screenName :
+                        | keyof HomeStackParamList
+                        | keyof RootStackParamList ;
+                        switch (index) {
+                            case 0:
+                                screenName = "Competitor";
+                                break;
+                            case 1:
+                                screenName = "MyLikes";
+                                break;
+                            case 2:
+                                screenName = "NoticeSearch";
+                                break;
+                            case 3:
+                                screenName = "Alarm";
+                                break;
+                            default:
+                                screenName = "Competitor";
+                                break;
+                        }
+                        return (
+                            <TouchableOpacity
+                                onPress={() => props.navigation.navigate(screenName as never)}
+                                key={index}
+                                style={styles.navIconWrapper}
+                            >
+                                {IconComponent && <Image style={{width : 60, height : 60}} source={IconComponent} />}
+                                <Text style={styles.navIconText}>{label}</Text>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+            </View>
+        );
+
+        const categorySection = (
+            <View style={styles.flatListWrapper}>
+                <View style={styles.textWrapper}>
+                    <Text style={styles.titleText}>지원 사업 공고</Text>
+                    <Text style={styles.captionText}>
+                        카테고리를 눌러 공고를 조회할 수 있어요
+                    </Text>
+                </View>
+                <View style={styles.noticeItemListWrapper}>
+                    {noticeCategoryList.map(({ label, value, noticeType }, index) => {
+                        const IconComponent = categoryMap[noticeType];
+                        const buttonSide = (width - 80) / 4;
+                        return (
+                            <TouchableOpacity
+                                onPress={() => goNotice(value)}
+                                key={index}
+                                style={styles.iconWrapper}
+                            >
+                                <GlassView
+                                    blurPercent={0.5}
+                                    containerStyle={{
+                                        width: buttonSide,
+                                        alignItems: "center",
+                                        gap: 4,
+                                        padding: 10,
+                                        backgroundColor: "rgba(255, 255, 255, 0.5)",
+                                    }}
+                                >
+                                    {IconComponent && (
+                                        <Image
+                                            style={{ width: 50, height: 50 }}
+                                            source={IconComponent}
+                                        />
+                                    )}
+                                    <Text style={styles.iconLabel}>{label}</Text>
+                                </GlassView>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+            </View>
+        );
+
+        // 추천 공고 제목
+        const recommendedTitle = (
+            <View style={styles.flatListWrapper}>
+                <View style={styles.textWrapper}>
+                    <Text style={styles.titleText}>맞춤 추천 공고</Text>
+                    <Text style={styles.captionText}>
+                        사용자님의 관심을 분석하여 제공해 드려요
+                    </Text>
+                </View>
+            </View>
+        );
+
+        return (
+            <>
+                {banner}
+                {categorySection}
+                {recommendedTitle}
+            </>
+        );
+    }, [userName, noticeCategoryList, navItemList, goNotice, props.navigation]);
 
     return (
-        <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.flatListContainer}>
-                <View style={styles.bannerContainer}> 
-                    <Text style={styles.mainText}>
-                        {`좋은 아침이에요,\n${userName}님!`}
-                    </Text>
-                    <View style={styles.navIconContainer}>
-                        {
-                            navItemList.map(({label, nav}, index) => {
-                                const IconComponent = featureMap[nav];
-                                let screenName :
-                                    | keyof HomeStackParamList
-                                    | keyof RootStackParamList ;
-                                switch (index) {
-                                    case 0:
-                                        screenName = "Competitor";
-                                        break;
-                                    case 1:
-                                        screenName = "MyLikes";
-                                        break;
-                                    case 2:
-                                        screenName = "NoticeSearch";
-                                        break;
-                                    case 3:
-                                        screenName = "Alarm";
-                                        break;
-                                    default:
-                                        screenName = "Competitor";
-                                        break;
-                                    }
-                                return (
-                                    <TouchableOpacity
-                                        onPress={() => props.navigation.navigate(screenName as never)}
-
-                                        key={index}
-                                        style={styles.navIconWrapper}
-                                    >
-                                        {IconComponent && <IconComponent width={60} height={60}/>}
-                                        <Text style={styles.navIconText}>
-                                            {label}
-                                        </Text>
-                                    </TouchableOpacity>
-                                )
-                            })
-                        }
+        <FlatList
+            removeClippedSubviews
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ gap: 16, paddingBottom: 16, paddingHorizontal : 16 }}
+            data={noticeItems}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => renderNoticeItem(item)}
+            ListHeaderComponent={() => listHeader}
+            ListFooterComponent={
+                recomLoading ? (
+                    <View style={styles.loadingContainer}>
+                        <Progress.Circle
+                            size={40}
+                            indeterminate
+                            color={Colors.primary}
+                        />
                     </View>
-                </View>
-                <View style={styles.flatListWrapper}>
-                    <View style={styles.textWrapper}>
-                        <Text style={styles.titleText}>지원 사업 공고</Text>
-                        <Text style={styles.captionText}>카테고리를 눌러 공고를 조회할 수 있어요</Text>
-                    </View>
-                    <View style={styles.noticeItemListWrapper}>
-                        {noticeCategoryList.map(({
-                            label, 
-                            value,
-                            noticeType,
-                        }, index) => {
-                            const IconComponent = categoryMap[noticeType];
-                            const buttonSide = (width-80)/4
-                            return (
-                                <TouchableOpacity
-                                    onPress={() => {
-                                    goNotice(value);
-                                    }}
-                                    key={index}
-                                    style={styles.iconWrapper}
-                                >
-                                    <GlassView 
-                                        blurPercent={0.5} 
-                                        containerStyle={{
-                                            width : buttonSide, 
-                                            alignItems : 'center', 
-                                            gap : 4, 
-                                            padding : 10, 
-                                            backgroundColor : 'rgba(255, 255, 255, 0.5)'
-                                    }}>
-                                        {IconComponent && (
-                                            <Image style={{width : 50, height : 50}} source={IconComponent}/>
-                                        )}
-                                        <Text style={styles.iconLabel}>{label}</Text>
-                                    </GlassView>
-                                </TouchableOpacity>
-                            );
-                        })}
-                    </View>
-                </View>
-                <View style={styles.flatListWrapper}>
-                    <View style={styles.textWrapper}>
-                        <Text style={styles.titleText}>맞춤 추천 공고</Text>
-                        <Text style={styles.captionText}>사용자님의 관심을 분석하여 제공해 드려요</Text>
-                    </View>
-                    <FlatList
-                        scrollEnabled={false}
-                        contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
-                        showsHorizontalScrollIndicator={false}
-                        style={{ overflow: "visible" }}
-                        data={noticeItems}
-                        renderItem={({ item }) => (
-                            <NoticeItem
-                                item={item}
-                            onPress={() => {
-                                    props.navigation.navigate('InNotice', {Notice : item})
-                                }}
-                            />
-                        )}
-                        ListFooterComponent={
-                            recomLoading ? (
-                                <View style={styles.loadingContainer}>
-                                    <Progress.Circle size={40} indeterminate color={Colors.primary} />
-                                </View>
-                            ) : null
-                        }
-                    />
-                </View>
-                {
-                    bookmarkItems.length !== 0 && (
-                        <View style={styles.flatListWrapper}>
-                            <View style={styles.textWrapper}>
-                                <Text style={styles.titleText}>내 일정 공고</Text>
-                                <Text style={styles.captionText}>사용자님의 일정 중 마감 기한이 임박한 순으로 제공해 드려요</Text>
-                            </View>
-                            <FlatList
-                                contentContainerStyle={{ gap: 16, paddingHorizontal: 16,}}
-                                showsHorizontalScrollIndicator={false}
-                                horizontal={false}
-                                onEndReached={() => {}}
-                                style={{ overflow: "visible" }}
-                                data={bookmarkItems}
-                                renderItem={({ item }) => (
-                                <NoticeItem
-                                    item={item}
-                                    onPress={() => {
-                                        props.navigation.navigate('InNotice', {Notice : item})
-                                    }}
-                                />
-                                )}
-                            />
-                        </View>
-                    )
-                }
-            </View>
-        </ScrollView>
+                ) : null
+            }
+        />
     );
 }
+
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        flexDirection: "column",
-        backgroundColor: Colors.white1,
-        gap: 16,
-    },
-    flatListContainer: {
-        gap: 32,
-        paddingVertical: 20,
-    },
-    bannerContainer : {
-        gap : 24
-    },
-    flatListWrapper : {
-        gap : 12
-    },
-    textWrapper : {
-        gap : 6
-    },
-    titleText: {
-        fontSize: 18,
-        marginStart: 16,
-        fontFamily: Fonts.semiBold,
+    bannerContainer: { gap: 24, paddingTop : 20 },
+    mainText: { fontFamily: Fonts.semiBold, color: Colors.black1, fontSize: 28 },
+    navIconContainer: { flexDirection: "row", gap: 16},
+    navIconWrapper: { alignItems: "center", gap: 4, flex : 1 },
+    navIconText: {
+        textAlign: "center",
+        fontFamily: Fonts.medium,
+        fontSize: 14,
         color: Colors.black2,
     },
-    captionText: {
-        fontSize: 14,
-        marginStart: 16,
-        fontFamily: Fonts.reqular,
-        color: Colors.gray2,
-    },
-    noticeItemListWrapper : {
-        flexDirection : "row", 
-        paddingHorizontal : 16, 
-        gap : 16,
+    flatListWrapper: { marginTop : 32, gap: 10, },
+    textWrapper: { gap: 4 },
+    titleText: { fontSize: 18, fontFamily: Fonts.semiBold, color: Colors.black2 },
+    captionText: { fontSize: 14, fontFamily: Fonts.reqular, color: Colors.gray2 },
+    noticeItemListWrapper: {
+        flexDirection: "row",
         flexWrap: "wrap",
+        gap: 16,
+        marginTop: 8,
     },
-    iconWrapper : {
-        alignItems : "center",
-        gap : 6,
-    },
-    iconBox : {
-        borderRadius: 12,
-        justifyContent: "center",
-        alignItems: "center"
-    },
-    iconLabel : {
-        fontSize : 14,
-        fontFamily : Fonts.medium,
-        color : Colors.gray1
-    },
-    navIconContainer : {
-        flexDirection : 'row',
-        flex : 1,
-        alignItems: "center",
-        justifyContent : "center",
-        gap : 12
-    },
-    navIconWrapper : {
-        alignItems : 'center',
-        gap : 4,
-        paddingHorizontal : 8
-    },
-    navIcon : {
-        width : 48, 
-        height : 48
-    },
-    navIconText : {
-        textAlign : 'center', 
-        fontFamily : Fonts.medium, 
-        fontSize : 14,
-        color : Colors.black2
-    },
-    mainText : {
-        fontFamily : Fonts.semiBold,
-        color : Colors.black1,
-        fontSize : 28,
-        marginStart : 16
-    },
+    iconWrapper: { alignItems: "center", gap: 6 },
+    iconLabel: { fontSize: 14, fontFamily: Fonts.medium, color: Colors.gray1 },
     loadingContainer: {
         alignItems: "center",
         justifyContent: "center",

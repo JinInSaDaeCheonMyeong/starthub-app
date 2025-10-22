@@ -28,35 +28,48 @@ export type BMCScreenProps = CompositeScreenProps<
     StackScreenProps<RootStackParamList>
 >
 
-export default function BMCScreen(navigation: BMCScreenProps) {
+export default function BMCScreen({navigation}: BMCScreenProps) {
     const [allBMCs, setAllBMCs] = useState<BMCType[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-
+    
     const fetchBMCs = useCallback(async () => {
         setLoading(true);
         try {
             const response: GetBMCsResponse = await getBMCs();
             setAllBMCs(response.data);
         } catch (error) {
-            console.error('BMC 데이터 로딩 실패:', error);
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
     }, []);
-
-    // 화면 포커스될 때마다 데이터 갱신
+    
     useFocusEffect(
         useCallback(() => {
             fetchBMCs();
         }, [fetchBMCs])
     );
+    
 
     const handleRefresh = () => {
         setRefreshing(true);
         fetchBMCs();
     };
+
+    const renderItem = useCallback((item : BMCType) => (
+        <View style={{paddingHorizontal:16}}>
+            <BMCItem
+                title={item.title}
+                imageSource={{uri : item.imageUrl, cache: 'force-cache'}}
+                subText={formatToDate(item.updatedAt, 'dotted')}
+                onPress={() => navigation.navigate('InBMC', {
+                    BMC : item
+                })}
+            />
+        </View>
+    ), [])
+
     if (loading) {
         return (
             <View style={styles.container}>
@@ -71,10 +84,10 @@ export default function BMCScreen(navigation: BMCScreenProps) {
         );
     }
 
-
     return (
         <View style={styles.container}>
                 <FlatList
+                    removeClippedSubviews={true}
                     showsVerticalScrollIndicator={false}
                     data={refreshing ? [] : allBMCs}
                     ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
@@ -102,10 +115,10 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                                     <BMCItem
                                         width={189}
                                         height={120}
-                                        imageSource={{uri : item.imageUrl}}
+                                        imageSource={{uri : item.imageUrl, cache: 'force-cache'}}
                                         title={item.title}
                                         subText={formatToDate(item.updatedAt, 'dotted')}
-                                        onPress={() => navigation.navigation.navigate('InBMC', {
+                                        onPress={() => navigation.navigate('InBMC', {
                                             BMC : item
                                         })}
                                         isHorizontal
@@ -116,18 +129,7 @@ export default function BMCScreen(navigation: BMCScreenProps) {
                             </View>
                         ) : null  // ✅ null 추가
                     }
-                    renderItem={({ item }) => (
-                        <View style={{paddingHorizontal:16}}>
-                            <BMCItem
-                                title={item.title}
-                                imageSource={{uri : item.imageUrl}}
-                                subText={formatToDate(item.updatedAt, 'dotted')}
-                                onPress={() => navigation.navigation.navigate('InBMC', {
-                                    BMC : item
-                                })}
-                            />
-                        </View>
-                    )}
+                    renderItem={({ item }) => renderItem(item)}
                     ListFooterComponent={
                         <View style={{marginTop: 20}}/>
                     }

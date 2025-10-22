@@ -9,7 +9,6 @@ export const saveScheduleList = async (scheduleList : number[]) => {
         const json = JSON.stringify(scheduleList);
         await AsyncStorage.setItem(ScheduleStorage.SCHEDULE_LIST, json)
     } catch (error) {
-        console.error(error)
         throw error
     }
 }
@@ -24,7 +23,6 @@ export const getScheduleList = async () : Promise<number[]> => {
         else
             return []
     } catch (error) {
-        console.error(error)
         throw error
     }
 }
@@ -35,7 +33,6 @@ export const removeScheduleById = async (id: number): Promise<void> => {
         const filtered = data.filter((value) => value !== id);
         await saveScheduleList(filtered);
     } catch (error) {
-        console.error(error);
         throw error;
     }
 };
@@ -45,7 +42,6 @@ export const isScheduleExist = async (id : number) : Promise<boolean> => {
         const scheduleList = await getScheduleList()
         return scheduleList.some((value) => value === id);
     } catch (error) {
-        console.error(error);
         return false
     }
 }
@@ -54,7 +50,6 @@ export const resetScheduleList = async () : Promise<void> => {
     try {
         await AsyncStorage.setItem(ScheduleStorage.SCHEDULE_LIST, JSON.stringify([]))
     } catch(error) {
-        console.error(error);
         throw error
     }
 }

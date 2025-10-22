@@ -65,7 +65,6 @@ export function HomeStack({ navigation } : HomeStackProps) {
                     setProfileData(data)
                     setProfileProvider(data.provider);
                 } catch (error) {
-                    console.log("사용자 정보 조회 실패", error);
                 }
             };
             fetchData();
@@ -108,7 +107,7 @@ export function HomeStack({ navigation } : HomeStackProps) {
             const fcmToken : string | null = await getFCMToken()
             await (await removeFCMToken(fcmToken ?? '')).data
             setDrawerOpen(false);
-            ShowToast("로그아웃", "로그아웃에 성공하셨습니다", ToastType.SUCCESS)
+            ShowToast("로그아웃", "로그아웃에 성공했습니다", ToastType.SUCCESS)
             navigation.reset({
                 index: 0,
                 routes: [
@@ -141,7 +140,7 @@ export function HomeStack({ navigation } : HomeStackProps) {
             const fcmToken : string | null = await getFCMToken()
             await (await removeFCMToken(fcmToken ?? '')).data
             setDrawerOpen(false);
-            ShowToast("회원 탈퇴", "회원 탈퇴에 성공하셨습니다", ToastType.SUCCESS);
+            ShowToast("회원 탈퇴", "회원 탈퇴에 성공했습니다", ToastType.SUCCESS);
             navigation.reset({
                 index: 0,
                 routes: [
@@ -156,7 +155,6 @@ export function HomeStack({ navigation } : HomeStackProps) {
             })
         } catch (error) {
             ShowToast("회원 탈퇴", "회원 탈퇴에 실패했습니다", ToastType.ERROR);
-            if (isAxiosError(error)) console.log(error.response?.data);
         } finally {
             handleCloseModal();
         }
@@ -204,16 +202,16 @@ export function HomeStack({ navigation } : HomeStackProps) {
                 header: () => <HeaderBar onClickMenu={() => setDrawerOpen(true)} />,
                 animation: "shift",
                 transitionSpec: {
-                animation: "timing",
-                config: { duration: 90, easing: Easing.inOut(Easing.ease) },
+                    animation: "timing",
+                    config: { duration: 90, easing: Easing.inOut(Easing.ease) },
                 },
                 sceneStyle: { backgroundColor: "transparent", overflow: "visible" },
             }}
             >
-            <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="Notice" component={NoticeScreen} />
-            <Tab.Screen name="Calendar" component={CalendarScreen} />
-            <Tab.Screen name="BMC" component={BMCScreen} />
+            <Tab.Screen name="Home" component={HomeScreen}/>
+            <Tab.Screen name="Notice" component={NoticeScreen}/>
+            <Tab.Screen name="Calendar" component={CalendarScreen}/>
+            <Tab.Screen name="BMC" component={BMCScreen}/>
             </Tab.Navigator>
         </Drawer>
         <InputModal

@@ -76,6 +76,7 @@ export default function NoticeItem({
         "기술개발(R&D)" : {label : "R&D", icon : require("../../assets/images/notice/rnd.png")},
         "인력" : {label : "인력", icon : require("../../assets/images/notice/talent.png")},
         "판로ㆍ해외진출" : {label : "글로벌", icon : require("../../assets/images/notice/global.png")},
+        "융자" : {label : "자금", icon : require("../../assets/images/notice/funding.png")},
     }
 
     const handleBookmarkToggle = async () => {
@@ -91,7 +92,6 @@ export default function NoticeItem({
             item.isLiked = !item.isLiked
             setIsSelected((prev) => !prev)
         } catch (error) {
-            console.error('북마크 토글 중 오류:', error)
         } finally {
             setIsBookmarkLoading(false)
         }

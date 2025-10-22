@@ -3,9 +3,18 @@ import { createNavigationContainerRef, StackActions } from "@react-navigation/na
 export const navigationRef = createNavigationContainerRef()
 
 export default function popToSigninScreen(){
-    console.log(navigationRef)
-
     if(!navigationRef.isReady()) return
 
-    navigationRef.dispatch(StackActions.popToTop());
+    navigationRef.reset({
+        index: 0,
+        routes: [
+            {
+                name: "AuthStack" as any,
+                state: {
+                    routes: [{ name: "Signin" }],
+                    index: 0,
+                },
+            },
+        ]
+    })
 }

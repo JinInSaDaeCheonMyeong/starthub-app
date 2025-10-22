@@ -103,7 +103,7 @@ export default function InBMCScreen({navigation, route : {params}} : InBMCScreen
             <ScrollView contentContainerStyle={{gap : 24, paddingHorizontal : 16, paddingVertical : 16}}>
                 <View style={[styles.bmcImage]}>
                 <Image
-                    source={imageError || !imageSource ? defaultImage : {uri : imageSource}}
+                    source={imageError || !imageSource ? defaultImage : {uri : imageSource, cache : 'force-cache'}}
                     resizeMode="contain"
                     defaultSource={defaultImage}
                     style={styles.bmcImage}
