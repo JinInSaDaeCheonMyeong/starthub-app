@@ -3,7 +3,7 @@ import { getAccToken, getRefToken, removeTokens, saveAccToken, saveRefToken } fr
 import { BackHandler, Platform } from "react-native";
 import { RefreshResponse } from "../type/user/refresh.type";
 import { ShowToast, ToastType } from "../util/ShowToast";
-import popToSigninScreen from "../util/NavigationService";
+import popToSigninScreen, { navigationRef } from "../util/NavigationService";
 
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {

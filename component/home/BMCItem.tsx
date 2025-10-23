@@ -3,6 +3,7 @@ import GlassView from "../GlassView";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import { useState } from "react";
+import { DefaultImage } from "../../constants/AppImages";
 
 type BMCItemProps = {
     width?: DimensionValue
@@ -15,6 +16,8 @@ type BMCItemProps = {
     isCompetitor?: boolean
 }
 
+const defaultImage = DefaultImage.bmc
+
 export default function BMCItem({
     width = 'auto',
     height = 200,
@@ -25,7 +28,6 @@ export default function BMCItem({
     isHorizontal = false,
     isCompetitor = false
 }: BMCItemProps) {
-    const defaultImage = require("../../assets/images/bmc-thumbnail-exam.png");
     const contentHeight = height ? height : undefined;
     const [imageError, setImageError] = useState<boolean>(
         !imageSource || (typeof imageSource === 'object' && 'uri' in imageSource && !imageSource.uri)

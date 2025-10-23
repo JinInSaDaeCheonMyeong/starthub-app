@@ -37,6 +37,7 @@ export default function PreInterestScreen(props : PreInterestScreenProps){
             <FlatList
                 scrollEnabled={false}
                 data={InterestTypeList}
+                removeClippedSubviews={true}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle = {styles.listContentContainer}
                 renderItem={({item : {id, color, text, icon}}) => {

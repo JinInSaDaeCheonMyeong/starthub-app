@@ -76,15 +76,14 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
             nav: "NoticeSearch",
         },
         {
-            label: "내 알람",
+            label: "내 알림",
             nav: "Alarm",
         },
     ];
 
-    const parseReceptionPeriod = (period: string) => {
+    const parseReceptionPeriod = useCallback((period: string) => {
         try {
             if (!period || typeof period !== 'string') {
-                console.warn('Invalid reception period:', period);
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -92,7 +91,6 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
             }
             const parts = period.split("~").map(str => str.trim());
             if (parts.length !== 2) {
-                console.warn('Invalid period format - no ~ separator:', period);
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -115,11 +113,6 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
 
             // 유효한 날짜인지 확인
             if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                console.warn('Invalid date created from:', {
-                    startDateStr,
-                    endDateStr,
-                    originalPeriod: period
-                });
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -131,22 +124,22 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
                 endDate
             };
         } catch (error) {
-            console.error('Error parsing reception period:', error, 'Period:', period);
             return {
                 startDate: new Date(),
                 endDate: new Date()
             };
         }
-    };
+    }, [])
 
     const fetchItems = async () => {
         setRecomLoading(true);
         setScheduleLoading(true);
         try {
-            const name = await (await getMe()).data.username;
-            setUserName(name);
-            const noticeList : GetRecommendedNoticeResponse = await getRecommendedNotices();
-            const mapped = noticeList.data.map((notice: BeforeNoticeType) => {
+            const meResponse = (await getMe()).data;
+            const name = meResponse.username;
+            setUserName(name)
+            const noticeItems = (await getRecommendedNotices()).data
+            const mapped = noticeItems.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return {
                     ...notice,
@@ -178,6 +171,13 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
     useFocusEffect(
         useCallback(() => {
             fetchItems();
+            return () => {
+                setNoticeItems([]);
+                setBookmarkItems([]);
+                setUserName('');
+                setRecomLoading(true);
+                setScheduleLoading(true);
+            };
         }, [])
     );
 

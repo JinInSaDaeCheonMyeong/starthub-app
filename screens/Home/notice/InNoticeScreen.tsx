@@ -37,8 +37,11 @@ import {useFocusEffect} from "@react-navigation/native"
 import { isAxiosError } from 'axios';
 import { ErrorResponse } from '../../../type/util/response.type';
 import GlassView from '../../../component/GlassView';
+import { DefaultImage } from '../../../constants/AppImages';
 
 type InNoticeScreenProps = StackScreenProps<RootStackParamList, 'InNotice'>;
+
+const backgroundImage = DefaultImage.background
 
 export default function InNoticeScreen({navigation, route : {params}} : InNoticeScreenProps) {
     const notice = params.Notice
@@ -53,7 +56,6 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
             '$1'
         )
     };
-    console.log(source.html)
     const [isSelected, setIsSelected] = useState(notice.isLiked)
     const [isBookmarkLoading, setIsBookmarkLoading] = useState(false)
     const [isSchedules, setIsSchedules] = useState(false)
@@ -82,7 +84,6 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
             }
 
         } catch (error) {
-            console.error('북마크 토글 중 오류:', error)
         } finally {
             setIsBookmarkLoading(false)
         }
@@ -97,7 +98,7 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                 setIsSchedules(false)
                 const announcementId = notice.id
                 await removeSchedules(announcementId)
-                ShowToast("삭제 성공", "일정을 삭제하였습니다", ToastType.SUCCESS)
+                ShowToast("삭제 성공", "일정을 삭제했습니다", ToastType.SUCCESS)
                 return
             }
             const data : BaseScheduleType = {
@@ -107,9 +108,9 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
             }
             await registerSchedules(data)
             setIsSchedules(true)
-            ShowToast("추가 성공", "일정을 추가하였습니다", ToastType.SUCCESS)
+            ShowToast("추가 성공", "일정을 추가했습니다", ToastType.SUCCESS)
         } catch (error) {
-            ShowToast("오류 발생", "알 수 없는 오류가 발생하였습니다", ToastType.ERROR)
+            ShowToast("오류 발생", "알 수 없는 오류가 발생했습니다", ToastType.ERROR)
         } finally {
             setIsScheduleLoading(false)
         }
@@ -145,48 +146,43 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
         "기술개발(R&D)" : {label : "R&D", icon : <RNDIcon width={20} height={20} color={Colors.primary}/>},
         "인력" : {label : "인력", icon : <TalentIcon width={20} height={20} color={Colors.primary}/>},
         "판로ㆍ해외진출" : {label : "글로벌", icon : <GlobalIcon width={16} height={16} color={Colors.primary}/>},
-    }
+    } as const
+    
     const { width } = useWindowDimensions();
 
-    // 일정에 들어있는지 안들어있는지 검사하는 코드, 일정 추가 기능을 만들때 필요해서 작성함
-    useFocusEffect(
-        useCallback(() => {  
-            console.log("content :" + JSON.stringify(notice.content.replace(
-                /(<p class="txt-button">.*?<\/p>)\s*<br\s*\/?>/gi,
-                '$1'
-            )))
-            const fetchIsSchedule = async () => {
-                console.log(isScheduleLoading)
-                setIsScheduleLoading(true);
-                try {
-                    const exists = (await getDateSchedules(
-                        formatToDate(new Date(), 'solid'))
-                    ).data.some((value) => value.id === params.Notice.id);
-                    
-                    setIsSchedules(exists)
-                } catch (error) {
-                    if (isAxiosError(error)) {
-                        const response = error.response;
-                        if (!response) {
-                            ShowToast("오류 발생", "네트워크 오류가 발생했습니다", ToastType.ERROR);
-                            return;
-                        }
-                        const data = response.data as ErrorResponse;
-                        ShowToast("오류 발생", data.message, ToastType.ERROR);
-                        return;
-                    }
-                    ShowToast("오류 발생", "알 수 없는 오류가 발생하였습니다", ToastType.ERROR);
-                    console.log(error);
-                } finally {
-                    setIsScheduleLoading(false)
+    const fetchIsSchedule = async () => {
+        setIsScheduleLoading(true);
+        try {
+            const exists = (await getDateSchedules(
+                formatToDate(new Date(), 'solid'))
+            ).data.some((value) => value.id === params.Notice.id);
+            
+            setIsSchedules(exists)
+        } catch (error) {
+            if (isAxiosError(error)) {
+                const response = error.response;
+                if (!response) {
+                    ShowToast("오류 발생", "네트워크 오류가 발생했습니다", ToastType.ERROR);
+                    return;
                 }
+                const data = response.data as ErrorResponse;
+                ShowToast("오류 발생", data.message, ToastType.ERROR);
+                return;
             }
+            ShowToast("오류 발생", "알 수 없는 오류가 발생했습니다", ToastType.ERROR);
+        } finally {
+            setIsScheduleLoading(false)
+        }
+    }
+
+    useFocusEffect(
+        useCallback(() => { 
             fetchIsSchedule(); // async 함수 호출
         }, [])
     )
 
     return (
-        <ImageBackground source={require("../../../assets/images/glass-background.png")} style={{flex : 1, paddingTop: insets.top, paddingBottom: insets.bottom}}>
+        <ImageBackground source={backgroundImage} style={{flex : 1, paddingTop: insets.top, paddingBottom: insets.bottom}}>
             <SubHeaderBar
                 title={categoryMap[notice.supportField as keyof typeof categoryMap]?.label}
                 handleBackPress={handleBackPress}
@@ -274,7 +270,6 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                                     <Text
                                         onPress={() => {
                                             if (href) {
-                                                console.log(url)
                                                 if (url) {
                                                     handleOpenURL(url)
                                                 }

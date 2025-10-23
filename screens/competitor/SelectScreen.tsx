@@ -4,7 +4,7 @@ import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BMCType, GetBMCsResponse } from "../../type/BMC/BMC.type";
 import { getBMCs } from "../../api/bmc";
 import { formatToDate } from "../../util/DateFormat";
@@ -17,8 +17,10 @@ import { CompetitorRequest } from "../../type/competitor/competitor.type";
 import { isAxiosError } from "axios";
 import { ErrorResponse } from "../../type/util/response.type";
 import BMCItem from "../../component/home/BMCItem";
+import { DefaultImage } from "../../constants/AppImages";
 
 type SelectScreenProps = StackScreenProps<CompoetitorStackParamList, 'Select'>
+const backgroundImage = DefaultImage.background
 
 export default function SelectScreen({navigation} : SelectScreenProps){
     const [allBMCs, setAllBMCs] = useState<BMCType[]>([]);
@@ -39,7 +41,7 @@ export default function SelectScreen({navigation} : SelectScreenProps){
             const uri = allBMCs.filter((value) => {
                 return value.id === selectBMC
             })[0].imageUrl
-            navigation.navigate('Result', {image : {uri : uri}, bmcId : selectBMC, data : response})
+            navigation.navigate('Result', {image : {uri : uri, cache: 'force-cache'}, bmcId : selectBMC, data : response})
         } catch (error) {
             if(isAxiosError(error)){
                 const response = error.response
@@ -51,7 +53,7 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                         const errorMsg = message.slice(0, -1);
                         ShowToast("경쟁사 분석", errorMsg, ToastType.ERROR);
                     }
-                    ShowToast("경쟁사 분석", message + '입니다', ToastType.ERROR);
+                    ShowToast("경쟁사 분석", message, ToastType.ERROR);
                 }
             }
         } finally {
@@ -65,19 +67,46 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                 const response: GetBMCsResponse = await getBMCs();
                 setAllBMCs(response.data);
             } catch (error) {
-                console.error('BMC 데이터 로딩 실패:', error);
             } finally {
                 setLoading(false);
             }
         };
         fetchBMCs();
+        return () => {
+            setAllBMCs([])
+        };
     }, []);
+
+    const renderItem = useCallback(
+        ({ item }: { item: BMCType }) => {
+            const selected = item.id === selectBMC;
+            return (
+                <TouchableOpacity
+                    onPress={() => setSelectBMC(selected ? undefined : item.id)}
+                    style={[{
+                        borderRadius : 8,
+                        position : 'relative',
+                    },
+                    selected && { borderWidth: 2, borderColor: Colors.primary },
+                    ]}
+                >
+                    <BMCItem
+                        title={item.title}
+                        subText={formatToDate(item.updatedAt, "dotted")}
+                        imageSource={{ uri: item.imageUrl, cache: 'force-cache' }}
+                        onPress={() => setSelectBMC(selected ? undefined : item.id)}
+                    />
+                </TouchableOpacity>
+            );
+        }, [selectBMC]
+    );
+    
 
     return (
         <>
         <ImageBackground 
             style={{flex : 1, position : 'relative'}} 
-            source={require("../../assets/images/glass-background.png")}
+            source={backgroundImage}
         >
             <SubHeaderBar
                 handleBackPress={navigation.goBack}
@@ -93,34 +122,11 @@ export default function SelectScreen({navigation} : SelectScreenProps){
             />
             <FlatList
                 style={{flex : 1}}
+                removeClippedSubviews={true}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{gap : 16, padding : 16}}
                 data={allBMCs}
-                renderItem={({ item }) => {
-                    const selected = item.id === selectBMC;
-                    return (
-                        <TouchableOpacity 
-                            onPress={() => 
-                                setSelectBMC(selected ? undefined : item.id)
-                            }
-                            style={[{
-                                    borderRadius : 8,
-                                    position : 'relative',
-                                },
-                                selected && {
-                                    borderWidth : 2,
-                                    borderColor : Colors.primary
-                                }
-                            ]}>
-                            <BMCItem
-                                title={item.title}
-                                subText={formatToDate(item.updatedAt, 'dotted')}
-                                imageSource={{uri : item.imageUrl}}
-                                onPress={() => {setSelectBMC(selected ? undefined : item.id);}}
-                            />
-                        </TouchableOpacity>
-                    );
-                }}
+                renderItem={({item}) => renderItem({item})}
                 ListEmptyComponent={() => (
                     !loading ? (
                         <View style={styles.emptyContainer}>

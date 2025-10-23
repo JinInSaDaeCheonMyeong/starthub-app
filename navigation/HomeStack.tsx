@@ -30,6 +30,7 @@ import { RootStackParamList } from "./RootStack";
 import StartupStatus from "../constants/StartupStatus";
 import {useFocusEffect} from '@react-navigation/native'
 import { removeFCMToken } from "../api/notification";
+import { DefaultImage } from "../constants/AppImages";
 
 export type HomeStackParamList = {
     Home : undefined,
@@ -41,6 +42,7 @@ export type HomeStackParamList = {
 type HomeStackProps = StackScreenProps<RootStackParamList, 'HomeStack'>;
 
 const Tab = createBottomTabNavigator<HomeStackParamList>();
+const backgroundImage = DefaultImage.background
 
 export function HomeStack({ navigation } : HomeStackProps) {
     const insets = useSafeAreaInsets();
@@ -57,17 +59,18 @@ export function HomeStack({ navigation } : HomeStackProps) {
     const isLocal = profileProvider === "LOCAL";
     const {width} = useWindowDimensions()
 
+    const fetchData = async () => {
+        try {
+            const data = (await getMe()).data;
+            setProfileData(data)
+            setProfileProvider(data.provider);
+        } catch (error) {
+            ShowToast('', '알 수 없는 오류가 발생했습니다', ToastType.ERROR)
+        }
+    };
+
     useFocusEffect(
         useCallback(() => {
-            const fetchData = async () => {
-                try {
-                    const data = (await getMe()).data;
-                    setProfileData(data)
-                    setProfileProvider(data.provider);
-                } catch (error) {
-                    console.log("사용자 정보 조회 실패", error);
-                }
-            };
             fetchData();
         }, [])
     );
@@ -108,7 +111,7 @@ export function HomeStack({ navigation } : HomeStackProps) {
             const fcmToken : string | null = await getFCMToken()
             await (await removeFCMToken(fcmToken ?? '')).data
             setDrawerOpen(false);
-            ShowToast("로그아웃", "로그아웃에 성공하셨습니다", ToastType.SUCCESS)
+            ShowToast("로그아웃", "로그아웃에 성공했습니다", ToastType.SUCCESS)
             navigation.reset({
                 index: 0,
                 routes: [
@@ -141,7 +144,7 @@ export function HomeStack({ navigation } : HomeStackProps) {
             const fcmToken : string | null = await getFCMToken()
             await (await removeFCMToken(fcmToken ?? '')).data
             setDrawerOpen(false);
-            ShowToast("회원 탈퇴", "회원 탈퇴에 성공하셨습니다", ToastType.SUCCESS);
+            ShowToast("회원 탈퇴", "회원 탈퇴에 성공했습니다", ToastType.SUCCESS);
             navigation.reset({
                 index: 0,
                 routes: [
@@ -156,7 +159,6 @@ export function HomeStack({ navigation } : HomeStackProps) {
             })
         } catch (error) {
             ShowToast("회원 탈퇴", "회원 탈퇴에 실패했습니다", ToastType.ERROR);
-            if (isAxiosError(error)) console.log(error.response?.data);
         } finally {
             handleCloseModal();
         }
@@ -164,7 +166,7 @@ export function HomeStack({ navigation } : HomeStackProps) {
 
     return (
         <ImageBackground
-        source={require("../assets/images/glass-background.png")}
+        source={backgroundImage}
         style={[styles.container, { paddingTop: insets.top }]}
         >
         <Drawer
@@ -204,16 +206,16 @@ export function HomeStack({ navigation } : HomeStackProps) {
                 header: () => <HeaderBar onClickMenu={() => setDrawerOpen(true)} />,
                 animation: "shift",
                 transitionSpec: {
-                animation: "timing",
-                config: { duration: 90, easing: Easing.inOut(Easing.ease) },
+                    animation: "timing",
+                    config: { duration: 90, easing: Easing.inOut(Easing.ease) },
                 },
                 sceneStyle: { backgroundColor: "transparent", overflow: "visible" },
             }}
             >
-            <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="Notice" component={NoticeScreen} />
-            <Tab.Screen name="Calendar" component={CalendarScreen} />
-            <Tab.Screen name="BMC" component={BMCScreen} />
+            <Tab.Screen name="Home" component={HomeScreen}/>
+            <Tab.Screen name="Notice" component={NoticeScreen}/>
+            <Tab.Screen name="Calendar" component={CalendarScreen}/>
+            <Tab.Screen name="BMC" component={BMCScreen}/>
             </Tab.Navigator>
         </Drawer>
         <InputModal

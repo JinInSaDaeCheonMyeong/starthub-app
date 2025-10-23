@@ -19,11 +19,13 @@ import NoticeIcon from "../../assets/icons/alarm/Iconly/Regular/Bulk/Work.svg"
 import CalendarIcon from "../../assets/icons/alarm/Iconly/Regular/Bulk/Calendar.svg"
 import { getNotice } from "../../api/notice";
 import { NoticeType } from "../../type/notice/notice.type";
+import { DefaultImage } from "../../constants/AppImages";
 
 export type AlarmScreenProps = StackScreenProps<
     RootStackParamList,
     "Alarm"
 >;
+const backgroundImage = DefaultImage.background
 
 export default function AlarmScreen({navigation} : AlarmScreenProps) {
     const insets = useSafeAreaInsets()
@@ -62,11 +64,6 @@ export default function AlarmScreen({navigation} : AlarmScreenProps) {
 
             // 유효한 날짜인지 확인
             if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                console.warn('Invalid date created from:', {
-                    startDateStr,
-                    endDateStr,
-                    originalPeriod: period
-                });
                 return {
                     startDate: new Date(),
                     endDate: new Date()
@@ -139,40 +136,42 @@ export default function AlarmScreen({navigation} : AlarmScreenProps) {
             initData()
         }, [])
     )
+    const renderItem = useCallback(({item, index}:{item : AlarmHistory, index : number}) => {
+        const {title, icon} = getItem(item.notificationType)
+        return (
+            <TouchableOpacity onPress={async () => {
+                handleNotice(item.announcementId)
+            }}>
+                <GlassView 
+                    key={index} 
+                    containerStyle={{
+                        padding : 16,
+                        gap : 4
+                    }}
+                >
+                    <View style={{flexDirection : 'row', justifyContent : 'space-between', alignItems : 'center'}}>
+                        <View style={{flexDirection : 'row', gap : 6, alignItems : 'center'}}>
+                            {icon}
+                            <Text style={{color : '#777777', fontSize : 13, fontFamily : Fonts.reqular}}>{title}</Text>
+                        </View>
+                        <Text style={{color : '#777777', fontSize : 13, fontFamily : Fonts.reqular}}>{getDateDifference(new Date(item.createdAt))}</Text>
+                    </View>
+                    <Text numberOfLines={1} style={{color : Colors.black1, fontSize : 14, fontFamily : Fonts.semiBold}}>{item.title}</Text>
+                </GlassView>
+            </TouchableOpacity>
+        )
+    }, [handleNotice])
     return (
-        <ImageBackground source={require("../../assets/images/glass-background.png")} style={{paddingTop: insets.top, paddingBottom: insets.bottom, flex : 1}}>
+        <ImageBackground source={backgroundImage} style={{paddingTop: insets.top, paddingBottom: insets.bottom, flex : 1}}>
             <SubHeaderBar
                 title="내 알림"
                 handleBackPress={navigation.goBack}
             />
             <FlatList
+                removeClippedSubviews={true}
                 data={history}
                 contentContainerStyle={{padding : 16, gap : 16}}
-                renderItem={({item, index}) => {
-                    const {title, icon} = getItem(item.notificationType)
-                    return (
-                        <TouchableOpacity onPress={async () => {
-                            handleNotice(item.announcementId)
-                        }}>
-                            <GlassView 
-                                key={index} 
-                                containerStyle={{
-                                    padding : 16,
-                                    gap : 4
-                                }}
-                            >
-                                <View style={{flexDirection : 'row', justifyContent : 'space-between', alignItems : 'center'}}>
-                                    <View style={{flexDirection : 'row', gap : 6, alignItems : 'center'}}>
-                                        {icon}
-                                        <Text style={{color : '#777777', fontSize : 13, fontFamily : Fonts.reqular}}>{title}</Text>
-                                    </View>
-                                    <Text style={{color : '#777777', fontSize : 13, fontFamily : Fonts.reqular}}>{getDateDifference(new Date(item.createdAt))}</Text>
-                                </View>
-                                <Text numberOfLines={1} style={{color : Colors.black1, fontSize : 14, fontFamily : Fonts.semiBold}}>{item.title}</Text>
-                            </GlassView>
-                        </TouchableOpacity>
-                    )
-                }}
+                renderItem={(item) => renderItem(item)}
                 ListFooterComponent={
                     loading ? (
                         <View style={styles.loadingContainer}>

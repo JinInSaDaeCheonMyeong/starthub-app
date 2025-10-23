@@ -22,11 +22,14 @@ import {CompositeScreenProps} from "@react-navigation/core";
 import {RootStackParamList} from "../../navigation/RootStack";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { DefaultImage } from "../../constants/AppImages";
 
 export type MyLikesScreenProps = StackScreenProps<RootStackParamList>
 
 
 const { height} = Dimensions.get("window");
+
+const backgroundImage = DefaultImage.background
 
 export default function MyLikesScreen({navigation, route : {params}}: MyLikesScreenProps){
     const parseReceptionPeriod = (period: string) => {
@@ -116,7 +119,6 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
             });
             setAllLikes(mapped);
         } catch (error) {
-            console.error('좋아요 데이터 로딩 실패:', error);
             ShowToast(
                 "문제가 발생하였습니다",
                 "데이터를 불러오지 못하였습니다",
@@ -198,9 +200,23 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
         );
     }, []);
 
+    const renderItem = useCallback((item : NoticeType) => (
+        <View style={styles.noticeItemContainer}>
+            <NoticeItem
+                item={item}
+                onPress={()=>{
+                    navigation.navigate('InNotice', {
+                        Notice: item,
+                        onGoBack: updateNoticeInList
+                    })
+                }}
+            />
+        </View>
+    ), [])
+
     return (
         <ImageBackground 
-            source={require('../../assets/images/glass-background.png')}
+            source={backgroundImage}
             style={[styles.container, {paddingTop : insets.top, paddingBottom : insets.bottom}]}
         >
             <SubHeaderBar
@@ -208,6 +224,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
                 handleBackPress={navigation.goBack}
             />
             <FlatList
+                removeClippedSubviews={true}
                 data={refreshing ? [] : allLikes}  // ✅ 새로고침 시 빈 배열
                 refreshControl={
                     <RefreshControl
@@ -217,23 +234,14 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
                         tintColor={Colors.white1}
                     />
                 }
+                showsVerticalScrollIndicator={false}
                 viewabilityConfig={{
                     itemVisiblePercentThreshold: 50
                 }}
                 keyExtractor={(item) => item.id.toString()}
                 onViewableItemsChanged={onViewableItemsChanged}
                 renderItem={({item}) => (
-                    <View style={styles.noticeItemContainer}>
-                        <NoticeItem
-                            item={item}
-                            onPress={()=>{
-                                navigation.navigate('InNotice', {
-                                    Notice: item,
-                                    onGoBack: updateNoticeInList
-                                })
-                            }}
-                        />
-                    </View>
+                    renderItem(item)
                 )}
                 ListFooterComponent={
                     loading || isFetchingNextPage ?

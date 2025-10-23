@@ -55,6 +55,7 @@ export const BottomBar: React.FC<BottomTabBarProps> = ({state, descriptors, navi
                                           onPress={onPress}
                                           style={styles.itemContainer}
                                           activeOpacity={0.7}
+                                          hitSlop={{left : 16, right : 16}}
                         >
                             {getTabIcon(route.name, color)}
                             {label && <Text style={[styles.labelText, {color:color}]}>{label}</Text>}

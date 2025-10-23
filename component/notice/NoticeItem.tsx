@@ -1,17 +1,33 @@
 import { Image, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native"
 import { Colors } from "../../constants/Color"
 import { Fonts } from "../../constants/Fonts"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import BookMarkFill from "../../assets/icons/bookMark/bookmark.fill.svg"
 import BookMark from "../../assets/icons/bookMark/bookmark.svg"
 import {NoticeType} from "../../type/notice/notice.type";
 import {deleteLikes, postLikes} from "../../api/likes";
 import GlassView from "../GlassView"
+import { NoticeImages } from "../../constants/AppImages"
 
 interface NoticeItemProps {
     item : NoticeType
     onPress : () => void
 }
+
+const categoryMap = {
+    "사업화" : {label : "사업화", icon : NoticeImages.business},
+    "멘토링ㆍ컨설팅ㆍ교육" : {label : "교육", icon : NoticeImages.education},
+    "창업교육" : {label : "교육", icon : NoticeImages.education},
+    "행사ㆍ네트워크" : {label : "행사", icon : NoticeImages.event},
+    "시설ㆍ공간ㆍ보육" : {label : "시설", icon : NoticeImages.facility},
+    "정책자금" : {label : "자금", icon : NoticeImages.funding},
+    "글로벌" : {label : "글로벌", icon : NoticeImages.funding},
+    "기술개발(R&D)" : {label : "R&D", icon : NoticeImages.rnd},
+    "인력" : {label : "인력", icon : NoticeImages.talent},
+    "판로ㆍ해외진출" : {label : "글로벌", icon : NoticeImages.global},
+    "융자" : {label : "자금", icon : NoticeImages.funding},
+} as const
+
 export default function NoticeItem({
                                        item,
                                        onPress,
@@ -24,63 +40,12 @@ export default function NoticeItem({
         setIsSelected(item.isLiked);
     }, [item.isLiked]);
 
-    const transformDate = (date : Date) => {
+    const transformDate = useCallback((date : Date) => {
         return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`
-    }
+    }, [])
 
-    const getApplyTargetDisplay = () => {
-        if (!item.targetAge) return "";
-
-        const targets = item.targetAge
-            .split(",")
-            .map((target) => target.trim())
-            .filter((target) => target);
-        if (targets.length === 0) return "";
-
-        const firstTarget = targets[0];
-
-        const getAgeGroup = (target: string) => {
-            const match = target.match(/만\s*(\d+)\s*세/);
-            if (!match) return target;
-            const age = parseInt(match[1], 10);
-
-            if (target.includes("~")) {
-                if (age >= 20 && age < 30) return "20대";
-                if (age >= 30 && age < 40) return "30대";
-                if (age >= 40 && age < 50) return "40대";
-                if (age >= 50 && age < 60) return "50대";
-                return `${age}대`;
-            } else {
-                if (target.includes("이상")) {
-                    return `${age}세 이상`;
-                }
-                if (target.includes("이하")) {
-                    return `${age}세 이하`;
-                }
-                return `${age}세`;
-            }
-        };
-
-        const display = getAgeGroup(firstTarget);
-        return targets.length > 1 ? `${display} 등` : display;
-    };
-
-    const categoryMap = {
-        "사업화" : {label : "사업화", icon : require( "../../assets/images/notice/business.png")},
-        "멘토링ㆍ컨설팅ㆍ교육" : {label : "교육", icon : require("../../assets/images/notice/education.png")},
-        "창업교육" : {label : "교육", icon : require("../../assets/images/notice/education.png")},
-        "행사ㆍ네트워크" : {label : "행사", icon : require("../../assets/images/notice/event.png")},
-        "시설ㆍ공간ㆍ보육" : {label : "시설", icon : require("../../assets/images/notice/facility.png")},
-        "정책자금" : {label : "자금", icon : require("../../assets/images/notice/funding.png")},
-        "글로벌" : {label : "글로벌", icon : require("../../assets/images/notice/global.png")},
-        "기술개발(R&D)" : {label : "R&D", icon : require("../../assets/images/notice/rnd.png")},
-        "인력" : {label : "인력", icon : require("../../assets/images/notice/talent.png")},
-        "판로ㆍ해외진출" : {label : "글로벌", icon : require("../../assets/images/notice/global.png")},
-    }
-
-    const handleBookmarkToggle = async () => {
+    const handleBookmarkToggle = useCallback(async () => {
         if (isBookmarkLoading) return
-
         setIsBookmarkLoading(true)
         try {
             if (isSelected) {
@@ -89,13 +54,15 @@ export default function NoticeItem({
                 await postLikes(item.id)
             }
             item.isLiked = !item.isLiked
-            setIsSelected((prev) => !prev)
+            setIsSelected(prev => !prev)
         } catch (error) {
-            console.error('북마크 토글 중 오류:', error)
+            // 필요 시 에러 처리
         } finally {
             setIsBookmarkLoading(false)
         }
-    }
+    }, [isSelected, isBookmarkLoading, item])
+
+    const category = categoryMap[item.supportField as keyof typeof categoryMap];
 
     return (
         <TouchableOpacity
@@ -105,7 +72,7 @@ export default function NoticeItem({
             <GlassView
                 containerStyle={styles.shadowContainer}
             >
-                <Image style={{width : 50, height : 50}} source={categoryMap[item.supportField as keyof typeof categoryMap]?.icon}/>
+                <Image style={{width : 50, height : 50}} source={category?.icon}/>
                 <View style={styles.titleContainer}>
                     <Text style={styles.titleText}
                         numberOfLines={1}

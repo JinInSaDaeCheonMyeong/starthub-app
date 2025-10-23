@@ -24,6 +24,7 @@ import RevenueStreamsIcon from "../../../assets/icons/bmc/revenue_streams.svg"
 import ValuePropositionIcon from "../../../assets/icons/bmc/value_proposition.svg"
 import SubHeaderBar from '../../../component/home/SubHeaderBar';
 import GlassView from '../../../component/GlassView';
+import { DefaultImage } from '../../../constants/AppImages';
 
 const {width} = Dimensions.get('window');
 
@@ -68,12 +69,12 @@ const values = [
         icon: RevenueStreamsIcon,
     }
 ]
-
+const backgroundImage = DefaultImage.background
+const defaultBMCImage = DefaultImage.bmc
 export default function InBMCScreen({navigation, route : {params}} : InBMCScreenProps) {
     const handleBackPress = () => {
         navigation.goBack()
     };
-    const defaultImage = require("../../../assets/images/bmc-thumbnail-exam.png");
     const buttonSide = (width-96)/5
     const [selectValue, setSelectValue] = useState<SelectBMCValue>(SelectBMCValue.keyPartners);
     const imageSource = params.BMC.imageUrl
@@ -94,7 +95,7 @@ export default function InBMCScreen({navigation, route : {params}} : InBMCScreen
     return (
         <ImageBackground 
             style={[styles.container,{paddingTop: insets.top, paddingBottom: insets.bottom}]}
-            source={require("../../../assets/images/glass-background.png")}
+            source={backgroundImage}
         >
             <SubHeaderBar
                 title={params.BMC.title}
@@ -103,9 +104,9 @@ export default function InBMCScreen({navigation, route : {params}} : InBMCScreen
             <ScrollView contentContainerStyle={{gap : 24, paddingHorizontal : 16, paddingVertical : 16}}>
                 <View style={[styles.bmcImage]}>
                 <Image
-                    source={imageError || !imageSource ? defaultImage : {uri : imageSource}}
+                    source={imageError || !imageSource ? defaultBMCImage : {uri : imageSource, cache : 'force-cache'}}
                     resizeMode="contain"
-                    defaultSource={defaultImage}
+                    defaultSource={defaultBMCImage}
                     style={styles.bmcImage}
                     onError={() => {
                         setImageError(true)

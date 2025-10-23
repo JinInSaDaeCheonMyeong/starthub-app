@@ -132,7 +132,7 @@ export default function SignupScreen(props : SignupScreenProps){
                         }
                     </>
                 )
-            case 2: 
+            case 2:
                 return (
                     <>
                         <AuthTextInput
@@ -159,7 +159,6 @@ export default function SignupScreen(props : SignupScreenProps){
                         <View style={styles.allSelectBox}>
                             <Checkbox
                                 value={allChecked}
-                                onChange={() => {console.log(allChecked)}}
                                 onValueChange={(value) => {
                                     setAllChecked(value)
                                 }}
