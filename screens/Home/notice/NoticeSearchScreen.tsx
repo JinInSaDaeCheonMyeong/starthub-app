@@ -116,6 +116,7 @@ export default function NoticeSearchScreen({
 
   const [page, setPage] = useState(0);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+  const [isNatural, setIsNatural] = useState(false);
   const lastRequestTime = useRef<number>(0);
   const dropDownMargin = [
     regionOpen,
@@ -168,6 +169,7 @@ export default function NoticeSearchScreen({
                     0
                 );
         setIsLast(response.data.isLast);
+        setIsNatural(response.data.content[0].isNatural);
 
         const mapped = response.data.content.map((notice: BeforeNoticeType) => {
           const { startDate, endDate } = parseReceptionPeriod(
@@ -338,106 +340,108 @@ export default function NoticeSearchScreen({
       ]}
     >
       <SubHeaderBar title={"공고 검색"} handleBackPress={handleBackPress} />
-      <View>
-        <View style={styles.searchBar}>
-          <SearchBar onPress={(text) => setTitle(text)} value={title} />
+        <View>
+            <View style={styles.searchBar}>
+                <SearchBar onPress={(text) => setTitle(text)} value={title} />
+            </View>
+            {!isNatural && (
+                <ScrollView
+                    style={{ position: "absolute", zIndex: 999, paddingTop: 60 }}
+                    keyboardShouldPersistTaps="handled"
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    nestedScrollEnabled={true}
+                >
+                    <View style={{ paddingBottom: dropDownMargin, marginStart: 16 }}>
+                        <DropDown
+                            placeholderStyle={styles.dropDownPlaceHolder}
+                            labelStyle={styles.dropDownLabel}
+                            textStyle={styles.dropDownText}
+                            open={supportFieldOpen}
+                            value={supportField}
+                            items={SupportFieldItems}
+                            placeholder={"지원분야"}
+                            setOpen={setSupportFieldOpen}
+                            minWidth={90}
+                            maxWidth={150}
+                            setValue={(s) => {
+                                if (s === supportField) {
+                                    setSupportField("");
+                                } else {
+                                    setSupportField(s);
+                                }
+                            }}
+                        />
+                    </View>
+                    <View style={{ marginStart: 16 }}>
+                        <DropDown
+                            placeholderStyle={styles.dropDownPlaceHolder}
+                            labelStyle={styles.dropDownLabel}
+                            textStyle={styles.dropDownText}
+                            open={regionOpen}
+                            value={region}
+                            items={RegionItems}
+                            placeholder={"지역"}
+                            setOpen={setRegionOpen}
+                            minWidth={70}
+                            maxWidth={120}
+                            setValue={(s) => {
+                                if (s === region) {
+                                    setRegion("");
+                                } else {
+                                    setRegion(s);
+                                }
+                            }}
+                        />
+                    </View>
+                    <View style={{ marginStart: 16 }}>
+                        <DropDown
+                            placeholderStyle={styles.dropDownPlaceHolder}
+                            labelStyle={styles.dropDownLabel}
+                            textStyle={styles.dropDownText}
+                            open={targetAgeOpen}
+                            value={targetAge}
+                            items={TargetAgeItems}
+                            placeholder={"연령"}
+                            setOpen={setTargetAgeOpen}
+                            minWidth={150}
+                            maxWidth={3000}
+                            setValue={(s) => {
+                                if (s === targetAge) {
+                                    setTargetAge("");
+                                } else {
+                                    setTargetAge(s);
+                                }
+                            }}
+                        />
+                    </View>
+                    <View style={{ marginStart: 16, marginEnd: 16 }}>
+                        <DropDown
+                            placeholderStyle={styles.dropDownPlaceHolder}
+                            labelStyle={styles.dropDownLabel}
+                            textStyle={styles.dropDownText}
+                            open={businessExperienceOpen}
+                            value={businessExperience}
+                            items={BusinessExperienceItems}
+                            placeholder={"창업업력"}
+                            setOpen={setBusinessExperienceOpen}
+                            minWidth={90}
+                            maxWidth={150}
+                            setValue={(s) => {
+                                if (s === businessExperience) {
+                                    setBusinessExperience("");
+                                } else {
+                                    setBusinessExperience(s);
+                                }
+                            }}
+                        />
+                    </View>
+                </ScrollView>
+            )}
         </View>
-        <ScrollView
-          style={{ position: "absolute", zIndex: 999, paddingTop: 60 }}
-          keyboardShouldPersistTaps="handled"
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          nestedScrollEnabled={true}
-        >
-          <View style={{ paddingBottom: dropDownMargin, marginStart: 16 }}>
-            <DropDown
-              placeholderStyle={styles.dropDownPlaceHolder}
-              labelStyle={styles.dropDownLabel}
-              textStyle={styles.dropDownText}
-              open={supportFieldOpen}
-              value={supportField}
-              items={SupportFieldItems}
-              placeholder={"지원분야"}
-              setOpen={setSupportFieldOpen}
-              minWidth={90}
-              maxWidth={150}
-              setValue={(s) => {
-                if (s === supportField) {
-                  setSupportField("");
-                } else {
-                  setSupportField(s);
-                }
-              }}
-            />
-          </View>
-          <View style={{ marginStart: 16 }}>
-            <DropDown
-              placeholderStyle={styles.dropDownPlaceHolder}
-              labelStyle={styles.dropDownLabel}
-              textStyle={styles.dropDownText}
-              open={regionOpen}
-              value={region}
-              items={RegionItems}
-              placeholder={"지역"}
-              setOpen={setRegionOpen}
-              minWidth={70}
-              maxWidth={120}
-              setValue={(s) => {
-                if (s === region) {
-                  setRegion("");
-                } else {
-                  setRegion(s);
-                }
-              }}
-            />
-          </View>
-          <View style={{ marginStart: 16 }}>
-            <DropDown
-              placeholderStyle={styles.dropDownPlaceHolder}
-              labelStyle={styles.dropDownLabel}
-              textStyle={styles.dropDownText}
-              open={targetAgeOpen}
-              value={targetAge}
-              items={TargetAgeItems}
-              placeholder={"연령"}
-              setOpen={setTargetAgeOpen}
-              minWidth={150}
-              maxWidth={3000}
-              setValue={(s) => {
-                if (s === targetAge) {
-                  setTargetAge("");
-                } else {
-                  setTargetAge(s);
-                }
-              }}
-            />
-          </View>
-          <View style={{ marginStart: 16, marginEnd: 16 }}>
-            <DropDown
-              placeholderStyle={styles.dropDownPlaceHolder}
-              labelStyle={styles.dropDownLabel}
-              textStyle={styles.dropDownText}
-              open={businessExperienceOpen}
-              value={businessExperience}
-              items={BusinessExperienceItems}
-              placeholder={"창업업력"}
-              setOpen={setBusinessExperienceOpen}
-              minWidth={90}
-              maxWidth={150}
-              setValue={(s) => {
-                if (s === businessExperience) {
-                  setBusinessExperience("");
-                } else {
-                  setBusinessExperience(s);
-                }
-              }}
-            />
-          </View>
-        </ScrollView>
-      </View>
       <FlatList
         removeClippedSubviews={true}
-        style={{ marginTop: 70 }}
+        style={isNatural? {marginTop:20} : { marginTop: 70 }}
         contentContainerStyle={{ gap: 16 }}
         showsVerticalScrollIndicator={false}
         data={refreshing ? [] : allNotices} // ✅ 새로고침 시 빈 배열
