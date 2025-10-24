@@ -29,6 +29,7 @@ export interface BeforeNoticeType {
     departmentInCharge: string,
     content: string,
     isLiked: boolean,
+    isNatural: boolean
 }
 
 export interface NoticeType extends BeforeNoticeType {
