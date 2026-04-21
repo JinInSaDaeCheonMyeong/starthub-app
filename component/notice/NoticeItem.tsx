@@ -1,13 +1,15 @@
-import { Image, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native"
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { Colors } from "../../constants/Color"
 import { Fonts } from "../../constants/Fonts"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, memo } from "react"
 import BookMarkFill from "../../assets/icons/bookMark/bookmark.fill.svg"
 import BookMark from "../../assets/icons/bookMark/bookmark.svg"
 import {NoticeType} from "../../type/notice/notice.type";
 import {deleteLikes, postLikes} from "../../api/likes";
 import GlassView from "../GlassView"
 import { NoticeImages } from "../../constants/AppImages"
+import { Image } from 'expo-image';
+
 
 interface NoticeItemProps {
     item : NoticeType
@@ -28,7 +30,7 @@ const categoryMap = {
     "융자" : {label : "자금", icon : NoticeImages.funding},
 } as const
 
-export default function NoticeItem({
+function NoticeItem({
                                        item,
                                        onPress,
                                    } : NoticeItemProps ){
@@ -44,6 +46,10 @@ export default function NoticeItem({
         return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`
     }, [])
 
+    const isValidDate = useCallback((date: Date) => {
+        return !Number.isNaN(date.getTime())
+    }, [])
+
     const handleBookmarkToggle = useCallback(async () => {
         if (isBookmarkLoading) return
         setIsBookmarkLoading(true)
@@ -53,7 +59,6 @@ export default function NoticeItem({
             } else {
                 await postLikes(item.id)
             }
-            item.isLiked = !item.isLiked
             setIsSelected(prev => !prev)
         } catch (error) {
             // 필요 시 에러 처리
@@ -63,6 +68,7 @@ export default function NoticeItem({
     }, [isSelected, isBookmarkLoading, item])
 
     const category = categoryMap[item.supportField as keyof typeof categoryMap];
+    const hasValidDateRange = isValidDate(item.startDate) && isValidDate(item.endDate)
 
     return (
         <TouchableOpacity
@@ -81,7 +87,9 @@ export default function NoticeItem({
                         {item.title}
                     </Text>
                     <Text style={styles.dateText}>
-                        {`모집 : ${transformDate(item.startDate)}~${transformDate(item.endDate)}`}
+                        {hasValidDateRange
+                            ? `모집 : ${transformDate(item.startDate)}~${transformDate(item.endDate)}`
+                            : `모집 : ${item.receptionPeriod || '모집기간 정보 없음'}`}
                     </Text>
                     <View style={styles.bookMarkCotainer}>
                         <View style={[styles.hashTagContainer, {height : 'auto'}]}>
@@ -114,6 +122,8 @@ export default function NoticeItem({
         </TouchableOpacity>
     )
 }
+
+export default memo(NoticeItem);
 
 const styles = StyleSheet.create({
     shadowContainer: {

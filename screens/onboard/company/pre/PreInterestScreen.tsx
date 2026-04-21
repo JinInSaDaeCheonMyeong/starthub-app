@@ -1,9 +1,10 @@
-import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import CategorySelectButton from "../../../../component/auth/CategorySelectButton";
 import { Colors } from "../../../../constants/Color";
 import { InterestTypeList } from "../../../../constants/InterestTypeList";
 import { Fonts } from "../../../../constants/Fonts";
 import { StartupField } from "../../../../type/user/companyInput.type";
+import {FlashList} from "@shopify/flash-list";
 
 type PreInterestScreenProps = {
     startupLocation : string
@@ -34,7 +35,7 @@ export default function PreInterestScreen(props : PreInterestScreenProps){
                 <Text style={styles.subText}>드디어 마지막입니다!</Text>
                 <Text style={styles.mainText}>창업 분야를 1개 이상 선택해주세요!</Text>
             </View>
-            <FlatList
+            <FlashList
                 scrollEnabled={false}
                 data={InterestTypeList}
                 removeClippedSubviews={true}

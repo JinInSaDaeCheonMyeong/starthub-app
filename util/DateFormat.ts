@@ -1,3 +1,22 @@
+export const parseReceptionPeriod = (period: string): { startDate: Date; endDate: Date } => {
+    const fallback = { startDate: new Date(), endDate: new Date() };
+    try {
+        if (!period || typeof period !== 'string') return fallback;
+        const parts = period.split('~').map((s) => s.trim());
+        if (parts.length !== 2) return fallback;
+        const startDateStr = parts[0].split(' ')[0];
+        const endDateStr = parts[1].split(' ')[0];
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(startDateStr) || !dateRegex.test(endDateStr)) return fallback;
+        const startDate = new Date(startDateStr + 'T00:00:00');
+        const endDate = new Date(endDateStr + 'T00:00:00');
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return fallback;
+        return { startDate, endDate };
+    } catch {
+        return fallback;
+    }
+};
+
 export const getDateDifference = (date: Date): string => {
     const now = new Date();
     

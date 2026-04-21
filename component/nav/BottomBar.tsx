@@ -10,7 +10,7 @@ import BMCIcon from "../../assets/icons/bottom/BMC.svg"
 
 
 
-export const BottomBar: React.FC<BottomTabBarProps> = ({state, descriptors, navigation}) => {
+export const BottomBar: React.FC<BottomTabBarProps> = ({state, navigation}) => {
     const insets = useSafeAreaInsets();
     const labelMap = new Map<string, string>([
         ['Home', '홈'],

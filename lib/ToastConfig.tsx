@@ -1,7 +1,4 @@
-import { StyleSheet } from "react-native"
 import { BaseToastProps, ToastConfig, } from "react-native-toast-message"
-import { Fonts } from "../constants/Fonts"
-import { Colors } from "../constants/Color"
 import CustomToast from "../component/CustomToast"
 import { ToastType } from "../util/ShowToast"
 

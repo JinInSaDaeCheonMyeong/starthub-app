@@ -31,11 +31,11 @@ export const useSignupScreen = ({ navigation }: SignupScreenProps) => {
 
     const { width } = useWindowDimensions();
     const { disabled, disabledBtn, enabledBtn } = useDisabled();
-    const { validSignupForm, isValidEmail, isValidPassword, isValidChecked, isValidVerifyCode } = useSignupValid();
+    const { validSignupForm, isValidEmail, isValidPassword, isValidVerifyCode } = useSignupValid();
 
     const {
-        value: { errorText, errorVisible },
-        handler: { showError, hideError, handleAxiosError },
+        value: { errorVisible },
+        handler: { hideError, handleAxiosError },
     } = useError();
 
     // 📌 공통 상태 업데이트

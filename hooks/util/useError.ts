@@ -1,6 +1,5 @@
 import { isAxiosError } from "axios"
 import { useState } from "react"
-import { DefaultErrorMessage, ErrorType } from "../../type/error/error.type"
 import { ErrorResponse } from "../../type/util/response.type"
 import { ShowToast, ToastType } from "../../util/ShowToast"
 
@@ -18,12 +17,9 @@ export const useError = () => {
         setErrorVisible(false)
     }
 
-    const toastErrorMessage = () => {
-    }
-
     const handleAxiosError = (
         error : unknown,
-        show : (value : string) => void
+        _show : (value : string) => void
     ) => {
         if(isAxiosError(error)){
             const response = error.response
@@ -46,7 +42,6 @@ export const useError = () => {
         handler : {
             showError,
             hideError,
-            toastErrorMessage,
             handleAxiosError
         },
     }

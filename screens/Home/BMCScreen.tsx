@@ -1,10 +1,8 @@
 import {
-    FlatList,
     StyleSheet,
     Text,
-    TouchableOpacity,
     View,
-    Image, Dimensions, RefreshControl,
+    Dimensions, RefreshControl,
 } from "react-native";
 import {Fonts} from "../../constants/Fonts";
 import {Colors} from "../../constants/Color";
@@ -14,14 +12,16 @@ import {HomeStackParamList} from "../../navigation/HomeStack";
 import {StackScreenProps} from "@react-navigation/stack";
 import {RootStackParamList} from "../../navigation/RootStack";
 import {getBMCs} from "../../api/bmc";
-import {useCallback, useEffect, useRef, useState} from "react";
+import {useCallback, useState} from "react";
 import {BMCType, GetBMCsResponse} from "../../type/BMC/BMC.type";
 import  *  as  Progress  from  'react-native-progress' ;
 import {useFocusEffect} from "@react-navigation/native";
 import { formatToDate } from "../../util/DateFormat";
+import { ShowToast, ToastType } from "../../util/ShowToast";
 import BMCItem from "../../component/home/BMCItem";
+import {FlashList} from "@shopify/flash-list";
 
-const {width, height} = Dimensions.get('window');
+const { height} = Dimensions.get('window');
 
 export type BMCScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, 'BMC'>,
@@ -38,7 +38,8 @@ export default function BMCScreen({navigation}: BMCScreenProps) {
         try {
             const response: GetBMCsResponse = await getBMCs();
             setAllBMCs(response.data);
-        } catch (error) {
+        } catch {
+            ShowToast('오류 발생', 'BMC를 불러올 수 없습니다', ToastType.ERROR);
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -89,24 +90,24 @@ export default function BMCScreen({navigation}: BMCScreenProps) {
 
     return (
         <View style={styles.container}>
-                <FlatList
+                <FlashList
                     removeClippedSubviews={true}
                     showsVerticalScrollIndicator={false}
                     data={refreshing ? [] : allBMCs}
                     ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
                     refreshControl={
                         <RefreshControl
-                            refreshing={false}  // ✅ 이렇게 변경
+                            refreshing={false}
                             onRefresh={refreshing ? undefined : handleRefresh}
                             tintColor={Colors.white1}
                             colors={[Colors.white1]}
                         />
                     }
                     ListHeaderComponent={
-                        allBMCs.length > 0 ? (  // ✅ 삼항 연산자 사용
+                        allBMCs.length > 0 ? (
                             <View style={{ paddingHorizontal: 0 }}>
                                 <Text style={[styles.headerText, {marginTop: 16}]}>최근 BMC </Text>
-                                <FlatList
+                                <FlashList
                                     data={allBMCs.slice(0,8)}
                                     horizontal={true}
                                     ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
@@ -130,14 +131,14 @@ export default function BMCScreen({navigation}: BMCScreenProps) {
                                 />
                                 <Text style={styles.middleText}>내 BMC</Text>
                             </View>
-                        ) : null  // ✅ null 추가
+                        ) : null
                     }
                     renderItem={({ item }) => renderItem(item)}
                     ListFooterComponent={
                         <View style={{marginTop: 20}}/>
                     }
                     ListEmptyComponent={
-                        refreshing ? (  // ✅ 새로고침 중일 때도 인디케이터 추가
+                        refreshing ? (
                             <View style={styles.emptyContainer}>
                                 <Progress.Circle
                                     color={Colors.primary}

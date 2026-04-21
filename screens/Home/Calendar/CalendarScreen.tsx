@@ -1,4 +1,4 @@
-import { ScrollView, Text, TouchableOpacity, View, StyleSheet,useWindowDimensions, FlatList } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, StyleSheet } from "react-native";
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { Colors } from "../../../constants/Color";
 import { Fonts } from "../../../constants/Fonts";
@@ -17,6 +17,7 @@ import GlassView from "../../../component/GlassView";
 import { NoticeType } from "../../../type/notice/notice.type";
 import NoticeItem from "../../../component/notice/NoticeItem";
 import XIcon from "../../../assets/icons/xmark.svg";
+import {FlashList} from "@shopify/flash-list";
 
 LocaleConfig.locales['ko'] = {
     monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
@@ -50,7 +51,6 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
         },
         action : {
             getNoticeItem,
-            initMarkedDates
         }
     } = useCalendarScreen()
     return (
@@ -167,7 +167,7 @@ export default function CalendarScreen({navigation} : CalendarScreenProps) {
                     }}
                 />
             </GlassView>
-            <FlatList
+            <FlashList
                 refreshing={loading}
                 showsVerticalScrollIndicator={false}
                 scrollEnabled={false}

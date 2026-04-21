@@ -1,4 +1,3 @@
-import axios from "axios";
 import { SendcodeRequest } from "../type/email/sendcode.type";
 import { VerifyRequest } from "../type/email/verify.type";
 import { Response } from "../type/util/response.type";

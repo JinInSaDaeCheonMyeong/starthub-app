@@ -7,16 +7,18 @@ import { Fonts } from "../../constants/Fonts";
 
 type SubHeaderBarProps = {
     title : string,
-    handleBackPress : () => void
+    handleBackPress ?: () => void
     subIcon ?: "None" | "Profile" | "EditProfile" | React.ReactNode
     handleSubPress ?: () => void
+    leftIcon ?: React.ReactNode
 }
 
 export default function SubHeaderBar({
     title,
-    handleBackPress,
+    handleBackPress = () => {},
     subIcon = "None",
-    handleSubPress = () => {}
+    handleSubPress = () => {},
+    leftIcon
 } : SubHeaderBarProps) {
     const renderIcon = () => {
         switch(subIcon){
@@ -70,12 +72,14 @@ export default function SubHeaderBar({
             end={{ x: 0, y: 1 }}
             style={styles.headerContainer}
         >
-            <BackButton
-                width={20}
-                height={20}
-                color={Colors.black2}
-                onClick={handleBackPress}
-            />
+            {leftIcon ? leftIcon : (
+                <BackButton
+                    width={20}
+                    height={20}
+                    color={Colors.black2}
+                    onClick={handleBackPress}
+                />
+            )}
             <Text style={styles.title}>{title}</Text>
             {renderIcon()}
         </LinearGradient>

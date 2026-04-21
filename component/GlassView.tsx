@@ -20,26 +20,23 @@ export default function GlassView({
     blurType = 'light',
     overlayColor = "rgba(255, 255, 255, 1)"
 } : GlassViewProps){
-    const iosMax = 100;
-    const androidMax = 25;
+    // Android에서 BlurView는 CPU 블러 연산으로 매우 느림 — 단순 배경색으로 대체
+    if (Platform.OS === 'android') {
+        return (
+            <View style={[styles.container, containerStyle, { backgroundColor: overlayColor }]}>
+                {children}
+            </View>
+        );
+    }
 
-    const blurAmount =
-        Platform.OS === "android"
-            ? Math.round(androidMax * blurPercent)
-            : Math.round(iosMax * blurPercent);
+    const blurAmount = Math.round(100 * blurPercent);
 
-    const overlayColors = 
-        Platform.OS === 'android'
-            ? overlayColor
-            : undefined
-    
     return (
         <View style={[styles.container, containerStyle]}>
             <BlurView
                 style={[StyleSheet.absoluteFill, blurStyle]}
                 blurType={blurType}
                 blurAmount={blurAmount}
-                overlayColor={overlayColors}
                 reducedTransparencyFallbackColor="transparent"
             />
             {children}

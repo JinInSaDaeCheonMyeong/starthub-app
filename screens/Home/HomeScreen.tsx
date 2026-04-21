@@ -3,10 +3,8 @@ import {
     Text,
     TouchableOpacity,
     View,
-    Image,
     Dimensions,
 } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
 import { Fonts } from "../../constants/Fonts";
 import { Colors } from "../../constants/Color";
 import { CompositeScreenProps } from "@react-navigation/core";
@@ -22,6 +20,8 @@ import { useCallback, useMemo } from "react";
 import { NoticeType } from "../../type/notice/notice.type";
 import NoticeItem from "../../component/notice/NoticeItem";
 import { NavImages, NoticeImages } from "../../constants/AppImages";
+import {FlashList} from "@shopify/flash-list";
+import { Image } from 'expo-image';
 
 export type HomeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Home">,
@@ -33,7 +33,7 @@ const { width } = Dimensions.get("window");
 const featureMap = {
     Competitor: NavImages.competitor,
     MyLikes: NavImages.compare,
-    NoticeSearch: NavImages.suggestion,
+    ChatBot: NavImages.suggestion,
     Alarm: NavImages.calendar,
 };
 
@@ -74,29 +74,9 @@ export default function HomeScreen(props: HomeScreenProps) {
                 <View style={styles.navIconContainer}>
                     {navItemList.map(({ label, nav }, index) => {
                         const IconComponent = featureMap[nav];
-                        let screenName :
-                        | keyof HomeStackParamList
-                        | keyof RootStackParamList ;
-                        switch (index) {
-                            case 0:
-                                screenName = "Competitor";
-                                break;
-                            case 1:
-                                screenName = "MyLikes";
-                                break;
-                            case 2:
-                                screenName = "NoticeSearch";
-                                break;
-                            case 3:
-                                screenName = "Alarm";
-                                break;
-                            default:
-                                screenName = "Competitor";
-                                break;
-                        }
                         return (
                             <TouchableOpacity
-                                onPress={() => props.navigation.navigate(screenName as never)}
+                                onPress={() => props.navigation.navigate(nav)}
                                 key={index}
                                 style={styles.navIconWrapper}
                             >
@@ -174,10 +154,12 @@ export default function HomeScreen(props: HomeScreenProps) {
     }, [userName, noticeCategoryList, navItemList, goNotice, props.navigation]);
 
     return (
-        <FlatList
+        <FlashList
             removeClippedSubviews
+            estimatedItemSize={108}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ gap: 16, paddingBottom: 16, paddingHorizontal : 16 }}
+            contentContainerStyle={{ paddingBottom: 16, paddingHorizontal : 16 }}
+            ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
             data={noticeItems}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => renderNoticeItem(item)}

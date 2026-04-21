@@ -8,7 +8,6 @@ import {
     ImageBackground,
     Keyboard,
     StyleSheet,
-    useWindowDimensions,
 } from "react-native";
 import HeaderBar from "../component/HeaderBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,13 +15,10 @@ import CalendarScreen from "../screens/Home/Calendar/CalendarScreen";
 import { Drawer } from "react-native-drawer-layout";
 import { useEffect, useState, useCallback } from "react";
 import SideBar from "../component/home/SideBar";
-import { Colors } from "../constants/Color";
-import { Fonts } from "../constants/Fonts";
 import { getFCMToken, removeTokens } from "../util/token";
 import { resetScheduleList } from "../util/Schedule";
 import { ShowToast, ToastType } from "../util/ShowToast";
 import { deleteUser, getMe } from "../api/user";
-import { isAxiosError } from "axios";
 import { GetMeResponse, ProfileProvider } from "../type/user/user.type";
 import InputModal from "../component/home/InputModal";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -57,7 +53,6 @@ export function HomeStack({ navigation } : HomeStackProps) {
     const [profileProvider, setProfileProvider] =
         useState<ProfileProvider>("LOCAL");
     const isLocal = profileProvider === "LOCAL";
-    const {width} = useWindowDimensions()
 
     const fetchData = async () => {
         try {
@@ -104,27 +99,23 @@ export function HomeStack({ navigation } : HomeStackProps) {
         setPassword("");
     };
 
+    const cleanupAndNavigateToAuth = async () => {
+        await removeTokens();
+        await resetScheduleList();
+        const fcmToken = await getFCMToken();
+        if (fcmToken) await removeFCMToken(fcmToken);
+        setDrawerOpen(false);
+        navigation.reset({
+            index: 0,
+            routes: [{ name: "AuthStack" }],
+        });
+    };
+
     const handleSignOut = async () => {
         try {
-            await removeTokens();
-            await resetScheduleList();
-            const fcmToken : string | null = await getFCMToken()
-            await (await removeFCMToken(fcmToken ?? '')).data
-            setDrawerOpen(false);
-            ShowToast("로그아웃", "로그아웃에 성공했습니다", ToastType.SUCCESS)
-            navigation.reset({
-                index: 0,
-                routes: [
-                {
-                    name: "AuthStack" as any,
-                    state: {
-                        routes: [{ name: "Welcome" }],
-                        index: 0,
-                    },
-                },
-                ]
-            })
-        } catch (error) {
+            await cleanupAndNavigateToAuth();
+            ShowToast("로그아웃", "로그아웃에 성공했습니다", ToastType.SUCCESS);
+        } catch {
             ShowToast("로그아웃", "로그아웃에 실패했습니다", ToastType.ERROR);
         } finally {
             handleCloseModal();
@@ -138,26 +129,10 @@ export function HomeStack({ navigation } : HomeStackProps) {
             return;
         }
         try {
-            (await deleteUser(deleteUserData)).data;
-            await removeTokens();
-            await resetScheduleList();
-            const fcmToken : string | null = await getFCMToken()
-            await (await removeFCMToken(fcmToken ?? '')).data
-            setDrawerOpen(false);
+            await deleteUser(deleteUserData);
+            await cleanupAndNavigateToAuth();
             ShowToast("회원 탈퇴", "회원 탈퇴에 성공했습니다", ToastType.SUCCESS);
-            navigation.reset({
-                index: 0,
-                routes: [
-                {
-                    name: "AuthStack" as any,
-                    state: {
-                        routes: [{ name: "Welcome" }],
-                        index: 0,
-                    },
-                },
-                ]
-            })
-        } catch (error) {
+        } catch {
             ShowToast("회원 탈퇴", "회원 탈퇴에 실패했습니다", ToastType.ERROR);
         } finally {
             handleCloseModal();
@@ -239,57 +214,5 @@ export function HomeStack({ navigation } : HomeStackProps) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    modalContent: {
-        backgroundColor: Colors.white1,
-        borderRadius: 12,
-        width: "80%",
-        overflow: "hidden",
-        paddingTop: 24,
-        gap: 20,
-    },
-    modalTitle: {
-        fontSize: 16,
-        fontFamily: Fonts.semiBold,
-        textAlign: "center",
-        color: Colors.error,
-    },
-    modalInput: {
-        fontSize: 16,
-        fontFamily: Fonts.medium,
-        color: Colors.black2,
-        textAlign: "center",
-        marginHorizontal: 16,
-    },
-    modalButtons: {
-        flexDirection: "row",
-        borderTopWidth: 1,
-        borderTopColor: Colors.gray3,
-    },
-    modalButton: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingVertical: 16,
-    },
-    modalDivider: {
-        width: 1,
-        backgroundColor: Colors.gray3,
-    },
-    cancelButton: {
-        fontSize: 14,
-        color: Colors.gray2,
-        fontFamily: Fonts.semiBold,
-    },
-    confirmButton: {
-        fontSize: 14,
-        color: Colors.info,
-        fontFamily: Fonts.semiBold,
     },
 });

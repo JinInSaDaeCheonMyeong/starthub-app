@@ -1,8 +1,7 @@
-import React, { useCallback, useState, useMemo } from "react";
+import React, { useCallback, useState } from "react";
+import { parseReceptionPeriod } from "../../util/DateFormat";
+import { ShowToast, ToastType } from "../../util/ShowToast";
 import {
-    Dimensions,
-    FlatList,
-    Image,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -24,6 +23,9 @@ import { getRecommendedNotices } from "../../api/notice";
 import { GetRecommendedNoticeResponse, BeforeNoticeType, NoticeType } from "../../type/notice/notice.type";
 import { NoticeCategory } from "../../constants/NoticeCategory";
 import { NoticeImages } from "../../constants/AppImages";
+import {FlashList} from "@shopify/flash-list";
+import { Image } from 'expo-image';
+
 
 export type NoticeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Notice">,
@@ -66,30 +68,17 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
                 return { ...notice, startDate, endDate };
             });
             setRecommends(mapped);
-        } catch (error) {
+        } catch {
+            ShowToast('오류 발생', '공고를 불러올 수 없습니다', ToastType.ERROR);
         } finally {
             setLoading(false);
         }
     }, []);
 
-    /** 날짜 파싱 */
-    const parseReceptionPeriod = (period: string) => {
-        try {
-            const [start, end] = period.split("~").map(p => p.trim());
-            return {
-                startDate: new Date(start),
-                endDate: new Date(end),
-            };
-        } catch {
-            return { startDate: new Date(), endDate: new Date() };
-        }
-    };
-
     const goNotice = useCallback((supportField?: string, text?: string) => {
         navigation.navigate("NoticeSearch", { text, supportField });
     }, [navigation]);
 
-    /** 카테고리 렌더 (FlatList로 변경) */
     const renderCategory = useCallback(
         ({ item }: { item: (typeof noticeCategoryList)[0] }) => (
             <TouchableOpacity onPress={() => goNotice(item.value)}>
@@ -116,14 +105,11 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
     );
 
     return (
-        <FlatList
+        <FlashList
             data={recommends}
             showsVerticalScrollIndicator={false}
             keyExtractor={(item, index) => String(item.id ?? index)}
             removeClippedSubviews
-            initialNumToRender={5}
-            maxToRenderPerBatch={6}
-            windowSize={10}
             ListHeaderComponent={
                 <>
                     <Text style={styles.titleText}>공고를{"\n"}검색해보세요</Text>
@@ -132,7 +118,8 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
                     </View>
 
                     <Text style={styles.smallText}>카테고리별 공고를 확인해보세요!</Text>
-                    <FlatList
+                    <FlashList
+                        ItemSeparatorComponent={() => <View style={{ width: 13 }} />}
                         data={noticeCategoryList}
                         keyExtractor={(item) => item.label}
                         renderItem={renderCategory}

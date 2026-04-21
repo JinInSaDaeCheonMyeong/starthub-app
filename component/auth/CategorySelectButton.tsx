@@ -58,7 +58,8 @@ const styles = StyleSheet.create({
         flexDirection : "row",
         justifyContent : "space-between",
         borderWidth : 2,
-        borderRadius : 8
+        borderRadius : 8,
+        marginBottom : 12,
     },
     titleContainer : {
         gap : 16,

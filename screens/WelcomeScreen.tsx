@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, SafeAreaView, StyleSheet, Dimensions, Image, StatusBar} from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, Dimensions, StatusBar} from 'react-native';
 import {StackScreenProps} from "@react-navigation/stack";
 import {AuthStackParamList} from "../navigation/AuthStack";
 import {Colors} from "../constants/Color";
@@ -9,6 +9,7 @@ import { useDisabled } from '../hooks/util/useDisabled';
 import { Fonts } from '../constants/Fonts';
 import {CompositeScreenProps} from "@react-navigation/core";
 import {RootStackParamList} from "../navigation/RootStack";
+import { Image } from 'expo-image';
 
 const { width } = Dimensions.get('window');
 

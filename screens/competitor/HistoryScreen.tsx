@@ -1,10 +1,10 @@
 import { StackScreenProps } from "@react-navigation/stack";
-import { FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
 import {useFocusEffect} from "@react-navigation/native"
 import { useCallback, useState } from "react";
-import { CompetitorFormData, GetCompetitorsResponse } from "../../type/competitor/competitor.type";
+import { CompetitorFormData } from "../../type/competitor/competitor.type";
 import { getCompetitors } from "../../api/competitor";
 import { isAxiosError } from "axios";
 import { ShowToast, ToastType } from "../../util/ShowToast";
@@ -16,6 +16,7 @@ import { getBMC } from "../../api/bmc";
 import { formatToDate } from "../../util/DateFormat";
 import { ErrorResponse } from "../../type/util/response.type";
 import { DefaultImage } from "../../constants/AppImages";
+import {FlashList} from "@shopify/flash-list";
 
 type HistoryScreenProps = StackScreenProps<CompoetitorStackParamList, 'History'>
 const backgroundImage = DefaultImage.background
@@ -23,7 +24,6 @@ const backgroundImage = DefaultImage.background
 export function HistoryScreen({navigation} : HistoryScreenProps) {
     const [competitorList, setCompetitorList] = useState<CompetitorFormData[]>([])
     const [loading, setLoading] = useState(true)
-    const errorTitle = '경쟁사 분석'
     const renderItem = useCallback(
         ({ item }: { item: CompetitorFormData }) => (
             <TouchableOpacity
@@ -105,13 +105,14 @@ export function HistoryScreen({navigation} : HistoryScreenProps) {
                 title="내 경쟁사 분석"
                 subIcon='Profile'
             />
-            <FlatList
+            <FlashList
                 removeClippedSubviews={true}
                 showsVerticalScrollIndicator={false}
-                style={{paddingHorizontal : 16}}
-                contentContainerStyle={{gap : 16, paddingVertical : 16}}
+                style={{paddingHorizontal : 16, marginTop: 16   }}
+                contentContainerStyle={{paddingVertical : 16}}
                 data={competitorList}
                 renderItem={(item) => renderItem(item)}
+                ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
                 ListEmptyComponent={() => (
                     !loading ? (
                         <View style={styles.emptyContainer}>

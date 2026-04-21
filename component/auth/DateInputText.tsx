@@ -2,7 +2,7 @@ import { Keyboard, StyleSheet, TouchableWithoutFeedback, View } from "react-nati
 import BottomArrow from "../../assets/icons/bottom-arrow-back.svg"
 import TopArrow from "../../assets/icons/top-arrow-back.svg"
 import { Colors } from "../../constants/Color";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 import CheckMark from "../../assets/icons/checkmark.svg"
 import { Fonts } from "../../constants/Fonts";

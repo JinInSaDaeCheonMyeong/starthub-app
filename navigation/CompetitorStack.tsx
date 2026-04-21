@@ -1,5 +1,5 @@
 import { createStackNavigator } from "@react-navigation/stack";
-import { ImageBackground, ImageSourcePropType, ImageURISource, View } from "react-native";
+import { ImageURISource, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import SelectScreen from "../screens/competitor/SelectScreen";
 import ResultScreen from "../screens/competitor/ResultScreen";

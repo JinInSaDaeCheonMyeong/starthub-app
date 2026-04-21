@@ -1,6 +1,6 @@
 import {
     Dimensions,
-    FlatList, ImageBackground,
+    ImageBackground,
     ScrollView,
     StyleSheet,
     Text,
@@ -27,10 +27,11 @@ import { RootStackParamList } from "../../../navigation/RootStack";
 import { SupportFieldItems } from "../../../constants/SupportFieldItems";
 import { RegionItems } from "../../../constants/RegionItems";
 import { TargetAgeItems } from "../../../constants/TargetAgeItems";
-import { isAxiosError } from "axios";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
+import { parseReceptionPeriod } from "../../../util/DateFormat";
 import SubHeaderBar from "../../../component/home/SubHeaderBar";
 import { DefaultImage } from "../../../constants/AppImages";
+import {FlashList} from "@shopify/flash-list";
 
 const { height } = Dimensions.get("window");
 
@@ -52,57 +53,6 @@ export default function NoticeSearchScreen({
       navigation.goBack()
   };
   const insets = useSafeAreaInsets();
-  const parseReceptionPeriod = (period: string) => {
-    try {
-      if (!period || typeof period !== "string") {
-        return {
-          startDate: new Date(),
-          endDate: new Date(),
-        };
-      }
-
-      const parts = period.split("~").map((str) => str.trim());
-
-      if (parts.length !== 2) {
-        return {
-          startDate: new Date(),
-          endDate: new Date(),
-        };
-      }
-
-      const [startPart, endPart] = parts;
-      const startDateStr = startPart.split(" ")[0];
-      const endDateStr = endPart.split(" ")[0];
-
-      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      if (!dateRegex.test(startDateStr) || !dateRegex.test(endDateStr)) {
-        return {
-          startDate: new Date(),
-          endDate: new Date(),
-        };
-      }
-
-      const startDate = new Date(startDateStr + "T00:00:00");
-      const endDate = new Date(endDateStr + "T00:00:00");
-
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        return {
-          startDate: new Date(),
-          endDate: new Date(),
-        };
-      }
-
-      return {
-        startDate,
-        endDate,
-      };
-    } catch (error) {
-      return {
-        startDate: new Date(),
-        endDate: new Date(),
-      };
-    }
-  };
 
   const [title, setTitle] = useState("");
   const [supportField, setSupportField] = useState("");
@@ -183,9 +133,7 @@ export default function NoticeSearchScreen({
         });
 
         setAllNotices(mapped);
-      } catch (error) {
-        if (isAxiosError(error)) {
-        }
+      } catch {
         ShowToast(
           "문제가 발생했습니다",
           "데이터를 불러오지 못 했습니다",
@@ -236,10 +184,9 @@ export default function NoticeSearchScreen({
     }
   }, [params?.supportField]);
 
-  const loadNextPage = async () => {
+  const loadNextPage = useCallback(async () => {
     const now = Date.now();
 
-    // 500ms로 증가하여 중복 요청 방지 강화
     if (now - lastRequestTime.current < 500) {
       return;
     }
@@ -285,9 +232,9 @@ export default function NoticeSearchScreen({
     } finally {
       setIsFetchingNextPage(false);
     }
-  };
+  }, [isFetchingNextPage, loading, isLast, page, title, supportField, region, targetAge, businessExperience]);
 
-  const onViewableItemsChanged = ({ viewableItems }: any) => {
+  const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
     if (!viewableItems || viewableItems.length === 0 || allNotices.length === 0)
       return;
 
@@ -299,7 +246,7 @@ export default function NoticeSearchScreen({
     if (lastIndex >= allNotices.length - 5 && !isLast) {
       loadNextPage();
     }
-  };
+  }, [allNotices.length, isLast, loadNextPage]);
 
   const updateNoticeInList = useCallback(
     (noticeId: number, newIsLiked: boolean) => {
@@ -332,167 +279,169 @@ export default function NoticeSearchScreen({
   ), [navigation, updateNoticeInList])
 
   return (
-    <ImageBackground
-      source={backgroundImage}
-      style={[
-        styles.container,
-        { paddingTop: insets.top, paddingBottom: insets.bottom },
-      ]}
-    >
-      <SubHeaderBar title={"공고 검색"} handleBackPress={handleBackPress} />
-        <View>
-            <View style={styles.searchBar}>
-                <SearchBar onPress={(text) => setTitle(text)} value={title} />
-            </View>
-            {!isNatural && (
-                <ScrollView
-                    style={{ position: "absolute", zIndex: 999, paddingTop: 60 }}
-                    keyboardShouldPersistTaps="handled"
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    nestedScrollEnabled={true}
-                >
-                    <View style={{ paddingBottom: dropDownMargin, marginStart: 16 }}>
-                        <DropDown
-                            placeholderStyle={styles.dropDownPlaceHolder}
-                            labelStyle={styles.dropDownLabel}
-                            textStyle={styles.dropDownText}
-                            open={supportFieldOpen}
-                            value={supportField}
-                            items={SupportFieldItems}
-                            placeholder={"지원분야"}
-                            setOpen={setSupportFieldOpen}
-                            minWidth={90}
-                            maxWidth={150}
-                            setValue={(s) => {
-                                if (s === supportField) {
-                                    setSupportField("");
-                                } else {
-                                    setSupportField(s);
-                                }
-                            }}
-                        />
-                    </View>
-                    <View style={{ marginStart: 16 }}>
-                        <DropDown
-                            placeholderStyle={styles.dropDownPlaceHolder}
-                            labelStyle={styles.dropDownLabel}
-                            textStyle={styles.dropDownText}
-                            open={regionOpen}
-                            value={region}
-                            items={RegionItems}
-                            placeholder={"지역"}
-                            setOpen={setRegionOpen}
-                            minWidth={70}
-                            maxWidth={120}
-                            setValue={(s) => {
-                                if (s === region) {
-                                    setRegion("");
-                                } else {
-                                    setRegion(s);
-                                }
-                            }}
-                        />
-                    </View>
-                    <View style={{ marginStart: 16 }}>
-                        <DropDown
-                            placeholderStyle={styles.dropDownPlaceHolder}
-                            labelStyle={styles.dropDownLabel}
-                            textStyle={styles.dropDownText}
-                            open={targetAgeOpen}
-                            value={targetAge}
-                            items={TargetAgeItems}
-                            placeholder={"연령"}
-                            setOpen={setTargetAgeOpen}
-                            minWidth={150}
-                            maxWidth={3000}
-                            setValue={(s) => {
-                                if (s === targetAge) {
-                                    setTargetAge("");
-                                } else {
-                                    setTargetAge(s);
-                                }
-                            }}
-                        />
-                    </View>
-                    <View style={{ marginStart: 16, marginEnd: 16 }}>
-                        <DropDown
-                            placeholderStyle={styles.dropDownPlaceHolder}
-                            labelStyle={styles.dropDownLabel}
-                            textStyle={styles.dropDownText}
-                            open={businessExperienceOpen}
-                            value={businessExperience}
-                            items={BusinessExperienceItems}
-                            placeholder={"창업업력"}
-                            setOpen={setBusinessExperienceOpen}
-                            minWidth={90}
-                            maxWidth={150}
-                            setValue={(s) => {
-                                if (s === businessExperience) {
-                                    setBusinessExperience("");
-                                } else {
-                                    setBusinessExperience(s);
-                                }
-                            }}
-                        />
-                    </View>
-                </ScrollView>
-            )}
-        </View>
-      <FlatList
-        removeClippedSubviews={true}
-        style={isNatural? {marginTop:20} : { marginTop: 70 }}
-        contentContainerStyle={{ gap: 16 }}
-        showsVerticalScrollIndicator={false}
-        data={refreshing ? [] : allNotices} // ✅ 새로고침 시 빈 배열
-        refreshing={false} // ✅ 이렇게 변경
-        onRefresh={refreshing ? undefined : handleRefresh}
-        viewabilityConfig={{
-          itemVisiblePercentThreshold: 50,
-        }}
-        keyExtractor={(item) => item.id.toString()}
-        onViewableItemsChanged={onViewableItemsChanged}
-        renderItem={(item) => renderItem(item)}
-        ListFooterComponent={
-          loading || isFetchingNextPage ? (
-            <View
-              style={[styles.indicatorContainer, { marginTop: height * 0.25 }]}
-            >
-              <Progress.Circle
-                color={Colors.primary}
-                size={50}
-                indeterminate={true}
-                thickness={300}
-              />
-            </View>
-          ) : (
-            <View style={{ height: 16 }} />
-          )
-        }
-        ListEmptyComponent={
-          !isFetchingNextPage && !loading && refreshing ? ( // ✅ 새로고침 중일 때 중앙에 인디케이터
-            <View
-              style={[styles.indicatorContainer, { marginTop: height * 0.25 }]}
-            >
-              <Progress.Circle
-                color={Colors.primary}
-                size={50}
-                indeterminate={true}
-                thickness={300}
-              />
-            </View>
-          ) : !loading && !isFetchingNextPage ? (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyContainerText}>
-                존재하는 공고가 없습니다.
-              </Text>
-            </View>
-          ) : (
-            <View />
-          )
-        }
-      />
-    </ImageBackground>
+      <ImageBackground
+        source={backgroundImage}
+        style={[
+          styles.container,
+          { paddingTop: insets.top, paddingBottom: insets.bottom },
+        ]}
+      >
+        <SubHeaderBar title={"공고 검색"} handleBackPress={handleBackPress} />
+          <View>
+              <View style={styles.searchBar}>
+                  <SearchBar onPress={(text) => setTitle(text)} value={title} />
+              </View>
+              {!isNatural && (
+                  <ScrollView
+                      style={{ position: "absolute", zIndex: 999, paddingTop: 60 }}
+                      keyboardShouldPersistTaps="handled"
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      nestedScrollEnabled={true}
+                  >
+                      <View style={{ paddingBottom: dropDownMargin, marginStart: 16 }}>
+                          <DropDown
+                              placeholderStyle={styles.dropDownPlaceHolder}
+                              labelStyle={styles.dropDownLabel}
+                              textStyle={styles.dropDownText}
+                              open={supportFieldOpen}
+                              value={supportField}
+                              items={SupportFieldItems}
+                              placeholder={"지원분야"}
+                              setOpen={setSupportFieldOpen}
+                              minWidth={90}
+                              maxWidth={150}
+                              setValue={(s) => {
+                                  if (s === supportField) {
+                                      setSupportField("");
+                                  } else {
+                                      setSupportField(s);
+                                  }
+                              }}
+                          />
+                      </View>
+                      <View style={{ marginStart: 16 }}>
+                          <DropDown
+                              placeholderStyle={styles.dropDownPlaceHolder}
+                              labelStyle={styles.dropDownLabel}
+                              textStyle={styles.dropDownText}
+                              open={regionOpen}
+                              value={region}
+                              items={RegionItems}
+                              placeholder={"지역"}
+                              setOpen={setRegionOpen}
+                              minWidth={70}
+                              maxWidth={120}
+                              setValue={(s) => {
+                                  if (s === region) {
+                                      setRegion("");
+                                  } else {
+                                      setRegion(s);
+                                  }
+                              }}
+                          />
+                      </View>
+                      <View style={{ marginStart: 16 }}>
+                          <DropDown
+                              placeholderStyle={styles.dropDownPlaceHolder}
+                              labelStyle={styles.dropDownLabel}
+                              textStyle={styles.dropDownText}
+                              open={targetAgeOpen}
+                              value={targetAge}
+                              items={TargetAgeItems}
+                              placeholder={"연령"}
+                              setOpen={setTargetAgeOpen}
+                              minWidth={150}
+                              maxWidth={3000}
+                              setValue={(s) => {
+                                  if (s === targetAge) {
+                                      setTargetAge("");
+                                  } else {
+                                      setTargetAge(s);
+                                  }
+                              }}
+                          />
+                      </View>
+                      <View style={{ marginStart: 16, marginEnd: 16 }}>
+                          <DropDown
+                              placeholderStyle={styles.dropDownPlaceHolder}
+                              labelStyle={styles.dropDownLabel}
+                              textStyle={styles.dropDownText}
+                              open={businessExperienceOpen}
+                              value={businessExperience}
+                              items={BusinessExperienceItems}
+                              placeholder={"창업업력"}
+                              setOpen={setBusinessExperienceOpen}
+                              minWidth={90}
+                              maxWidth={150}
+                              setValue={(s) => {
+                                  if (s === businessExperience) {
+                                      setBusinessExperience("");
+                                  } else {
+                                      setBusinessExperience(s);
+                                  }
+                              }}
+                          />
+                      </View>
+                  </ScrollView>
+              )}
+          </View>
+        <FlashList
+          estimatedItemSize={108}
+          ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+          removeClippedSubviews={true}
+          style={isNatural? {marginTop:20} : { marginTop: 70 }}
+          contentContainerStyle={{ gap: 16 }}
+          showsVerticalScrollIndicator={false}
+          data={refreshing ? [] : allNotices}
+          refreshing={false}
+          onRefresh={refreshing ? undefined : handleRefresh}
+          viewabilityConfig={{
+            itemVisiblePercentThreshold: 50,
+          }}
+          keyExtractor={(item) => item.id.toString()}
+          onViewableItemsChanged={onViewableItemsChanged}
+          renderItem={(item) => renderItem(item)}
+          ListFooterComponent={
+            loading || isFetchingNextPage ? (
+              <View
+                style={[styles.indicatorContainer, { marginTop: height * 0.25 }]}
+              >
+                <Progress.Circle
+                  color={Colors.primary}
+                  size={50}
+                  indeterminate={true}
+                  thickness={300}
+                />
+              </View>
+            ) : (
+              <View style={{ height: 16 }} />
+            )
+          }
+          ListEmptyComponent={
+            !isFetchingNextPage && !loading && refreshing ? (
+              <View
+                style={[styles.indicatorContainer, { marginTop: height * 0.25 }]}
+              >
+                <Progress.Circle
+                  color={Colors.primary}
+                  size={50}
+                  indeterminate={true}
+                  thickness={300}
+                />
+              </View>
+            ) : !loading && !isFetchingNextPage ? (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyContainerText}>
+                  존재하는 공고가 없습니다.
+                </Text>
+              </View>
+            ) : (
+              <View />
+            )
+          }
+        />
+      </ImageBackground>
   );
 }
 

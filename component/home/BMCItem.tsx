@@ -1,9 +1,10 @@
-import { DimensionValue, Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { DimensionValue, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import GlassView from "../GlassView";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import { useState } from "react";
 import { DefaultImage } from "../../constants/AppImages";
+import { Image } from 'expo-image';
 
 type BMCItemProps = {
     width?: DimensionValue
@@ -45,8 +46,8 @@ export default function BMCItem({
                 <View style={{ position: 'relative', height : contentHeight }}>
                 <Image
                     source={imageError || !imageSource ? defaultImage : imageSource}
-                    resizeMode="contain"
-                    defaultSource={defaultImage}
+                    contentFit="contain"
+                    placeholder={defaultImage}
                     style={{ width: '100%', height : contentHeight, padding : 8 }}
                     onError={() => setImageError(true)}
                 />

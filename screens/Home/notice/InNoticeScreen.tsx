@@ -23,7 +23,6 @@ import GlobalIcon from "../../../assets/icons/category/notice/global.svg";
 import RNDIcon from "../../../assets/icons/category/notice/rnd.svg";
 import TalentIcon from "../../../assets/icons/category/notice/talent.svg";
 import CalendarIcon from "../../../assets/icons/notice/calendar.svg";
-import ComparisonIcon from "../../../assets/icons/notice/comparison.svg";
 import OriginalIcon from "../../../assets/icons/notice/rectangle.svg"
 import {deleteLikes, postLikes} from "../../../api/likes";
 import BookMarkFill from "../../../assets/icons/bookMark/bookmark.fill.svg";
@@ -49,9 +48,36 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
     const cleanedContent = notice.content
         .replace(/<br>\s*<!--/g, "<!--")
         .replace(/<br>\s*<\/(.*?)>/gi, "</$1>");
-    
+
+    const isValidDate = (date: Date) => !Number.isNaN(date.getTime());
+    const hasValidDateRange = isValidDate(notice.startDate) && isValidDate(notice.endDate);
+
+    const extractUrlFromAnchor = (href?: string, onClick?: string): string | null => {
+        const candidates = [href, onClick].filter(Boolean) as string[];
+
+        for (const value of candidates) {
+            const trimmed = value.trim();
+
+            if (/^https?:\/\//i.test(trimmed)) {
+                return trimmed;
+            }
+
+            const quotedHttp = trimmed.match(/['\"](https?:\/\/[^'\"]+)['\"]/i);
+            if (quotedHttp?.[1]) {
+                return quotedHttp[1];
+            }
+
+            const plainHttp = trimmed.match(/https?:\/\/[^\s'\"]+/i);
+            if (plainHttp?.[0]) {
+                return plainHttp[0];
+            }
+        }
+
+        return null;
+    };
+
     const source = {
-        html: notice.content.replace(
+        html: cleanedContent.replace(
             /(<p class="txt-button">.*?<\/p>)\s*<br\s*\/?>/gi,
             '$1'
         )
@@ -60,7 +86,6 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
     const [isBookmarkLoading, setIsBookmarkLoading] = useState(false)
     const [isSchedules, setIsSchedules] = useState(false)
     const [isScheduleLoading, setIsScheduleLoading] = useState(true)
-    const [isPressed, setIsPressed] = useState(false)
 
     const handleBackPress = () => {
         navigation.goBack()
@@ -83,7 +108,8 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                 params.onGoBack(notice.id, newIsLiked);
             }
 
-        } catch (error) {
+        } catch {
+            ShowToast('오류 발생', '북마크 처리 중 오류가 발생했습니다', ToastType.ERROR);
         } finally {
             setIsBookmarkLoading(false)
         }
@@ -91,6 +117,11 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
 
     const handleSaveSchedules = async () => {
         if (isScheduleLoading) return
+        if (!hasValidDateRange) {
+            ShowToast("추가 불가", "상시 접수 공고는 일정을 추가할 수 없습니다", ToastType.ERROR)
+            return
+        }
+
         setIsScheduleLoading(true)
 
         try {
@@ -124,7 +155,9 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                 { text: "취소", style: "cancel" },
                 {
                     text: "이동",
-                    onPress: () => Linking.openURL(url)
+                    onPress: () => Linking.openURL(url).catch(() =>
+                        ShowToast('오류 발생', '링크를 열 수 없습니다', ToastType.ERROR)
+                    )
                 }
             ]
         );
@@ -193,7 +226,9 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                         {notice.title}
                     </Text>
                     <Text style={styles.topDateText}>
-                        {transformDate(notice.startDate)}~{transformDate(notice.endDate)}
+                        {hasValidDateRange
+                            ? `${transformDate(notice.startDate)}~${transformDate(notice.endDate)}`
+                            : notice.receptionPeriod || '모집 기간 정보 없음'}
                     </Text>
                     <View style={styles.hashTagContainer}>
                         {[notice.region, targetAge, startupHistory].map((item, index) => (
@@ -263,23 +298,21 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                             // btn_by-bl 클래스가 있는 a 태그인지 확인
                             if (tnode.classes?.includes('btn_by-bl')) {
                                 // 버튼 스타일로 렌더링
-                                const href = tnode.attributes?.href;
-                                const matches = href.match(/'(.*?)'/) || [null, href];
-                                const url = matches[1];
+                                const url = extractUrlFromAnchor(
+                                    tnode.attributes?.href,
+                                    tnode.attributes?.onclick
+                                );
                                 return (
                                     <Text
                                         onPress={() => {
-                                            if (href) {
-                                                if (url) {
-                                                    handleOpenURL(url)
-                                                }
+                                            if (url) {
+                                                handleOpenURL(url)
                                             }
                                         }}
                                         style={{
                                             color: Colors.info,
                                             fontFamily: Fonts.reqular,
                                             fontSize: 14,
-                                            opacity : isPressed ? 0.2 : 1,
                                             textDecorationLine : 'underline'
                                         }}
                                     >
@@ -293,10 +326,9 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                     }}
                     renderersProps={{
                         a: {
-                            onPress(event, href, htmlAttribs, target) {
-                                const matches = href.match(/'(.*?)'/)
-                                if (matches !== null) {
-                                    const url: string = matches[1];
+                            onPress(_event, href, htmlAttribs, _target) {
+                                const url = extractUrlFromAnchor(href, htmlAttribs?.onclick)
+                                if (url) {
                                     handleOpenURL(url);
                                 }
                             }

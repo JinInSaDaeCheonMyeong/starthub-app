@@ -11,15 +11,19 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.jininsa.startHubapp",
-      "config": { "usesPushNotifications": true },
+      "config": {
+        "usesPushNotifications": true
+      },
       "entitlements": {
         "aps-environment": "production"
-      }
+      },
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/icon.png",
-        "backgroundColor": "#ffffff" 
+        "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.jininsa.startHubapp"
@@ -34,17 +38,23 @@
     },
     "owner": "iszero",
     "plugins": [
-      "expo-web-browser",
-      "expo-font",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      "@react-native-firebase/crashlytics",
       [
-        "expo-notifications",
+        "expo-build-properties",
         {
-          "icon": "./assets/icon.png",
-          "color": "#ffffff",
-          "sounds": ["./assets/notification.wav"],
-          "mode": "production"
+          "ios": {
+            "useFrameworks": "static",
+            "forceStaticLinking": [
+              "RNFBApp",
+              "RNFBAnalytics"
+            ]
+          }
         }
-      ]
+      ],
+      "expo-image",
+      "./plugins/withAndroidCleartext"
     ]
   }
 }

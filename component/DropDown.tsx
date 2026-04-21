@@ -1,18 +1,17 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import DropDownPicker, { ItemType } from "react-native-dropdown-picker";
 import {
   StyleProp,
   StyleSheet,
   TextStyle,
   ViewStyle,
-  PixelRatio, View,
+  PixelRatio,
 } from "react-native";
 import TopButton from "../assets/icons/top-arrow-back.svg";
 import BottomButton from "../assets/icons/bottom-arrow-back.svg";
 import CheckMark from "../assets/icons/checkmark.svg";
 import { Colors } from "../constants/Color";
 import { Fonts } from "../constants/Fonts";
-import GlassView from "./GlassView";
 
 type DropDownProps = {
   open: boolean;

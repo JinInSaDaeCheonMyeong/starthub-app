@@ -4,7 +4,6 @@ import { Colors } from "../constants/Color";
 import TitleLogo from "../assets/logos/starthub-title-logo.svg";
 import LogoIcon from "../assets/logos/starthub-logo.svg";
 import MenuIcon from "../assets/icons/header/menu.svg";
-import { BlurView } from "@react-native-community/blur";
 import GlassView from "./GlassView";
 
 type HeaderBarProps = {

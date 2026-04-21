@@ -1,7 +1,7 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { AuthStackParamList } from "../navigation/AuthStack";
 import { Colors } from "../constants/Color";
-import {Keyboard, KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, useWindowDimensions, View} from "react-native";
+import {Keyboard, KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View} from "react-native";
 import BackButton from "../component/BackButton";
 import AuthTextInput from "../component/auth/AuthTextInput";
 import CommonButton from "../component/CommonButton";
@@ -11,7 +11,6 @@ import { useSignupScreen } from "../hooks/auth/signup/useSignupScreen";
 import { Fonts } from "../constants/Fonts";
 import { useCallback, useEffect, useState } from "react";
 import * as Progress from 'react-native-progress'
-import { sendcode } from "../api/email";
 
 export type SignupScreenProps = StackScreenProps<AuthStackParamList, 'Signup'>;
 

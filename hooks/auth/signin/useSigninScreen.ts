@@ -1,168 +1,284 @@
-import { useCallback, useEffect, useState } from "react";
-import { useError } from "../../util/useError";
-import { SigninFormData, SigninRequest } from "../../../type/user/signin.type";
-import { getFCMToken, saveAccToken, saveRefToken } from "../../../util/token";
-import { useSigninValid } from "./useSigninValid";
-import { useDisabled } from "../../util/useDisabled";
-import { getMe, signin } from "../../../api/user";
-import { SigninScreenProps } from "../../../screens/SigninScreen";
-import { ShowToast, ToastType } from "../../../util/ShowToast";
-import { getMyFCMTokens, registerFCMToken, removeFCMToken } from "../../../api/notification";
-import {getDeviceTypeAsync, DeviceType as ExpoDeviceType} from "expo-device"
-import { Platform } from "react-native";
-import { DeviceType } from "../../../type/notification/notification.type";
-import {RootStackParamList} from "../../../navigation/RootStack";
-import { NavigationProp } from "@react-navigation/native";
+import { useCallback, useState } from "react"
+import { Platform } from "react-native"
+import { NavigationProp } from "@react-navigation/native"
 
-export const useSigninScreen = ({navigation} : SigninScreenProps) => {
-    const rootNavigation = navigation as unknown as NavigationProp<RootStackParamList>;
+import { useError } from "../../util/useError"
+import { useDisabled } from "../../util/useDisabled"
+import { useSigninValid } from "./useSigninValid"
+
+import { signin, getMe } from "../../../api/user"
+
+import {
+    getFCMToken,
+    saveAccToken,
+    saveRefToken
+} from "../../../util/token"
+
+import {
+    getMyFCMTokens,
+    registerFCMToken,
+    removeFCMToken
+} from "../../../api/notification"
+
+import { ShowToast, ToastType } from "../../../util/ShowToast"
+
+import {
+    getDeviceTypeAsync,
+    DeviceType as ExpoDeviceType
+} from "expo-device"
+
+import { SigninScreenProps } from "../../../screens/SigninScreen"
+import { RootStackParamList } from "../../../navigation/RootStack"
+
+import {
+    SigninFormData,
+    SigninRequest
+} from "../../../type/user/signin.type"
+
+import { DeviceType } from "../../../type/notification/notification.type"
+
+export const useSigninScreen = ({ navigation }: SigninScreenProps) => {
+
+    /** Root Navigation 접근용 */
+    const rootNavigation =
+        navigation as unknown as NavigationProp<RootStackParamList>
+
+    /** 로그인 입력값 */
     const [formData, setFormData] = useState<SigninFormData>({
-        email : '',
-        password : ''
+        email: "",
+        password: ""
     })
+
     const {
-        value : {
-            errorText,
-            errorVisible
-        },
-        handler : {
-            showError,
-            hideError,
-            handleAxiosError
-        }
+        value: { errorText, errorVisible },
+        handler: { showError, hideError, handleAxiosError }
     } = useError()
-    const {
-        validSigninForm
-    } = useSigninValid()
+
+    const { validSigninForm } = useSigninValid()
+
     const {
         disabled,
         disabledBtn,
         enabledBtn
     } = useDisabled()
 
-    useEffect(() => {
-    const controller = new AbortController()
-    return () => controller.abort()
-    }, [])
+    /**
+     * formData 업데이트 함수
+     */
+    const updateFormData = useCallback<
+        <K extends keyof SigninFormData>(
+            key: K,
+            value: SigninFormData[K]
+        ) => void
+    >((key, value) => {
 
-    const updateFormData = useCallback(<K extends keyof SigninFormData>(key : K, value : SigninFormData[K]) => {
-        setFormData(prev => ({...prev, [key] : value}))
-        if(errorVisible){
-            hideError()
-        }
-    }, [errorVisible])
+        setFormData(prev => ({
+            ...prev,
+            [key]: value
+        }))
 
-    const setEmail = useCallback((value : string) => updateFormData("email", value), [updateFormData])
-    const setPassword = useCallback((value : string) => updateFormData("password", value), [updateFormData])
+        if (errorVisible) hideError()
 
+    }, [errorVisible, hideError])
+
+    const setEmail = useCallback(
+        (value: string) => updateFormData("email", value),
+        [updateFormData]
+    )
+
+    const setPassword = useCallback(
+        (value: string) => updateFormData("password", value),
+        [updateFormData]
+    )
+
+    /**
+     * 로그인 처리
+     */
     const handleSignin = async () => {
+
         disabledBtn()
+
         const email = formData.email.trim()
         const password = formData.password.trim()
-        const validResult = validSigninForm({...formData, email : email, password : password})
-        if(!validResult.isValid){
-            ShowToast('실패', validResult.message ?? '', ToastType.WARNING)
+
+        const validResult = validSigninForm({
+            ...formData,
+            email,
+            password
+        })
+
+        if (!validResult.isValid) {
+            ShowToast(
+                "실패",
+                validResult.message ?? "",
+                ToastType.WARNING
+            )
             enabledBtn()
             return
         }
-        const loginRequest : SigninRequest = {
-            email : email,
-            password : password
+
+        const loginRequest: SigninRequest = {
+            email,
+            password
         }
+
         try {
+
+            /** 로그인 API */
             const { data } = await signin(loginRequest)
+
+            /** 토큰 저장 */
             await saveAccToken(data.access)
             await saveRefToken(data.refresh)
+
+            /** FCM 토큰 등록 */
             await handleFCMToken()
-            ShowToast("성공", "로그인에 성공하셨습니다", ToastType.SUCCESS)
-            const userData = await (await getMe()).data
-            if(!data.isFirstLogin && !!userData.username){
+
+            ShowToast(
+                "성공",
+                "로그인에 성공하셨습니다",
+                ToastType.SUCCESS
+            )
+
+            /** 사용자 정보 조회 */
+            const { data: userData } = await getMe()
+
+            if (!data.isFirstLogin && userData.username) {
                 successLogin()
             } else {
+
                 navigation.reset({
                     index: 0,
-                    routes: [{ name: "SignupInput" }],
-                });
+                    routes: [{ name: "SignupInput" }]
+                })
+
             }
-        } catch (error) { 
-            handleAxiosError(error, (value) => {showError(value)})
+
+        } catch (error) {
+
+            handleAxiosError(error, value => showError(value))
+
         } finally {
+
             enabledBtn()
+
         }
     }
 
+    /**
+     * FCM 토큰 처리
+     */
     const handleFCMToken = async () => {
+
+        const FCMToken = await getFCMToken()
+
+        if (!FCMToken) return
+
         try {
-            const FCMToken = await getFCMToken();
-            if (!FCMToken) return;
-        
-            const device = await getDeviceTypeAsync();
-            const isIOS = Platform.OS === "ios";
-            const isANDROID = Platform.OS === "android";
-            const isPhone = device === ExpoDeviceType.PHONE;
-            const isTablet = device === ExpoDeviceType.TABLET;
-        
-            let deviceType: DeviceType = "UNKNOWN";
-            if (isIOS) {
-                deviceType = isPhone ? "IOS" : isTablet ? "IPADOS" : "UNKNOWN";
-            } else if (isANDROID) {
-                deviceType = isPhone ? "ANDROID" : isTablet ? "ANDROID_TABLET" : "UNKNOWN";
+
+            /** 디바이스 타입 확인 */
+            const device = await getDeviceTypeAsync()
+
+            let deviceType: DeviceType = "UNKNOWN"
+
+            if (Platform.OS === "ios") {
+                deviceType =
+                    device === ExpoDeviceType.PHONE
+                        ? "IOS"
+                        : device === ExpoDeviceType.TABLET
+                            ? "IPADOS"
+                            : "UNKNOWN"
+
+            } else if (Platform.OS === "android") {
+
+                deviceType =
+                    device === ExpoDeviceType.PHONE
+                        ? "ANDROID"
+                        : device === ExpoDeviceType.TABLET
+                            ? "ANDROID_TABLET"
+                            : "UNKNOWN"
             }
-        
-            const { data: myFCMTokens } = await getMyFCMTokens();
-        
-            if (myFCMTokens.length !== 0) {
-                for (const value of myFCMTokens) {
-                    if (value.deviceType === deviceType && value.token !== FCMToken) {
-                        console.log("기존 토큰 삭제:", value.token);
-                        await removeFCMToken(value.token);
-                    }
+
+            /** 기존 FCM 토큰 조회 */
+            const { data: myFCMTokens } =
+                await getMyFCMTokens()
+
+            /** 동일 디바이스 타입 기존 토큰 제거 */
+            for (const value of myFCMTokens) {
+
+                if (
+                    value.deviceType === deviceType &&
+                    value.token !== FCMToken
+                ) {
+                    await removeFCMToken(value.token)
                 }
+
             }
+
+            /** 새 토큰 등록 */
             await registerFCMToken({
                 token: FCMToken,
-                deviceType,
-            });
-        
-            console.log("FCM 토큰 등록 완료:", deviceType);
-        } catch (error) {
-            throw error
-        }
-    };
+                deviceType
+            })
 
+        } catch (error) {
+
+            throw error
+
+        }
+    }
+
+    /**
+     * 회원가입 화면 이동
+     */
     const goSignupScreen = () => {
         disabledBtn()
         navigation.navigate("Signup")
         enabledBtn()
     }
 
+    /**
+     * 로그인 성공 후 홈 이동
+     */
     const successLogin = () => {
-        disabledBtn();
+
+        disabledBtn()
+
         rootNavigation.reset({
             index: 0,
-            routes: [{ name: "HomeStack" }],
-        });
-        enabledBtn();
-    };
+            routes: [{ name: "HomeStack" }]
+        })
 
+        enabledBtn()
+    }
+
+    /**
+     * 뒤로가기
+     */
     const goBack = () => {
+
         disabledBtn()
+
         navigation.goBack()
+
         enabledBtn()
     }
 
     return {
-        form : {
+
+        form: {
             ...formData,
             setEmail,
             setPassword
         },
-        actions : {
+
+        actions: {
             handleSignin,
             goSignupScreen,
             goBack
         },
-        ui : {
+
+        ui: {
             disabled,
             errorVisible,
             errorText

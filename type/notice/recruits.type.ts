@@ -1,4 +1,3 @@
-import { InterestType } from "../../constants/InterestType"
 import { Response } from "../util/response.type"
 
 export interface RecruitsItemType {

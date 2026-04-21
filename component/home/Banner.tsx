@@ -1,4 +1,4 @@
-import { Image, ImageBackground, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { ImageBackground, Pressable, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../constants/Color";
 import { BannerType } from "../../type/banner/banner.type";
 import { Fonts } from "../../constants/Fonts";

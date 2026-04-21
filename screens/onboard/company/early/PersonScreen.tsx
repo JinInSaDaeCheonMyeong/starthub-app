@@ -1,9 +1,6 @@
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { Colors } from "../../../../constants/Color";
-import DateInputText from "../../../../component/auth/DateInputText";
-import { DayList, MonthList, YearList } from "../.../../../../../constants/DateNumber";
 import { Fonts } from "../../../../constants/Fonts";
-import { useState } from "react";
 
 type PersonScreenProps = {
     numberOfEmployees: string;

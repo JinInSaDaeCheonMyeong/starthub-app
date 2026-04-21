@@ -1,8 +1,7 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/RootStack";
-import { FlatList, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import SideBar from "../../component/home/SideBar";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
 import GlassView from "../../component/GlassView";
 import { useCallback, useState } from "react";
@@ -14,12 +13,12 @@ import { ShowToast, ToastType } from "../../util/ShowToast";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import * as Progress from "react-native-progress"
-import { formatToDate, getDateDifference } from "../../util/DateFormat";
+import { getDateDifference, parseReceptionPeriod } from "../../util/DateFormat";
 import NoticeIcon from "../../assets/icons/alarm/Iconly/Regular/Bulk/Work.svg"
 import CalendarIcon from "../../assets/icons/alarm/Iconly/Regular/Bulk/Calendar.svg"
 import { getNotice } from "../../api/notice";
-import { NoticeType } from "../../type/notice/notice.type";
 import { DefaultImage } from "../../constants/AppImages";
+import {FlashList} from "@shopify/flash-list";
 
 export type AlarmScreenProps = StackScreenProps<
     RootStackParamList,
@@ -31,56 +30,6 @@ export default function AlarmScreen({navigation} : AlarmScreenProps) {
     const insets = useSafeAreaInsets()
     const [history, setHistory] = useState<AlarmHistory[]>([])
     const [loading, setLoading] = useState(true)
-
-    const parseReceptionPeriod = (period: string) => {
-        try {
-            if (!period || typeof period !== 'string') {
-                return {
-                    startDate: new Date(),
-                    endDate: new Date()
-                };
-            }
-            const parts = period.split("~").map(str => str.trim());
-            if (parts.length !== 2) {
-                return {
-                    startDate: new Date(),
-                    endDate: new Date()
-                };
-            }
-            const [startPart, endPart] = parts;
-            const startDateStr = startPart.split(" ")[0];
-            const endDateStr = endPart.split(" ")[0];
-            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-            if (!dateRegex.test(startDateStr) || !dateRegex.test(endDateStr)) {
-                return {
-                    startDate: new Date(),
-                    endDate: new Date()
-                };
-            }
-
-            // Date 객체 생성 시 시간을 00:00:00으로 설정하여 날짜만 사용
-            const startDate = new Date(startDateStr + 'T00:00:00');
-            const endDate = new Date(endDateStr + 'T00:00:00');
-
-            // 유효한 날짜인지 확인
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                return {
-                    startDate: new Date(),
-                    endDate: new Date()
-                };
-            }
-
-            return {
-                startDate,
-                endDate
-            };
-        } catch (error) {
-            return {
-                startDate: new Date(),
-                endDate: new Date()
-            };
-        }
-    };
 
     const getItem = (type : string) => {
         switch (type) {
@@ -167,7 +116,7 @@ export default function AlarmScreen({navigation} : AlarmScreenProps) {
                 title="내 알림"
                 handleBackPress={navigation.goBack}
             />
-            <FlatList
+            <FlashList
                 removeClippedSubviews={true}
                 data={history}
                 contentContainerStyle={{padding : 16, gap : 16}}

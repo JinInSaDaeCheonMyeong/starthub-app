@@ -22,11 +22,6 @@ import { Fonts } from "../constants/Fonts";
 import { CompositeScreenProps } from "@react-navigation/core";
 import { RootStackParamList } from "../navigation/RootStack";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import EarlyInterestScreen from "./onboard/company/early/EarlyInterestScreen";
-import MoneyScreen from "./onboard/company/early/MoneyScreen";
-import NameScreen from "./onboard/company/early/NameScreen";
-import PersonScreen from "./onboard/company/early/PersonScreen";
-import PreInterestScreen from "./onboard/company/pre/PreInterestScreen";
 
 export type SignupInputScreenProps = CompositeScreenProps<
     StackScreenProps<AuthStackParamList, 'SignupInput'>,

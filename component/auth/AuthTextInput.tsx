@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import {
-    Animated,
     Platform,
     StyleSheet,
     Text,
@@ -9,6 +8,13 @@ import {
     View,
     ViewStyle,
 } from "react-native";
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withTiming,
+    interpolate,
+    interpolateColor,
+} from "react-native-reanimated";
 import { Colors } from "../../constants/Color";
 import VisibleIcon from "../../assets/icons/eye.svg";
 import InVisibleIcon from "../../assets/icons/eye.fill.svg";
@@ -19,67 +25,47 @@ type AuthTextInputProps = TextInputProps & {
     placeHolder: string;
     value: string;
     isPassword?: boolean;
-    isVerify ?: boolean;
+    isVerify?: boolean;
     onChangeText: (text: string) => void;
-    onSendVerify ?: (text : string) => void;
+    onSendVerify?: (text: string) => void;
     error?: boolean;
     containerStyle?: ViewStyle;
 };
 
 export default function AuthTextInput({
-    placeHolder,
-    value,
-    isPassword = false,
-    isVerify = false,
-    onChangeText,
-    onSendVerify,
-    error = false,
-    containerStyle,
-    ...props
-}: AuthTextInputProps) {
+                                          placeHolder,
+                                          value,
+                                          isPassword = false,
+                                          isVerify = false,
+                                          onChangeText,
+                                          onSendVerify,
+                                          error = false,
+                                          containerStyle,
+                                          ...props
+                                      }: AuthTextInputProps) {
     const [visible, setVisible] = useState(true);
     const [isFocused, setIsFocused] = useState(false);
-    const labelAnim = useRef(new Animated.Value(0)).current;
+    const labelAnim = useSharedValue(0);
 
-    useEffect(() => {
-        Animated.timing(labelAnim, {
-            toValue: isFocused ? 1 : 0,
-            duration: 180,
-            useNativeDriver: false,
-        }).start();
-    }, [isFocused]);
-
-    const labelY = labelAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [isPassword ? Platform.OS === 'ios' ? 22 : 20 : 20, 10],
-    });
-
-    const labelFontSize = labelAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [14, 10],
-    });
-    const labelColor = labelAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [Colors.gray2, Colors.gray2],
-    });
+    const animatedLabelStyle = useAnimatedStyle(() => ({
+        top: interpolate(labelAnim.value, [0, 1], [isPassword ? (Platform.OS === 'ios' ? 22 : 20) : 20, 10]),
+        fontSize: interpolate(labelAnim.value, [0, 1], [14, 10]),
+        color: interpolateColor(labelAnim.value, [0, 1], [Colors.gray2, Colors.gray2]),
+    }));
 
     const borderColor = error
         ? Colors.error
         : isFocused
-        ? Colors.primary
-        : Colors.gray3;
+            ? Colors.primary
+            : Colors.gray3;
 
     return (
         <View style={[styles.container, { borderColor }, containerStyle]}>
             <Animated.Text
                 style={[
                     styles.label,
-                    {
-                        top: labelY,
-                        fontSize: labelFontSize,
-                        color: labelColor,
-                        opacity : !value || value.length === 0 ? 1 : 0
-                    },
+                    animatedLabelStyle,
+                    { opacity: !value || value.length === 0 ? 1 : 0 },
                 ]}
             >
                 {placeHolder}
@@ -89,17 +75,20 @@ export default function AuthTextInput({
                 value={value}
                 onChangeText={onChangeText}
                 secureTextEntry={isPassword ? visible : false}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
+                onFocus={() => {
+                    setIsFocused(true);
+                    labelAnim.value = withTiming(1, { duration: 180 });
+                }}
+                onBlur={() => {
+                    setIsFocused(false);
+                    labelAnim.value = withTiming(0, { duration: 180 });
+                }}
                 autoCapitalize="none"
                 {...props}
             />
 
             {isPassword ? (
-                <TouchableOpacity
-                    hitSlop={8}
-                    onPress={() => setVisible((prev) => !prev)}
-                >
+                <TouchableOpacity hitSlop={8} onPress={() => setVisible((prev) => !prev)}>
                     {visible ? (
                         <VisibleIcon width={22} height={22} color={Colors.gray2} />
                     ) : (
@@ -107,17 +96,8 @@ export default function AuthTextInput({
                     )}
                 </TouchableOpacity>
             ) : isVerify ? (
-                <TouchableOpacity
-                    hitSlop={8}
-                    onPress={() => {
-                        if(!!onSendVerify){
-                            onSendVerify(value)
-                        }
-                    }}
-                >
-                    <Text style={styles.sendText}>
-                        재전송
-                    </Text>
+                <TouchableOpacity hitSlop={8} onPress={() => { if (!!onSendVerify) onSendVerify(value); }}>
+                    <Text style={styles.sendText}>재전송</Text>
                 </TouchableOpacity>
             ) : null}
         </View>

@@ -1,8 +1,7 @@
-import { Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import { Colors } from "../../../constants/Color";
 import DateInputText from "../../../component/auth/DateInputText";
 import { DayList, MonthList, YearList } from "../../../constants/DateNumber";
-import { useState } from "react";
 import { Fonts } from "../../../constants/Fonts";
 
 type InfoScreenProps = {

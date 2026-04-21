@@ -4,7 +4,6 @@ import {
     Text,
     StyleSheet, ScrollView, Dimensions, TouchableOpacity,
     ImageBackground,
-    Image,
     Platform,
 } from 'react-native';
 import { Colors } from '../../../constants/Color';
@@ -12,7 +11,7 @@ import { Fonts } from '../../../constants/Fonts';
 import {StackScreenProps} from "@react-navigation/stack";
 import {RootStackParamList} from "../../../navigation/RootStack";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
-import {BMCType, SelectBMCValue} from "../../../type/BMC/BMC.type";
+import {SelectBMCValue} from "../../../type/BMC/BMC.type";
 import ChannelsIcon from "../../../assets/icons/bmc/channels.svg"
 import CostStructureIcon from "../../../assets/icons/bmc/cost_structure.svg"
 import CustomerRelationshipsIcon from "../../../assets/icons/bmc/customer_relationships.svg"
@@ -25,6 +24,8 @@ import ValuePropositionIcon from "../../../assets/icons/bmc/value_proposition.sv
 import SubHeaderBar from '../../../component/home/SubHeaderBar';
 import GlassView from '../../../component/GlassView';
 import { DefaultImage } from '../../../constants/AppImages';
+import { Image } from 'expo-image';
+
 
 const {width} = Dimensions.get('window');
 
@@ -105,8 +106,8 @@ export default function InBMCScreen({navigation, route : {params}} : InBMCScreen
                 <View style={[styles.bmcImage]}>
                 <Image
                     source={imageError || !imageSource ? defaultBMCImage : {uri : imageSource, cache : 'force-cache'}}
-                    resizeMode="contain"
-                    defaultSource={defaultBMCImage}
+                    contentFit="contain"
+                    placeholder={defaultBMCImage}
                     style={styles.bmcImage}
                     onError={() => {
                         setImageError(true)

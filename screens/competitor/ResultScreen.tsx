@@ -1,24 +1,22 @@
-import { Alert, DimensionValue, FlatList, ImageBackground, ImageSourcePropType, ImageURISource, Linking, Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import { Alert, DimensionValue, ImageBackground, Linking, Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import { StackScreenProps } from "@react-navigation/stack";
-import { Image } from "react-native";
+import { Image } from 'expo-image';
 import SubHeaderBar from "../../component/home/SubHeaderBar";
 import { Colors } from "../../constants/Color";
 import GlassView from "../../component/GlassView";
 import { Fonts } from "../../constants/Fonts";
 import React, { useState } from "react";
-import { CompetitorComparison, CompetitorRequest, CompetitorResponse } from "../../type/competitor/competitor.type";
+import { CompetitorComparison, CompetitorResponse } from "../../type/competitor/competitor.type";
 import Carousel from "react-native-reanimated-carousel";
 import CommonButton from "../../component/CommonButton";
-import DownloadIcon from "../../assets/icons/download.svg"
 import { BlurView } from "@react-native-community/blur";
 import * as Progress from "react-native-progress"
 import { ShowToast, ToastType } from "../../util/ShowToast";
-import { ErrorResponse } from "../../type/util/response.type";
 import { isAxiosError } from "axios";
-import { competitorAnalysis, recompetitorAnalysis } from "../../api/competitor";
-import { ScrollView } from "react-native-gesture-handler";
+import { recompetitorAnalysis } from "../../api/competitor";
 import { DefaultImage } from "../../constants/AppImages";
+import {FlashList} from "@shopify/flash-list";
 
 type ResultScreenProps = StackScreenProps<CompoetitorStackParamList, 'Result'>
 const defaultBMCImage = DefaultImage.bmc
@@ -162,7 +160,7 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                                         }} 
                                         source={imageError ? defaultImage : {uri : item.logoUrl, cache: 'force-cache'}}
                                         onError={() => setImageError(true)}
-                                        defaultSource={defaultImage}
+                                        placeholder={defaultImage}
                                     />
                                     <View style={{gap : 8, flex : 1}}>
                                         <View style={{flexDirection : 'row', justifyContent : 'space-between', gap : 8}}>
@@ -245,8 +243,8 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                             ? defaultBMCImage
                             : params.image
                     }
-                    resizeMode="contain"
-                    defaultSource={defaultBMCImage}
+                    contentFit="contain"
+                    placeholder={defaultBMCImage}
                     style={styles.bmcImage}
                     onError={() => setImageError(true)}
                 />
@@ -349,7 +347,7 @@ export default function ResultScreen({navigation, route : {params}} : ResultScre
                 handleBackPress={navigation.goBack}
                 title="경쟁사 분석 결과"
             />
-            <FlatList
+            <FlashList
                 data={sections}
                 keyExtractor={(item) => item.key}
                 renderItem={({ item }) => item.render()}

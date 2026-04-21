@@ -1,5 +1,5 @@
 import { StackScreenProps } from "@react-navigation/stack";
-import { FlatList, Image, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
 import { Colors } from "../../constants/Color";
@@ -8,7 +8,6 @@ import { useCallback, useEffect, useState } from "react";
 import { BMCType, GetBMCsResponse } from "../../type/BMC/BMC.type";
 import { getBMCs } from "../../api/bmc";
 import { formatToDate } from "../../util/DateFormat";
-import { Shadow } from "react-native-shadow-2";
 import * as Progress from "react-native-progress"
 import { BlurView } from "@react-native-community/blur";
 import { ShowToast, ToastType } from "../../util/ShowToast";
@@ -18,6 +17,7 @@ import { isAxiosError } from "axios";
 import { ErrorResponse } from "../../type/util/response.type";
 import BMCItem from "../../component/home/BMCItem";
 import { DefaultImage } from "../../constants/AppImages";
+import {FlashList} from "@shopify/flash-list";
 
 type SelectScreenProps = StackScreenProps<CompoetitorStackParamList, 'Select'>
 const backgroundImage = DefaultImage.background
@@ -29,8 +29,8 @@ export default function SelectScreen({navigation} : SelectScreenProps){
     const [analyzing, setAnalyzing] = useState(false)
 
     const handleCompetitorRequest = async () => {
-        setAnalyzing(true)
         if(!selectBMC) return
+        setAnalyzing(true)
         try {
             const data : CompetitorRequest = {
                 bmcId : selectBMC,
@@ -46,15 +46,14 @@ export default function SelectScreen({navigation} : SelectScreenProps){
             if(isAxiosError(error)){
                 const response = error.response
                 if(!response){
-                    ShowToast("경쟁사 분석", '네트워크 오류가 발생헀습니다', ToastType.ERROR);
+                    ShowToast("경쟁사 분석", '네트워크 오류가 발생했습니다', ToastType.ERROR);
                 } else {
                     const message = (response.data as ErrorResponse).message
-                    if(message[message.length] === '.') {
-                        const errorMsg = message.slice(0, -1);
-                        ShowToast("경쟁사 분석", errorMsg, ToastType.ERROR);
-                    }
-                    ShowToast("경쟁사 분석", message, ToastType.ERROR);
+                    const displayMsg = message[message.length - 1] === '.' ? message.slice(0, -1) : message;
+                    ShowToast("경쟁사 분석", displayMsg, ToastType.ERROR);
                 }
+            } else {
+                ShowToast("경쟁사 분석", '알 수 없는 오류가 발생했습니다', ToastType.ERROR);
             }
         } finally {
             setAnalyzing(false)
@@ -66,7 +65,8 @@ export default function SelectScreen({navigation} : SelectScreenProps){
             try {
                 const response: GetBMCsResponse = await getBMCs();
                 setAllBMCs(response.data);
-            } catch (error) {
+            } catch {
+                ShowToast('오류 발생', 'BMC를 불러올 수 없습니다', ToastType.ERROR);
             } finally {
                 setLoading(false);
             }
@@ -120,7 +120,7 @@ export default function SelectScreen({navigation} : SelectScreenProps){
                 title="BMC 선택"
                 subIcon="Profile"
             />
-            <FlatList
+            <FlashList
                 style={{flex : 1}}
                 removeClippedSubviews={true}
                 showsVerticalScrollIndicator={false}

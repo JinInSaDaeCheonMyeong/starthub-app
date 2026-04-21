@@ -11,6 +11,7 @@ import CompetitorStack from "./CompetitorStack";
 import MyLikesScreen from "../screens/system/MyLikesScreen";
 import NoticeSearchScreen from "../screens/Home/notice/NoticeSearchScreen";
 import AlarmScreen from "../screens/Home/AlarmScreen";
+import ChatBotScreen from "../screens/Home/ChatBotScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -31,7 +32,8 @@ export type RootStackParamList = {
         text? : string,
         supportField ?: string
     },
-    Alarm : undefined
+    Alarm : undefined,
+    ChatBot : undefined
 };
 
 export default function RootStack() {
@@ -53,6 +55,7 @@ export default function RootStack() {
             <Stack.Screen name="Competitor" component={CompetitorStack}/>
             <Stack.Screen name="MyLikes" component={MyLikesScreen}/>
             <Stack.Screen name="NoticeSearch" component={NoticeSearchScreen}/>
+            <Stack.Screen name="ChatBot" component={ChatBotScreen}/>
             <Stack.Screen name="Alarm" component={AlarmScreen}/>
         </Stack.Navigator>
     )

@@ -1,64 +1,88 @@
-import { useCallback, useEffect, useState } from "react";
-import StartupStatus from "../../../../constants/StartupStatus"
-import { CompanyInputScreenProps } from "../../../../screens/CompanyInputScreen"
+import { useCallback, useState } from "react";
+import { BackHandler } from "react-native";
+import { NavigationProp, useFocusEffect } from "@react-navigation/native";
+
+import StartupStatus from "../../../../constants/StartupStatus";
+import { CompanyInputScreenProps } from "../../../../screens/CompanyInputScreen";
+import { RootStackParamList } from "../../../../navigation/RootStack";
+
 import { useError } from "../../../util/useError";
 import { useDisabled } from "../../../util/useDisabled";
+
 import { CompanyInputFormData } from "../../../../type/user/companyInput.type";
+
 import { ShowToast, ToastType } from "../../../../util/ShowToast";
 import { setProfile } from "../../../../api/user";
-import { BackHandler } from "react-native";
-import {NavigationProp, useFocusEffect} from "@react-navigation/native"
-import {RootStackParamList} from "../../../../navigation/RootStack";
 
 export const useCompanyInputScreen = (
     {
-        navigation, 
-        route : {
-            params : {
-                username,
-                birth,
-                gender,
-                startupType,
-            }
+        navigation,
+        route: {
+            params: { username, birth, gender, startupType }
         }
-    } : CompanyInputScreenProps,
-    earlyScreenNumber : number,
-    preScreenNumber : number
+    }: CompanyInputScreenProps,
+    earlyScreenNumber: number,
+    preScreenNumber: number
 ) => {
-    const rootNavigation = navigation as unknown as NavigationProp<RootStackParamList>;
-    const isEarlyStartup = startupType === StartupStatus.EARLY_STAGE; 
-    const MAXPROGRESS = isEarlyStartup ? earlyScreenNumber : preScreenNumber
-    const [currentProgress, setCurrentProgress] = useState(1)
+
+    /** Root Navigation 접근용 */
+    const rootNavigation =
+        navigation as unknown as NavigationProp<RootStackParamList>;
+
+    /** 초기 창업 여부 */
+    const isEarlyStartup = startupType === StartupStatus.EARLY_STAGE;
+
+    /** 총 진행 단계 */
+    const MAXPROGRESS = isEarlyStartup
+        ? earlyScreenNumber
+        : preScreenNumber;
+
+    /** 현재 진행 단계 */
+    const [currentProgress, setCurrentProgress] = useState(1);
+
+    /** 회사 입력 데이터 */
     const [formData, setFormData] = useState<CompanyInputFormData>({
-        startupFields : [],
-        companyName : '',
-        companyDescription : '',
-        numberOfEmployees : '',
-        companyWebsite : '',
-        startupLocation : '',
-        annualRevenue : '',
+        startupFields: [],
+        companyName: "",
+        companyDescription: "",
+        numberOfEmployees: "",
+        companyWebsite: "",
+        startupLocation: "",
+        annualRevenue: "",
     });
 
     const {
-        value: { 
-            errorVisible,
-            errorText
-        },
+        value: { errorVisible, errorText },
         handler: { showError, hideError }
-    } = useError()
-    const { disabled, disabledBtn, enabledBtn } = useDisabled()
+    } = useError();
 
-    const updateFormData = useCallback(<K extends keyof CompanyInputFormData>(
-        key: K,
-        value: CompanyInputFormData[K]
-    ) => {
-        setFormData(prev => ({ ...prev, [key]: value }))
-        if (errorVisible) hideError()
-    }, [errorVisible, hideError])
+    const { disabled, disabledBtn, enabledBtn } = useDisabled();
 
-    const makeSetter = useCallback(<K extends keyof CompanyInputFormData>(key: K) =>
-        (value: CompanyInputFormData[K]) => updateFormData(key, value), [updateFormData])
+    /**
+     * formData 업데이트 함수
+     */
+    const updateFormData = useCallback<
+        <K extends keyof CompanyInputFormData>(
+            key: K,
+            value: CompanyInputFormData[K]
+        ) => void
+    >((key, value) => {
+        setFormData(prev => ({ ...prev, [key]: value }));
 
+        if (errorVisible) hideError();
+    }, [errorVisible, hideError]);
+
+    /**
+     * setter 생성 함수 (generic)
+     */
+    const makeSetter = useCallback(
+        <K extends keyof CompanyInputFormData>(key: K) =>
+            (value: CompanyInputFormData[K]) =>
+                updateFormData(key, value),
+        [updateFormData]
+    );
+
+    /** 각 필드 setter */
     const setCompanyName = makeSetter("companyName");
     const setCompanyDescription = makeSetter("companyDescription");
     const setNumberOfEmployees = makeSetter("numberOfEmployees");
@@ -67,75 +91,93 @@ export const useCompanyInputScreen = (
     const setStartupLocation = makeSetter("startupLocation");
     const setStartupFields = makeSetter("startupFields");
 
+    /**
+     * 뒤로가기 처리
+     */
     const goBack = useCallback((): boolean => {
         hideError();
-        if (currentProgress <= 1) {
-            navigation.goBack();
+
+        if (currentProgress > 1) {
+            setCurrentProgress(prev => prev - 1);
         } else {
-            setCurrentProgress((prev) => prev - 1);
+            navigation.goBack();
         }
+
         return true;
-    }, [currentProgress, hideError, navigation])
+    }, [currentProgress, hideError, navigation]);
 
+    /**
+     * URL 검증 함수
+     */
+    const validateURL = (url: string) => {
+        const regex =
+            /^(https?:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/;
+        return regex.test(url);
+    };
+
+    /**
+     * 다음 단계 이동
+     */
     const goNext = async () => {
-        disabledBtn()
-        const companyName = formData.companyName.trim()
-        const companyDescription = formData.companyDescription.trim()
-        const numberOfEmployees = formData.numberOfEmployees.trim()
-        const companyWebsite = formData.companyWebsite.trim()
-        const annualRevenue = formData.annualRevenue.trim()
-        const startupLocation = formData.startupLocation.trim()
-        const startupFields = formData.startupFields
+        disabledBtn();
 
-        if(
-            !companyName && 
-            startupType === StartupStatus.EARLY_STAGE
-        ){
-            showError('기업명을 입력해주세요')
+        const companyName = formData.companyName.trim();
+        const companyDescription = formData.companyDescription.trim();
+        const numberOfEmployees = formData.numberOfEmployees.trim();
+        const companyWebsite = formData.companyWebsite.trim();
+        const annualRevenue = formData.annualRevenue.trim();
+        const startupLocation = formData.startupLocation.trim();
+        const startupFields = formData.startupFields;
+
+        /**
+         * 입력값 검증
+         */
+        if (!companyName && isEarlyStartup) {
+            showError("기업명을 입력해주세요");
             enabledBtn();
-            return
-        } else if (
-            !numberOfEmployees && 
-            currentProgress === 2 && 
-            startupType === StartupStatus.EARLY_STAGE
+            return;
+        }
+
+        if (
+            !numberOfEmployees &&
+            currentProgress === 2 &&
+            isEarlyStartup
         ) {
             showError("총 인원 수를 입력해주세요");
             enabledBtn();
             return;
-        } else if(
-            !!companyWebsite && 
-            currentProgress === 2 && 
-            startupType === StartupStatus.EARLY_STAGE
-        ){
-            // URL 검사식 (HTTP, HTTPS만 허용)
-            const urlRegex =
-                /^(https?:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/;
-                
-            if (!urlRegex.test(companyWebsite.trim())) {
-                showError(
-                    '올바른 URL 형식이 아닙니다. (예: https://example.com)'
-                );
-                enabledBtn();
-                return;
-            }
-        } else if (
-            !annualRevenue &&
-            currentProgress === 3
+        }
+
+        if (
+            companyWebsite &&
+            currentProgress === 2 &&
+            isEarlyStartup &&
+            !validateURL(companyWebsite)
         ) {
+            showError("올바른 URL 형식이 아닙니다. (예: https://example.com)");
+            enabledBtn();
+            return;
+        }
+
+        if (!annualRevenue && currentProgress === 3) {
             showError("연간 매출액을 입력해주세요");
             enabledBtn();
             return;
-        } else if (
-            startupFields.length === 0
-            && currentProgress === MAXPROGRESS
+        }
+
+        if (
+            startupFields.length === 0 &&
+            currentProgress === MAXPROGRESS
         ) {
             showError("창업 분야를 1개 이상 선택해주세요");
             enabledBtn();
             return;
         }
 
+        /**
+         * 마지막 단계
+         */
         if (currentProgress >= MAXPROGRESS) {
-            console.log("마지막 단계 도착")
             try {
                 await setProfile({
                     username,
@@ -144,46 +186,73 @@ export const useCompanyInputScreen = (
                     startupStatus: startupType,
                     companyName,
                     companyDescription,
-                    numberOfEmployees : Number(numberOfEmployees),
+                    numberOfEmployees: Number(numberOfEmployees),
                     companyWebsite,
-                    annualRevenue : Number(annualRevenue),
+                    annualRevenue: Number(annualRevenue),
                     startupLocation,
                     startupFields
-                })
-                ShowToast("프로필 등록", "프로필 등록에 성공하셨습니다", ToastType.SUCCESS)
+                });
+
+                ShowToast(
+                    "프로필 등록",
+                    "프로필 등록에 성공하셨습니다",
+                    ToastType.SUCCESS
+                );
+
                 rootNavigation.reset({
                     index: 0,
-                    routes: [{ name: "HomeStack" }],
+                    routes: [{ name: "HomeStack" }]
                 });
-            } catch (error : any) {
-                if(error.isAxiosError){
-                    ShowToast("프로필 등록", "프로필 등록에 실패하셨습니다", ToastType.ERROR)
-                    console.log(error.message)
-                    return
+
+            } catch (error: any) {
+
+                if (error.isAxiosError) {
+                    ShowToast(
+                        "프로필 등록",
+                        "프로필 등록에 실패하셨습니다",
+                        ToastType.ERROR
+                    );
+                    return;
                 }
-                ShowToast("프로필 등록", "알 수 없는 오류가 발생했습니다", ToastType.ERROR)
-            } finally{
+
+                ShowToast(
+                    "프로필 등록",
+                    "알 수 없는 오류가 발생했습니다",
+                    ToastType.ERROR
+                );
+
+            } finally {
                 hideError();
                 enabledBtn();
             }
-        } else {
-            setCurrentProgress(prev => prev + 1)
+
+            return;
         }
+
+        /** 다음 단계 */
+        setCurrentProgress(prev => prev + 1);
+
         hideError();
         enabledBtn();
-    }
+    };
 
+    /**
+     * 안드로이드 하드웨어 뒤로가기 처리
+     */
     useFocusEffect(
         useCallback(() => {
-            const backHandler = BackHandler.addEventListener('hardwareBackPress', goBack)
-            return () => {
-                backHandler.remove()
-            }
+            const handler =
+                BackHandler.addEventListener(
+                    "hardwareBackPress",
+                    goBack
+                );
+
+            return () => handler.remove();
         }, [goBack])
-    )
+    );
 
     return {
-        form : {
+        form: {
             ...formData,
             setCompanyName,
             setCompanyDescription,
@@ -193,7 +262,8 @@ export const useCompanyInputScreen = (
             setStartupLocation,
             setStartupFields
         },
-        ui : {
+
+        ui: {
             MAXPROGRESS,
             currentProgress,
             isEarlyStartup,
@@ -201,9 +271,10 @@ export const useCompanyInputScreen = (
             errorText,
             disabled
         },
-        action : {
+
+        action: {
             goNext,
             goBack
         }
-    }
-}
+    };
+};

@@ -1,13 +1,10 @@
 import { StackScreenProps } from "@react-navigation/stack";
-import { SystemStackParamList } from "../../navigation/SystemStack";
 import {
     Dimensions,
-    FlatList,
     ImageBackground,
     RefreshControl,
     StyleSheet,
     Text,
-    useWindowDimensions,
     View
 } from "react-native";
 import  *  as  Progress  from  'react-native-progress' ;
@@ -15,14 +12,15 @@ import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import {useCallback, useEffect, useRef, useState} from "react";
 import { ShowToast, ToastType } from "../../util/ShowToast";
+import { parseReceptionPeriod } from "../../util/DateFormat";
 import {getLikes} from "../../api/likes";
 import {BeforeNoticeType, GetNoticesResponse, NoticeType} from "../../type/notice/notice.type";
 import NoticeItem from "../../component/notice/NoticeItem";
-import {CompositeScreenProps} from "@react-navigation/core";
 import {RootStackParamList} from "../../navigation/RootStack";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DefaultImage } from "../../constants/AppImages";
+import {FlashList} from "@shopify/flash-list";
 
 export type MyLikesScreenProps = StackScreenProps<RootStackParamList>
 
@@ -31,59 +29,7 @@ const { height} = Dimensions.get("window");
 
 const backgroundImage = DefaultImage.background
 
-export default function MyLikesScreen({navigation, route : {params}}: MyLikesScreenProps){
-    const parseReceptionPeriod = (period: string) => {
-        try {
-            if (!period || typeof period !== 'string') {
-                return {
-                    startDate: new Date(),
-                    endDate: new Date()
-                };
-            }
-
-            const parts = period.split("~").map(str => str.trim());
-
-            if (parts.length !== 2) {
-                return {
-                    startDate: new Date(),
-                    endDate: new Date()
-                };
-            }
-
-            const [startPart, endPart] = parts;
-            const startDateStr = startPart.split(" ")[0];
-            const endDateStr = endPart.split(" ")[0];
-
-            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-            if (!dateRegex.test(startDateStr) || !dateRegex.test(endDateStr)) {
-                return {
-                    startDate: new Date(),
-                    endDate: new Date()
-                };
-            }
-
-            const startDate = new Date(startDateStr + 'T00:00:00');
-            const endDate = new Date(endDateStr + 'T00:00:00');
-
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                return {
-                    startDate: new Date(),
-                    endDate: new Date()
-                };
-            }
-
-            return {
-                startDate,
-                endDate
-            };
-        } catch (error) {
-            return {
-                startDate: new Date(),
-                endDate: new Date()
-            };
-        }
-    };
-
+export default function MyLikesScreen({navigation}: MyLikesScreenProps){
     const [allLikes, setAllLikes] = useState<NoticeType[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);  // ✅ 추가
@@ -194,7 +140,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
         }
     };
 
-    const updateNoticeInList = useCallback((noticeId: number, newIsLiked: boolean) => {
+    const updateNoticeInList = useCallback((noticeId: number, _newIsLiked: boolean) => {
         setAllLikes(prevNotices =>
             prevNotices.filter(notice => notice.id !== noticeId)  // ✅ 좋아요 해제시 목록에서 제거
         );
@@ -223,9 +169,9 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
                 title="내 북마크"
                 handleBackPress={navigation.goBack}
             />
-            <FlatList
+            <FlashList
                 removeClippedSubviews={true}
-                data={refreshing ? [] : allLikes}  // ✅ 새로고침 시 빈 배열
+                data={refreshing ? [] : allLikes}
                 refreshControl={
                     <RefreshControl
                         refreshing={false}
@@ -255,7 +201,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
                         </View> : <View style={{height: 16}}/>
                 }
                 ListEmptyComponent={
-                    refreshing ? (  // ✅ 새로고침 중
+                    refreshing ? (
                         <View style={styles.emptyContainer}>
                             <Progress.Circle
                                 color={Colors.primary}
@@ -264,7 +210,7 @@ export default function MyLikesScreen({navigation, route : {params}}: MyLikesScr
                                 thickness={300}
                             />
                         </View>
-                    ) : !loading && !isFetchingNextPage ? (  // ✅ 데이터 없음
+                    ) : !loading && !isFetchingNextPage ? (
                         <View style={styles.emptyContainer}>
                             <Text style={styles.emptyContainerText}>
                                 좋아요한 공고가 없습니다.

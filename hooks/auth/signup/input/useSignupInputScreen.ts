@@ -1,14 +1,21 @@
 import { useCallback, useEffect, useState } from "react"
+import { BackHandler } from "react-native"
+
 import { useError } from "../../../util/useError"
+import { useDisabled } from "../../../util/useDisabled"
+
 import { SignupInputScreenProps } from "../../../../screens/SignupInputScreen"
 import { SignupInputFormData } from "../../../../type/user/signupInput.type"
-import { useDisabled } from "../../../util/useDisabled"
+
 import StartupStatus from "../../../../constants/StartupStatus"
-import { BackHandler } from "react-native"
 import { removeTokens } from "../../../../util/token"
 import { resetScheduleList } from "../../../../util/Schedule"
 
-export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAXPROGRESS: number) => {
+export const useSignupInputScreen = (
+    { navigation }: SignupInputScreenProps,
+    MAXPROGRESS: number
+) => {
+
     const [formData, setFormData] = useState<SignupInputFormData>({
         name: "",
         year: "",
@@ -19,13 +26,14 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
     })
 
     const [currentProgress, setCurrentProgress] = useState(1)
+
     const {
         value: { errorVisible, errorText },
         handler: { showError, hideError }
     } = useError()
+
     const { disabled, disabledBtn, enabledBtn } = useDisabled()
 
-    // ✅ 유효한 일 계산 함수
     const getDaysInMonth = useCallback((year: number, month: number) => {
         return new Date(year, month, 0).getDate()
     }, [])
@@ -39,13 +47,15 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
     }, [errorVisible, hideError])
 
     const makeSetter = useCallback(<K extends keyof SignupInputFormData>(key: K) =>
-        (value: SignupInputFormData[K]) => updateFormData(key, value), [updateFormData])
+            (value: SignupInputFormData[K]) => updateFormData(key, value)
+        , [updateFormData])
 
     const setName = makeSetter("name")
     const setYear = makeSetter("year")
     const setMonth = makeSetter("month")
+    const setGender = makeSetter("gender")
+    const setStartupType = makeSetter("startupType")
 
-    // ✅ day setter에 유효성 추가
     const setDay = useCallback((value: string) => {
         const year = Number(formData.year)
         const month = Number(formData.month)
@@ -53,49 +63,44 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
 
         if (year && month) {
             const maxDay = getDaysInMonth(year, month)
-            if (day > maxDay) {
-                day = maxDay // 넘으면 마지막 날짜로 조정
-            }
+            if (day > maxDay) day = maxDay
         }
+
         updateFormData("day", String(day))
     }, [formData.year, formData.month, getDaysInMonth, updateFormData])
 
-    const setGender = makeSetter("gender")
-    const setStartupType = makeSetter("startupType")
-
     const goBack = useCallback((): boolean => {
-        hideError();
-        if (currentProgress <= 1) {
-            removeTokens();
-            resetScheduleList();
-            navigation.reset({
-                index: 0,
-                routes: [
-                    {
-                        name: "AuthStack" as any,
-                        state: {
-                            routes: [{ name: "Welcome" }],
-                            index: 0,
-                        },
-                    },
-                ]
-            })
-        } else {
+        hideError()
+
+        if (currentProgress > 1) {
             setCurrentProgress(prev => prev - 1)
+            return true
         }
+
+        removeTokens()
+        resetScheduleList()
+
+        navigation.reset({
+            index: 0,
+            routes: [{
+                name: "AuthStack" as any,
+                state: {
+                    routes: [{ name: "Welcome" }],
+                    index: 0,
+                }
+            }]
+        })
+
         return true
     }, [currentProgress, hideError, navigation])
 
-    /** 다음 단계 */
-    const goNext = async () => {
+    const goNext = () => {
         disabledBtn()
+
         const username = formData.name.trim()
-        const gender = formData.gender
         const year = formData.year.trim()
         const month = formData.month.trim()
         const day = formData.day.trim()
-        const birth = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-        const startupType = formData.startupType
 
         if (!username || !year || !month || !day) {
             showError("이름 또는 생년월일을 입력해주세요")
@@ -103,13 +108,15 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
             return
         }
 
+        const birth =
+            `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`
+
         if (currentProgress >= MAXPROGRESS) {
-            console.log("마지막 단계 도착")
             navigation.navigate("CompanyInput", {
                 username,
                 birth,
-                gender,
-                startupType
+                gender: formData.gender,
+                startupType: formData.startupType
             })
         } else {
             setCurrentProgress(prev => prev + 1)
@@ -120,11 +127,12 @@ export const useSignupInputScreen = ({ navigation }: SignupInputScreenProps, MAX
     }
 
     useEffect(() => {
-        const backHandler = BackHandler.addEventListener(
+        const handler = BackHandler.addEventListener(
             "hardwareBackPress",
             goBack
         )
-        return () => backHandler.remove()
+
+        return () => handler.remove()
     }, [goBack])
 
     return {
