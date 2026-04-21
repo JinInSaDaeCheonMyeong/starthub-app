@@ -3,6 +3,10 @@
 # dependencies
 node_modules/
 
+# IDE
+.idea/
+.vscode/
+
 # Expo
 .expo/
 dist/
@@ -29,15 +33,22 @@ yarn-error.*
 # macOS
 .DS_Store
 *.pem
+Thumbs.db
 
 # local env files
-.env*.local
-*.env
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
+# app/service secrets
+/google-services.json
+/GoogleService-Info.plist
+*.keystore
+*.pfx
 
 # typescript
 *.tsbuildinfo
-/google-services.json
-/GoogleService-Info.plist
 /android/
 /ios/
-.env.local
