@@ -21,7 +21,7 @@ import { RootStackParamList } from "../../navigation/RootStack";
 import { DefaultImage } from "../../constants/AppImages";
 import { Drawer } from "react-native-drawer-layout";
 import { FlashList, FlashListRef } from "@shopify/flash-list";
-import { Markdown } from "react-native-remark";
+import Markdown from "react-native-markdown-display";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 
 import SubHeaderBar from "../../component/home/SubHeaderBar";
@@ -389,7 +389,7 @@ export default function ChatBotScreen({ navigation }: ChatBotScreenProps) {
                                                                     }}
                                                                 />
                                                             ) : seg.content.trim() ? (
-                                                                <Markdown key={idx} markdown={seg.content} />
+                                                                <Markdown key={idx}>{seg.content}</Markdown>
                                                             ) : null
                                                         )}
                                                     </>

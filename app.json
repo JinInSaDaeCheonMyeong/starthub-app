@@ -1,19 +1,15 @@
 {
   "expo": {
-    "scheme": "startHub-app",
+    "scheme": "starthub-app",
     "name": "startHub-app",
     "slug": "startHub-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icons/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.jininsa.startHubapp",
-      "config": {
-        "usesPushNotifications": true
-      },
       "entitlements": {
         "aps-environment": "production"
       },
@@ -25,7 +21,6 @@
         "foregroundImage": "./assets/icons/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.jininsa.startHubapp"
     },
     "web": {
@@ -38,22 +33,25 @@
     },
     "owner": "iszero",
     "plugins": [
-      "@react-native-firebase/app",
-      "@react-native-firebase/auth",
-      "@react-native-firebase/crashlytics",
       [
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "static",
             "forceStaticLinking": [
               "RNFBApp",
-              "RNFBAnalytics"
-            ]
+              "RNFBAuth",
+              "RNFBCrashlytics",
+              "RNFBMessaging"
+            ],
+            "useFrameworks": "static"
           }
         }
       ],
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      "@react-native-firebase/crashlytics",
       "expo-image",
+      "expo-notifications",
       "./plugins/withAndroidCleartext"
     ]
   }
