@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Colors } from '../../../constants/Color';
 import { Fonts } from '../../../constants/Fonts';
-import {StackScreenProps} from "@react-navigation/stack";
+import {NativeStackScreenProps} from "@react-navigation/native-stack";
 import {RootStackParamList} from "../../../navigation/RootStack";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {SelectBMCValue} from "../../../type/BMC/BMC.type";
@@ -30,7 +30,7 @@ import { Image } from 'expo-image';
 const {width} = Dimensions.get('window');
 
 
-type InBMCScreenProps = StackScreenProps<RootStackParamList, 'InBMC'>;
+type InBMCScreenProps = NativeStackScreenProps<RootStackParamList, 'InBMC'>;
 
 const values = [
     {

@@ -1,4 +1,4 @@
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootStack";
 import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -20,7 +20,7 @@ import { getNotice } from "../../api/notice";
 import { DefaultImage } from "../../constants/AppImages";
 import {FlashList} from "@shopify/flash-list";
 
-export type AlarmScreenProps = StackScreenProps<
+export type AlarmScreenProps = NativeStackScreenProps<
     RootStackParamList,
     "Alarm"
 >;

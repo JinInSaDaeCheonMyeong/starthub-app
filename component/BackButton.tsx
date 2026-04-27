@@ -1,6 +1,6 @@
 import { useState } from "react";
 import LeftArrow from "../assets/icons/left-arrow-back.svg";
-import {TouchableOpacity} from "react-native";
+import ReanimatedPressable from "./ReanimatedPressable";
 
 type BackButtonProps = {
     width: number;
@@ -20,16 +20,18 @@ export default function BackButton(props: BackButtonProps) {
     };
 
     return (
-        <TouchableOpacity
+        <ReanimatedPressable
             onPress={handleClick}
+            disabled={disabled}
             hitSlop={16}
             style={{ width: props.width, height: props.height}}
+            scaleTo={0.9}
         >
         <LeftArrow
             width={props.width}
             height={props.height}
             color={props.color}
         />
-        </TouchableOpacity>
+        </ReanimatedPressable>
     );
 }

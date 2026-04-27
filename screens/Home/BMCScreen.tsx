@@ -9,7 +9,7 @@ import {Colors} from "../../constants/Color";
 import {CompositeScreenProps} from "@react-navigation/core";
 import {BottomTabScreenProps} from "@react-navigation/bottom-tabs";
 import {HomeStackParamList} from "../../navigation/HomeStack";
-import {StackScreenProps} from "@react-navigation/stack";
+import {NativeStackScreenProps} from "@react-navigation/native-stack";
 import {RootStackParamList} from "../../navigation/RootStack";
 import {getBMCs} from "../../api/bmc";
 import {useCallback, useState} from "react";
@@ -25,7 +25,7 @@ const { height} = Dimensions.get('window');
 
 export type BMCScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, 'BMC'>,
-    StackScreenProps<RootStackParamList>
+    NativeStackScreenProps<RootStackParamList>
 >
 
 export default function BMCScreen({navigation}: BMCScreenProps) {

@@ -15,7 +15,7 @@ import { Fonts } from "../../constants/Fonts";
 import { CompositeScreenProps } from "@react-navigation/core";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { HomeStackParamList } from "../../navigation/HomeStack";
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootStack";
 import GlassView from "../../component/GlassView";
 import { useFocusEffect } from "@react-navigation/native";
@@ -25,11 +25,12 @@ import { NoticeCategory } from "../../constants/NoticeCategory";
 import { NoticeImages } from "../../constants/AppImages";
 import {FlashList} from "@shopify/flash-list";
 import { Image } from 'expo-image';
+import { useNoticeStore } from "../../store/noticeStore";
 
 
 export type NoticeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Notice">,
-    StackScreenProps<RootStackParamList>
+    NativeStackScreenProps<RootStackParamList>
 >;
 
 const categoryMap = {
@@ -57,6 +58,7 @@ const noticeCategoryList = [
 export default function NoticeScreen({ navigation }: NoticeScreenProps) {
     const [loading, setLoading] = useState(false);
     const [recommends, setRecommends] = useState<NoticeType[]>([]);
+    const setNotices = useNoticeStore((state) => state.setNotices);
 
     /** 공고 데이터 요청 */
     const fetchRecommendNotices = useCallback(async () => {
@@ -67,13 +69,14 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return { ...notice, startDate, endDate };
             });
+            setNotices(mapped);
             setRecommends(mapped);
         } catch {
             ShowToast('오류 발생', '공고를 불러올 수 없습니다', ToastType.ERROR);
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [setNotices]);
 
     const goNotice = useCallback((supportField?: string, text?: string) => {
         navigation.navigate("NoticeSearch", { text, supportField });

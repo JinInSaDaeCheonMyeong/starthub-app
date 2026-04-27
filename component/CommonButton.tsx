@@ -1,6 +1,7 @@
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { Colors } from "../constants/Color";
 import { Fonts } from "../constants/Fonts";
+import ReanimatedPressable from "./ReanimatedPressable";
 
 type CommonButtonProps = {
     title : string,
@@ -10,9 +11,13 @@ type CommonButtonProps = {
 
 export default function CommonButton(props : CommonButtonProps) {
     return(
-        <TouchableOpacity style={styles.container} onPress={props.onPress} disabled={props.disabled}>
+        <ReanimatedPressable
+            style={styles.container}
+            onPress={props.onPress}
+            disabled={props.disabled}
+        >
             <Text style={styles.text}>{props.title}</Text>
-        </TouchableOpacity>
+        </ReanimatedPressable>
     )
 }
 

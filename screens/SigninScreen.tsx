@@ -10,7 +10,7 @@ import {
     ScrollView,
 } from "react-native";
 import { AuthStackParamList } from "../navigation/AuthStack";
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Colors } from "../constants/Color";
 import AuthTextInput from "../component/auth/AuthTextInput";
 import BackButton from "../component/BackButton";
@@ -24,8 +24,8 @@ import StartHubIcon from "../assets/logos/starthub-logo.svg";
 import StartHubTitleIcon from "../assets/logos/starthub-title-logo.svg";
 
 export type SigninScreenProps = CompositeScreenProps<
-    StackScreenProps<AuthStackParamList, "Signin">,
-    StackScreenProps<RootStackParamList>
+    NativeStackScreenProps<AuthStackParamList, "Signin">,
+    NativeStackScreenProps<RootStackParamList>
 >;
 
 export default function SigninScreen(props: SigninScreenProps) {

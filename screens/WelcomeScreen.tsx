@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {View, Text, StyleSheet, Dimensions, StatusBar} from 'react-native';
-import {StackScreenProps} from "@react-navigation/stack";
+import {NativeStackScreenProps} from "@react-navigation/native-stack";
 import {AuthStackParamList} from "../navigation/AuthStack";
 import {Colors} from "../constants/Color";
 import Carousel from "react-native-reanimated-carousel";
@@ -21,8 +21,8 @@ const images = [
 ];
 
 export type WelcomeScreenProps = CompositeScreenProps<
-    StackScreenProps<AuthStackParamList, 'Welcome'>,
-    StackScreenProps<RootStackParamList>
+    NativeStackScreenProps<AuthStackParamList, 'Welcome'>,
+    NativeStackScreenProps<RootStackParamList>
 >;
 
 export default function WelcomeScreen({navigation}: WelcomeScreenProps) {

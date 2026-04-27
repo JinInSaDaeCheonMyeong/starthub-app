@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback} from 'react';
 import {
     Alert, ImageBackground, Linking,
     ScrollView,
@@ -9,7 +9,7 @@ import {
     View
 } from 'react-native';
 import RenderHtml from 'react-native-render-html';
-import {StackScreenProps} from "@react-navigation/stack";
+import {NativeStackScreenProps} from "@react-navigation/native-stack";
 import {RootStackParamList} from "../../../navigation/RootStack";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {Colors} from "../../../constants/Color";
@@ -24,7 +24,6 @@ import RNDIcon from "../../../assets/icons/category/notice/rnd.svg";
 import TalentIcon from "../../../assets/icons/category/notice/talent.svg";
 import CalendarIcon from "../../../assets/icons/notice/calendar.svg";
 import OriginalIcon from "../../../assets/icons/notice/rectangle.svg"
-import {deleteLikes, postLikes} from "../../../api/likes";
 import BookMarkFill from "../../../assets/icons/bookMark/bookmark.fill.svg";
 import BookMark from "../../../assets/icons/bookMark/bookmark.svg";
 import { ShowToast, ToastType } from '../../../util/ShowToast';
@@ -37,8 +36,9 @@ import { isAxiosError } from 'axios';
 import { ErrorResponse } from '../../../type/util/response.type';
 import GlassView from '../../../component/GlassView';
 import { DefaultImage } from '../../../constants/AppImages';
+import { useNoticeStore } from '../../../store/noticeStore';
 
-type InNoticeScreenProps = StackScreenProps<RootStackParamList, 'InNotice'>;
+type InNoticeScreenProps = NativeStackScreenProps<RootStackParamList, 'InNotice'>;
 
 const backgroundImage = DefaultImage.background
 
@@ -82,10 +82,13 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
             '$1'
         )
     };
-    const [isSelected, setIsSelected] = useState(notice.isLiked)
-    const [isBookmarkLoading, setIsBookmarkLoading] = useState(false)
-    const [isSchedules, setIsSchedules] = useState(false)
-    const [isScheduleLoading, setIsScheduleLoading] = useState(true)
+    const isSelected = useNoticeStore((state) => state.likedById[notice.id] ?? notice.isLiked)
+    const isBookmarkLoading = useNoticeStore((state) => state.bookmarkLoadingById[notice.id] ?? false)
+    const isSchedules = useNoticeStore((state) => state.scheduleByNoticeId[notice.id] ?? false)
+    const isScheduleLoading = useNoticeStore((state) => state.scheduleLoadingByNoticeId[notice.id] ?? true)
+    const toggleNoticeLike = useNoticeStore((state) => state.toggleNoticeLike)
+    const setScheduleStatus = useNoticeStore((state) => state.setScheduleStatus)
+    const setScheduleLoading = useNoticeStore((state) => state.setScheduleLoading)
 
     const handleBackPress = () => {
         navigation.goBack()
@@ -94,24 +97,14 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
     const handleBookmarkToggle = async () => {
         if (isBookmarkLoading) return
 
-        setIsBookmarkLoading(true)
         try {
-            if (isSelected) {
-                await deleteLikes(notice.id)
-            } else {
-                await postLikes(notice.id)
-            }
-
-            const newIsLiked = !isSelected;
-            setIsSelected(newIsLiked);
+            const newIsLiked = await toggleNoticeLike(notice.id, notice.isLiked);
             if (params?.onGoBack) {
                 params.onGoBack(notice.id, newIsLiked);
             }
 
         } catch {
             ShowToast('오류 발생', '북마크 처리 중 오류가 발생했습니다', ToastType.ERROR);
-        } finally {
-            setIsBookmarkLoading(false)
         }
     }
 
@@ -122,13 +115,13 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
             return
         }
 
-        setIsScheduleLoading(true)
+        setScheduleLoading(notice.id, true)
 
         try {
             if(isSchedules){
-                setIsSchedules(false)
                 const announcementId = notice.id
                 await removeSchedules(announcementId)
+                setScheduleStatus(notice.id, false)
                 ShowToast("삭제 성공", "일정을 삭제했습니다", ToastType.SUCCESS)
                 return
             }
@@ -138,12 +131,12 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
                 endDate : formatToDate(notice.endDate, 'solid')
             }
             await registerSchedules(data)
-            setIsSchedules(true)
+            setScheduleStatus(notice.id, true)
             ShowToast("추가 성공", "일정을 추가했습니다", ToastType.SUCCESS)
         } catch (error) {
             ShowToast("오류 발생", "알 수 없는 오류가 발생했습니다", ToastType.ERROR)
         } finally {
-            setIsScheduleLoading(false)
+            setScheduleLoading(notice.id, false)
         }
     }
 
@@ -184,13 +177,13 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
     const { width } = useWindowDimensions();
 
     const fetchIsSchedule = async () => {
-        setIsScheduleLoading(true);
+        setScheduleLoading(notice.id, true);
         try {
             const exists = (await getDateSchedules(
                 formatToDate(new Date(), 'solid'))
             ).data.some((value) => value.id === params.Notice.id);
             
-            setIsSchedules(exists)
+            setScheduleStatus(notice.id, exists)
         } catch (error) {
             if (isAxiosError(error)) {
                 const response = error.response;
@@ -204,7 +197,7 @@ export default function InNoticeScreen({navigation, route : {params}} : InNotice
             }
             ShowToast("오류 발생", "알 수 없는 오류가 발생했습니다", ToastType.ERROR);
         } finally {
-            setIsScheduleLoading(false)
+            setScheduleLoading(notice.id, false)
         }
     }
 

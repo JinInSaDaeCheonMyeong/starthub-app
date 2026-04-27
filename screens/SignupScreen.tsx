@@ -1,4 +1,4 @@
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../navigation/AuthStack";
 import { Colors } from "../constants/Color";
 import {Keyboard, KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View} from "react-native";
@@ -12,7 +12,7 @@ import { Fonts } from "../constants/Fonts";
 import { useCallback, useEffect, useState } from "react";
 import * as Progress from 'react-native-progress'
 
-export type SignupScreenProps = StackScreenProps<AuthStackParamList, 'Signup'>;
+export type SignupScreenProps = NativeStackScreenProps<AuthStackParamList, 'Signup'>;
 
 export default function SignupScreen(props : SignupScreenProps){
     const {

@@ -5,6 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import toastConfig from "./lib/ToastConfig";
+import { ReduceMotion, ReducedMotionConfig } from "react-native-reanimated";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { useEffect, useState } from "react";
@@ -13,6 +14,7 @@ import { saveFCMToken } from "./util/token";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { navigationRef } from "./util/NavigationService";
 import messaging from '@react-native-firebase/messaging';
+import { useAuthStore } from "./store/authStore";
 
 messaging().setBackgroundMessageHandler(async () => {});
 
@@ -81,8 +83,11 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
 }
 
 function App() {
+  const loadTokens = useAuthStore((state) => state.loadTokens);
+
   useEffect(() => {
     const initializeApp = async () => {
+      await loadTokens();
       await setupNotificationChannels();
 
       const token = await registerForPushNotificationsAsync();
@@ -114,10 +119,11 @@ function App() {
       unsubscribeMessaging();
       unsubscribeTokenRefresh();
     };
-  }, []);
+  }, [loadTokens]);
 
   return (
       <GestureHandlerRootView style={{ flex: 1 }}>
+        <ReducedMotionConfig mode={ReduceMotion.System} />
         <BottomSheetModalProvider>
           <SafeAreaProvider>
             <AppContent />

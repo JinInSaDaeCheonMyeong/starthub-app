@@ -1,6 +1,6 @@
 import { Alert, DimensionValue, ImageBackground, Linking, Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from 'expo-image';
 import SubHeaderBar from "../../component/home/SubHeaderBar";
 import { Colors } from "../../constants/Color";
@@ -18,7 +18,7 @@ import { recompetitorAnalysis } from "../../api/competitor";
 import { DefaultImage } from "../../constants/AppImages";
 import {FlashList} from "@shopify/flash-list";
 
-type ResultScreenProps = StackScreenProps<CompoetitorStackParamList, 'Result'>
+type ResultScreenProps = NativeStackScreenProps<CompoetitorStackParamList, 'Result'>
 const defaultBMCImage = DefaultImage.bmc
 const defaultImage = DefaultImage.company
 const backgroundImage = DefaultImage.background

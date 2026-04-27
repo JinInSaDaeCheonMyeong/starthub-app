@@ -1,4 +1,4 @@
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ImageURISource, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import SelectScreen from "../screens/competitor/SelectScreen";
@@ -6,7 +6,7 @@ import ResultScreen from "../screens/competitor/ResultScreen";
 import { CompetitorResponse } from "../type/competitor/competitor.type";
 import { HistoryScreen } from "../screens/competitor/HistoryScreen";
 
-const Stack = createStackNavigator<CompoetitorStackParamList>()
+const Stack = createNativeStackNavigator<CompoetitorStackParamList>()
 
 export type CompoetitorStackParamList = {
     History : undefined;
@@ -28,9 +28,10 @@ export default function CompetitorStack() {
                 initialRouteName={"History"}
                 screenOptions={{
                     headerShown: false,
-                    cardStyle : {
+                    contentStyle : {
                         backgroundColor : 'transparent'
-                    }
+                    },
+                    animation: "slide_from_right"
             }}>
                 <Stack.Screen name="History" component={HistoryScreen}/>
                 <Stack.Screen name="Select" component={SelectScreen}/>

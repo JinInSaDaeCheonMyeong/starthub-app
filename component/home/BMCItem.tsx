@@ -1,10 +1,11 @@
-import { DimensionValue, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { DimensionValue, ImageSourcePropType, StyleSheet, Text, View } from "react-native";
 import GlassView from "../GlassView";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import { useState } from "react";
 import { DefaultImage } from "../../constants/AppImages";
 import { Image } from 'expo-image';
+import ReanimatedPressable from "../ReanimatedPressable";
 
 type BMCItemProps = {
     width?: DimensionValue
@@ -34,8 +35,7 @@ export default function BMCItem({
         !imageSource || (typeof imageSource === 'object' && 'uri' in imageSource && !imageSource.uri)
     );
     return (
-        <TouchableOpacity
-            activeOpacity={0.4}
+        <ReanimatedPressable
             style={{ width }}
             onPress={onPress}
         >
@@ -67,7 +67,7 @@ export default function BMCItem({
                     <Text style={styles.subText}>{subText}</Text>
                 )}
             </View>
-        </TouchableOpacity>
+        </ReanimatedPressable>
     )
 }
 

@@ -16,7 +16,7 @@ import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootStack";
 import { DefaultImage } from "../../constants/AppImages";
 import { Drawer } from "react-native-drawer-layout";
@@ -170,7 +170,7 @@ const announcementCardStyles = StyleSheet.create({
     },
 });
 
-export type ChatBotScreenProps = StackScreenProps<RootStackParamList, "ChatBot">;
+export type ChatBotScreenProps = NativeStackScreenProps<RootStackParamList, "ChatBot">;
 
 export default function ChatBotScreen({ navigation }: ChatBotScreenProps) {
     const insets = useSafeAreaInsets();

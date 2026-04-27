@@ -1,4 +1,4 @@
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { SystemStackParamList } from "../../navigation/SystemStack";
 import { Colors } from "../../constants/Color";
@@ -16,7 +16,7 @@ import LocationIcon from "../../assets/icons/profile/location.svg";
 import SiteIcon from "../../assets/icons/profile/link.svg";
 import MoneyIcon from "../../assets/icons/profile/money.svg";
 
-export type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'EditProfile'>
+export type ProfileScreenProps = NativeStackScreenProps<SystemStackParamList, 'EditProfile'>
 
 export default function EditProfileScreen(props: ProfileScreenProps){
     const {

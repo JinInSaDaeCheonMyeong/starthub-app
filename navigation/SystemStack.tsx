@@ -1,4 +1,4 @@
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 // import SystemScreen from "../screens/system/SystemScreen";
 import ProfileScreen from "../screens/system/ProfileScreen";
 import { Colors } from "../constants/Color";
@@ -7,7 +7,7 @@ import EditProfileScreen from "../screens/system/EditProfileScreen";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {View} from "react-native";
 
-const Stack = createStackNavigator<SystemStackParamList>();
+const Stack = createNativeStackNavigator<SystemStackParamList>();
 
 export type SystemStackParamList = {
     Profile : undefined,
@@ -21,10 +21,11 @@ export default function SystemStack(){
             <Stack.Navigator
                 initialRouteName={"Profile"}
                 screenOptions={{
-                    cardStyle : {
+                    contentStyle : {
                         backgroundColor : Colors.white1
                     },
                     headerShown: false,
+                    animation: "slide_from_right"
                 }}
             >
                 <Stack.Screen name="Profile" component={ProfileScreen}/>

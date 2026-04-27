@@ -11,7 +11,7 @@ import { ShowToast, ToastType } from "../../../util/ShowToast";
 import { CompositeScreenProps } from "@react-navigation/core";
 import { HomeStackParamList } from "../../../navigation/HomeStack";
 import { RootStackParamList } from "../../../navigation/RootStack";
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import GlassView from "../../../component/GlassView";
 import { NoticeType } from "../../../type/notice/notice.type";
@@ -30,7 +30,7 @@ LocaleConfig.defaultLocale = 'ko';
 
 export type CalendarScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Calendar">,
-    StackScreenProps<RootStackParamList>
+    NativeStackScreenProps<RootStackParamList>
 >
 
 export default function CalendarScreen({navigation} : CalendarScreenProps) {

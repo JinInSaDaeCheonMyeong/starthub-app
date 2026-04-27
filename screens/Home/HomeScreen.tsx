@@ -10,7 +10,7 @@ import { Colors } from "../../constants/Color";
 import { CompositeScreenProps } from "@react-navigation/core";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { HomeStackParamList } from "../../navigation/HomeStack";
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootStack";
 import useHomeScreen from "../../hooks/home/useHomeScreen";
 import { NoticeCategory } from "../../constants/NoticeCategory";
@@ -25,7 +25,7 @@ import { Image } from 'expo-image';
 
 export type HomeScreenProps = CompositeScreenProps<
     BottomTabScreenProps<HomeStackParamList, "Home">,
-    StackScreenProps<RootStackParamList>
+    NativeStackScreenProps<RootStackParamList>
 >;
 
 const { width } = Dimensions.get("window");
@@ -156,7 +156,6 @@ export default function HomeScreen(props: HomeScreenProps) {
     return (
         <FlashList
             removeClippedSubviews
-            estimatedItemSize={108}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 16, paddingHorizontal : 16 }}
             ItemSeparatorComponent={() => <View style={{ height: 16 }} />}

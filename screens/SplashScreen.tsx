@@ -1,5 +1,5 @@
 import { CompositeScreenProps } from "@react-navigation/native";
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../navigation/AuthStack";
 import { RootStackParamList } from "../navigation/RootStack";
 import { StyleSheet, View } from "react-native";
@@ -7,13 +7,16 @@ import { useEffect } from "react";
 import { getAccToken } from "../util/token";
 import { getMe } from "../api/user";
 import { Image } from "expo-image";
+import { useProfileStore } from "../store/profileStore";
 
 type SplashScreenProps = CompositeScreenProps<
-    StackScreenProps<AuthStackParamList, "Splash">,
-    StackScreenProps<RootStackParamList>
+    NativeStackScreenProps<AuthStackParamList, "Splash">,
+    NativeStackScreenProps<RootStackParamList>
 >;
 
 export default function SplashScreen({ navigation }: SplashScreenProps) {
+    const setProfileData = useProfileStore((state) => state.setProfileData);
+
     useEffect(() => {
         const autoLogin = async () => {
             const token = await getAccToken();
@@ -27,6 +30,7 @@ export default function SplashScreen({ navigation }: SplashScreenProps) {
 
             try {
                 const { data } = await getMe();
+                setProfileData(data);
                 const startupFields = data.startupFields ?? [];
 
                 if (data.username && startupFields.length > 0) {
@@ -40,7 +44,7 @@ export default function SplashScreen({ navigation }: SplashScreenProps) {
         };
 
         autoLogin();
-    }, []);
+    }, [navigation, setProfileData]);
 
     return (
         <View style={styles.container}>

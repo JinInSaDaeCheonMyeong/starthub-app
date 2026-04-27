@@ -1,4 +1,4 @@
-import {createStackNavigator} from "@react-navigation/stack";
+import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import SigninScreen from "../screens/SigninScreen";
 import { Colors } from "../constants/Color";
@@ -10,7 +10,7 @@ import CompanyInputScreen from "../screens/CompanyInputScreen";
 import StartupStatus from "../constants/StartupStatus";
 import SplashScreen from "../screens/SplashScreen";
 
-const Stack = createStackNavigator<AuthStackParamList>()
+const Stack = createNativeStackNavigator<AuthStackParamList>()
 
 export type AuthStackParamList = {
     Welcome: undefined;
@@ -33,10 +33,11 @@ export default function AuthStack() {
             <Stack.Navigator
                 initialRouteName={"Splash"}
                 screenOptions={{
-                    cardStyle : {
+                    contentStyle : {
                         backgroundColor : Colors.white1,
                     },
-                    headerShown: false
+                    headerShown: false,
+                    animation: "slide_from_right"
                 }}
             >
                 <Stack.Screen name="Splash" component={SplashScreen} />

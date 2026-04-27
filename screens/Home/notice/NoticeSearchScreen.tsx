@@ -22,7 +22,7 @@ import {
   NoticeType,
 } from "../../../type/notice/notice.type";
 import { getNotices } from "../../../api/notice";
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/RootStack";
 import { SupportFieldItems } from "../../../constants/SupportFieldItems";
 import { RegionItems } from "../../../constants/RegionItems";
@@ -32,12 +32,13 @@ import { parseReceptionPeriod } from "../../../util/DateFormat";
 import SubHeaderBar from "../../../component/home/SubHeaderBar";
 import { DefaultImage } from "../../../constants/AppImages";
 import {FlashList} from "@shopify/flash-list";
+import { useNoticeStore } from "../../../store/noticeStore";
 
 const { height } = Dimensions.get("window");
 
 
 
-export type NoticeScreenProps = StackScreenProps<
+export type NoticeScreenProps = NativeStackScreenProps<
   RootStackParamList,
   "NoticeSearch"
 >;
@@ -80,6 +81,8 @@ export default function NoticeSearchScreen({
   const [allNotices, setAllNotices] = useState<NoticeType[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLast, setIsLast] = useState<boolean>(false);
+  const setNotices = useNoticeStore((state) => state.setNotices);
+  const setNoticeLiked = useNoticeStore((state) => state.setNoticeLiked);
 
   const isInitialMount = useRef(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -132,6 +135,7 @@ export default function NoticeSearchScreen({
           };
         });
 
+        setNotices(mapped);
         setAllNotices(mapped);
       } catch {
         ShowToast(
@@ -153,6 +157,7 @@ export default function NoticeSearchScreen({
         params?.supportField,
         params?.text,  // ✅ 의존성 배열에 추가
         isFirst,  // ✅ 의존성 배열에 추가
+        setNotices,
     ]
   );
 
@@ -221,6 +226,7 @@ export default function NoticeSearchScreen({
 
       if (data.length > 0) {
         setPage(nextPage);
+        setNotices(data);
         setAllNotices((prev) => [...prev, ...data]);
       }
     } catch (error) {
@@ -232,7 +238,7 @@ export default function NoticeSearchScreen({
     } finally {
       setIsFetchingNextPage(false);
     }
-  }, [isFetchingNextPage, loading, isLast, page, title, supportField, region, targetAge, businessExperience]);
+  }, [isFetchingNextPage, loading, isLast, page, title, supportField, region, targetAge, businessExperience, setNotices]);
 
   const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
     if (!viewableItems || viewableItems.length === 0 || allNotices.length === 0)
@@ -255,8 +261,9 @@ export default function NoticeSearchScreen({
           notice.id === noticeId ? { ...notice, isLiked: newIsLiked } : notice
         )
       );
+      setNoticeLiked(noticeId, newIsLiked);
     },
-    []
+    [setNoticeLiked]
   );
 
   const handleRefresh = () => {
@@ -387,7 +394,6 @@ export default function NoticeSearchScreen({
               )}
           </View>
         <FlashList
-          estimatedItemSize={108}
           ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
           removeClippedSubviews={true}
           style={isNatural? {marginTop:20} : { marginTop: 70 }}

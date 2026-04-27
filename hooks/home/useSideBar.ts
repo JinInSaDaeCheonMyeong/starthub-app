@@ -1,15 +1,19 @@
 import { useState, useCallback } from "react";
-import { getMe, deleteUser } from "../../api/user";
-import { GetMeResponse, ProfileProvider } from "../../type/user/user.type";
+import { deleteUser } from "../../api/user";
 import { getFCMToken, removeTokens } from "../../util/token";
 import { resetScheduleList } from "../../util/Schedule";
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import { removeFCMToken } from "../../api/notification";
+import { useProfileStore } from "../../store/profileStore";
+import { useNoticeStore } from "../../store/noticeStore";
 
 export default function useSideBar(navigation: any) {
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [profileData, setProfileData] = useState<GetMeResponse['data'] | undefined>();
-    const [profileProvider, setProfileProvider] = useState<ProfileProvider>("LOCAL");
+    const profileData = useProfileStore((state) => state.profileData);
+    const profileProvider = useProfileStore((state) => state.profileProvider);
+    const fetchProfileStore = useProfileStore((state) => state.fetchProfile);
+    const clearProfile = useProfileStore((state) => state.clearProfile);
+    const clearNoticeState = useNoticeStore((state) => state.clearNoticeState);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
     const [password, setPassword] = useState("");
@@ -19,13 +23,11 @@ export default function useSideBar(navigation: any) {
 
     const fetchProfile = useCallback(async () => {
         try {
-            const data = (await getMe()).data;
-            setProfileData(data);
-            setProfileProvider(data.provider);
+            await fetchProfileStore();
         } catch {
             ShowToast('', '알 수 없는 오류가 발생했습니다', ToastType.ERROR);
         }
-    }, []);
+    }, [fetchProfileStore]);
 
     const handleOpenModal = useCallback((type: "Delete" | "SignOut") => {
         setPurpose(type);
@@ -47,12 +49,14 @@ export default function useSideBar(navigation: any) {
         await resetScheduleList();
         const fcmToken = await getFCMToken();
         if (fcmToken) await removeFCMToken(fcmToken);
+        clearProfile();
+        clearNoticeState();
         setDrawerOpen(false);
         navigation.reset({
             index: 0,
             routes: [{ name: "AuthStack" }],
         });
-    }, [navigation]);
+    }, [clearNoticeState, clearProfile, navigation]);
 
     const handleSignOut = useCallback(async () => {
         try {

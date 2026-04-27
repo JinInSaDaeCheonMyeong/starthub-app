@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { ProfileScreenProps } from "../../screens/system/EditProfileScreen"
 import { setProfile } from "../../api/user"
 import { ShowToast, ToastType } from "../../util/ShowToast"
+import { useProfileStore } from "../../store/profileStore"
 
 const useEditProfileScreen = ({
                                   navigation,
@@ -11,6 +12,7 @@ const useEditProfileScreen = ({
                               }: ProfileScreenProps) => {
 
     const insets = useSafeAreaInsets()
+    const fetchProfile = useProfileStore((state) => state.fetchProfile)
 
     /** 생년월일 분리 */
     const [year = "1000", month = "11", day = "11"] =
@@ -32,7 +34,7 @@ const useEditProfileScreen = ({
 
     /** 성별 선택 */
     const [selectGender, setSelectGender] = useState<
-        "male" | "female" | "none"
+        "male" | "female" | "none" | "other"
     >(
         user.gender === "MALE"
             ? "male"
@@ -154,6 +156,8 @@ const useEditProfileScreen = ({
                 startupHistory: params.startupHistory ?? 0
 
             })
+
+            await fetchProfile()
 
             ShowToast(
                 "프로필 수정",

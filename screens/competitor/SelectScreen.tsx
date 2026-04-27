@@ -1,4 +1,4 @@
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
@@ -19,7 +19,7 @@ import BMCItem from "../../component/home/BMCItem";
 import { DefaultImage } from "../../constants/AppImages";
 import {FlashList} from "@shopify/flash-list";
 
-type SelectScreenProps = StackScreenProps<CompoetitorStackParamList, 'Select'>
+type SelectScreenProps = NativeStackScreenProps<CompoetitorStackParamList, 'Select'>
 const backgroundImage = DefaultImage.background
 
 export default function SelectScreen({navigation} : SelectScreenProps){

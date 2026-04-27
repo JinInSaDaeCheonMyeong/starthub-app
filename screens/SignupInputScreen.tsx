@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Colors } from "../constants/Color";
 import BackButton from "../component/BackButton";
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../navigation/AuthStack";
 import * as Progress from 'react-native-progress';
 import InfoScreen from "./onboard/user/InfoScreen";
@@ -24,8 +24,8 @@ import { RootStackParamList } from "../navigation/RootStack";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type SignupInputScreenProps = CompositeScreenProps<
-    StackScreenProps<AuthStackParamList, 'SignupInput'>,
-    StackScreenProps<RootStackParamList>
+    NativeStackScreenProps<AuthStackParamList, 'SignupInput'>,
+    NativeStackScreenProps<RootStackParamList>
 >;
 
 const SCREENS = [

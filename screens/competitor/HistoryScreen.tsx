@@ -1,4 +1,4 @@
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { CompoetitorStackParamList } from "../../navigation/CompetitorStack";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
@@ -18,7 +18,7 @@ import { ErrorResponse } from "../../type/util/response.type";
 import { DefaultImage } from "../../constants/AppImages";
 import {FlashList} from "@shopify/flash-list";
 
-type HistoryScreenProps = StackScreenProps<CompoetitorStackParamList, 'History'>
+type HistoryScreenProps = NativeStackScreenProps<CompoetitorStackParamList, 'History'>
 const backgroundImage = DefaultImage.background
 
 export function HistoryScreen({navigation} : HistoryScreenProps) {

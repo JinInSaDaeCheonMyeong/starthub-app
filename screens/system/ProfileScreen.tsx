@@ -1,4 +1,4 @@
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SystemStackParamList } from "../../navigation/SystemStack";
 import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../constants/Color";
@@ -9,7 +9,7 @@ import SubHeaderBar from "../../component/home/SubHeaderBar";
 import * as Progress from 'react-native-progress';
 
 
-export type ProfileScreenProps = StackScreenProps<SystemStackParamList, 'Profile'>
+export type ProfileScreenProps = NativeStackScreenProps<SystemStackParamList, 'Profile'>
 
 export default function ProfileScreen(props : ProfileScreenProps){
     const {

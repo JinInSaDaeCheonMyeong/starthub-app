@@ -1,4 +1,4 @@
-import {createStackNavigator} from "@react-navigation/stack";
+import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import AuthStack from "./AuthStack";
 import {HomeStack} from "./HomeStack";
 import { Colors } from "../constants/Color";
@@ -13,7 +13,7 @@ import NoticeSearchScreen from "../screens/Home/notice/NoticeSearchScreen";
 import AlarmScreen from "../screens/Home/AlarmScreen";
 import ChatBotScreen from "../screens/Home/ChatBotScreen";
 
-const Stack = createStackNavigator<RootStackParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export type RootStackParamList = {
     AuthStack: undefined;
@@ -41,10 +41,11 @@ export default function RootStack() {
         <Stack.Navigator 
             initialRouteName={"AuthStack"} 
             screenOptions={{
-                cardStyle : {
+                contentStyle : {
                     backgroundColor : Colors.white1
                 },
-                headerShown: false
+                headerShown: false,
+                animation: "slide_from_right"
             }}
         >
             <Stack.Screen name="AuthStack" component={AuthStack} />

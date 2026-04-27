@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Colors } from "../constants/Color";
 import BackButton from "../component/BackButton";
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../navigation/AuthStack";
 import * as Progress from 'react-native-progress';
 import CommonButton from "../component/CommonButton";
@@ -27,8 +27,8 @@ import PreInterestScreen from "./onboard/company/pre/PreInterestScreen";
 import { useCompanyInputScreen } from "../hooks/auth/signup/input/useCompanyInputScreen";
 
 export type CompanyInputScreenProps = CompositeScreenProps<
-    StackScreenProps<AuthStackParamList, 'CompanyInput'>,
-    StackScreenProps<RootStackParamList>
+    NativeStackScreenProps<AuthStackParamList, 'CompanyInput'>,
+    NativeStackScreenProps<RootStackParamList>
 >;
 
 const EARLY_SCREENS = [

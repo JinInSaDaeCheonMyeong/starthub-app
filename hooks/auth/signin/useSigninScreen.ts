@@ -36,6 +36,7 @@ import {
 } from "../../../type/user/signin.type"
 
 import { DeviceType } from "../../../type/notification/notification.type"
+import { useProfileStore } from "../../../store/profileStore"
 
 export const useSigninScreen = ({ navigation }: SigninScreenProps) => {
 
@@ -55,6 +56,7 @@ export const useSigninScreen = ({ navigation }: SigninScreenProps) => {
     } = useError()
 
     const { validSigninForm } = useSigninValid()
+    const setProfileData = useProfileStore((state) => state.setProfileData)
 
     const {
         disabled,
@@ -142,6 +144,7 @@ export const useSigninScreen = ({ navigation }: SigninScreenProps) => {
 
             /** 사용자 정보 조회 */
             const { data: userData } = await getMe()
+            setProfileData(userData)
 
             if (!data.isFirstLogin && userData.username) {
                 successLogin()

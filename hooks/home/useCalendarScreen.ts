@@ -6,6 +6,7 @@ import { ShowToast, ToastType } from "../../util/ShowToast";
 import { useWindowDimensions } from "react-native";
 import { formatToDate, parseReceptionPeriod } from "../../util/DateFormat";
 import { getDateSchedules, getMonthSchedules } from "../../api/schedule";
+import { useNoticeStore } from "../../store/noticeStore";
 
 const useCalendarScreen = () => {
     const {width} = useWindowDimensions()
@@ -16,6 +17,7 @@ const useCalendarScreen = () => {
     const [loading, setLoading] = useState(false);
     const [markedDates, setMarkedDates] = useState<MarkedDates>({})
     const [noticeItemList, setNoticeItemList] = useState<NoticeType[]>([]);
+    const setNotices = useNoticeStore((state) => state.setNotices);
 
     const getNoticeItem = async (date: string): Promise<NoticeType[]> => {
         try {
@@ -50,6 +52,7 @@ const useCalendarScreen = () => {
                 return endA.getTime() - endB.getTime();
             });
             const resolvedNotices: NoticeType[] = sortedNotices;
+            setNotices(resolvedNotices);
             setNoticeItemList(resolvedNotices);
     
             return resolvedNotices;

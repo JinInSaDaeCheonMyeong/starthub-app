@@ -1,13 +1,13 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { Alert, Linking } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { isAxiosError } from "axios";
-import { getMe } from "../../api/user";
-import { GetMeResponse } from "../../type/user/user.type";
 import { ErrorResponse } from "../../type/util/response.type";
+import { GetMeResponse } from "../../type/user/user.type";
 import StartupStatus from "../../constants/StartupStatus";
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import { ProfileScreenProps } from "../../screens/system/ProfileScreen";
+import { useProfileStore } from "../../store/profileStore";
 
 // SVG Icons
 import NameIcon from "../../assets/icons/profile/name.svg";
@@ -34,8 +34,7 @@ const useProfileScreen = ({ navigation }: ProfileScreenProps) => {
         ["PRE_STARTUP", "예비 창업"],
     ]);
 
-    const [loading, setLoading] = useState(true);
-    const [profileData, setProfileData] = useState<GetMeResponse["data"]>({
+    const defaultProfileData: GetMeResponse["data"] = {
         id: -1,
         username: DEFAULT_DATA,
         birth: DEFAULT_DATA,
@@ -50,7 +49,11 @@ const useProfileScreen = ({ navigation }: ProfileScreenProps) => {
         annualRevenue: -1,
         startupFields: [],
         provider: "LOCAL",
-    });
+    };
+    const storeProfileData = useProfileStore((state) => state.profileData);
+    const profileData = storeProfileData ?? defaultProfileData;
+    const loading = useProfileStore((state) => state.loading);
+    const fetchProfile = useProfileStore((state) => state.fetchProfile);
 
     const profileList = [
         {
@@ -143,8 +146,7 @@ const useProfileScreen = ({ navigation }: ProfileScreenProps) => {
     ];
     const getProfileData = async () => {
         try {
-            const response = await getMe();
-            setProfileData(response.data);
+            await fetchProfile();
         } catch (error: unknown) {
             if (isAxiosError(error)) {
                 const response = error.response;
@@ -188,9 +190,8 @@ const useProfileScreen = ({ navigation }: ProfileScreenProps) => {
             let isActive = true;
 
             const fetchData = async () => {
-                setLoading(true);
                 await getProfileData();
-                if (isActive) setLoading(false);
+                if (!isActive) return;
             };
 
             fetchData();
@@ -198,7 +199,7 @@ const useProfileScreen = ({ navigation }: ProfileScreenProps) => {
             return () => {
                 isActive = false;
             };
-        }, [])
+        }, [fetchProfile])
     );
 
     return {

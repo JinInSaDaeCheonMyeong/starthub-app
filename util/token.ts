@@ -1,40 +1,48 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthStorage, useAuthStore } from "../store/authStore";
 
-export const AuthStorage = {
-  ACCESS_TOKEN: "accessToken",
-  REFRESH_TOKEN: "refreshToken",
-  FCM_TOKEN: "FCMToken",
-} as const;
+export { AuthStorage };
 
 export async function saveAccToken(accessToken: string): Promise<void> {
-  await AsyncStorage.setItem(AuthStorage.ACCESS_TOKEN, accessToken);
+  await useAuthStore.getState().setAccessToken(accessToken);
 }
 
 export async function getAccToken(): Promise<string | null> {
   try {
-    return await AsyncStorage.getItem(AuthStorage.ACCESS_TOKEN);
+    const cached = useAuthStore.getState().accessToken;
+    if (cached) return cached;
+
+    const accessToken = await AsyncStorage.getItem(AuthStorage.ACCESS_TOKEN);
+    if (accessToken) {
+      useAuthStore.setState({ accessToken });
+    }
+    return accessToken;
   } catch {
     return null;
   }
 }
 
 export async function saveRefToken(refreshToken: string): Promise<void> {
-  await AsyncStorage.setItem(AuthStorage.REFRESH_TOKEN, refreshToken);
+  await useAuthStore.getState().setRefreshToken(refreshToken);
 }
 
 export async function getRefToken(): Promise<string | null> {
   try {
-    return await AsyncStorage.getItem(AuthStorage.REFRESH_TOKEN);
+    const cached = useAuthStore.getState().refreshToken;
+    if (cached) return cached;
+
+    const refreshToken = await AsyncStorage.getItem(AuthStorage.REFRESH_TOKEN);
+    if (refreshToken) {
+      useAuthStore.setState({ refreshToken });
+    }
+    return refreshToken;
   } catch {
     return null;
   }
 }
 
 export async function removeTokens(): Promise<void> {
-  await AsyncStorage.multiRemove([
-    AuthStorage.ACCESS_TOKEN,
-    AuthStorage.REFRESH_TOKEN,
-  ]);
+  await useAuthStore.getState().clearTokens();
 }
 
 export async function hasValidTokens(): Promise<boolean> {
@@ -50,12 +58,19 @@ export async function hasValidTokens(): Promise<boolean> {
 }
 
 export async function saveFCMToken(token: string): Promise<void> {
-  await AsyncStorage.setItem(AuthStorage.FCM_TOKEN, token);
+  await useAuthStore.getState().setFCMToken(token);
 }
 
 export async function getFCMToken(): Promise<string | null> {
   try {
-    return await AsyncStorage.getItem(AuthStorage.FCM_TOKEN);
+    const cached = useAuthStore.getState().fcmToken;
+    if (cached) return cached;
+
+    const fcmToken = await AsyncStorage.getItem(AuthStorage.FCM_TOKEN);
+    if (fcmToken) {
+      useAuthStore.setState({ fcmToken });
+    }
+    return fcmToken;
   } catch {
     return null;
   }

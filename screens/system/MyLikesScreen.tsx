@@ -1,4 +1,4 @@
-import { StackScreenProps } from "@react-navigation/stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
     Dimensions,
     ImageBackground,
@@ -22,7 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DefaultImage } from "../../constants/AppImages";
 import {FlashList} from "@shopify/flash-list";
 
-export type MyLikesScreenProps = StackScreenProps<RootStackParamList>
+export type MyLikesScreenProps = NativeStackScreenProps<RootStackParamList>
 
 
 const { height} = Dimensions.get("window");

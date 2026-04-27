@@ -7,8 +7,9 @@ import { ErrorResponse } from "../../type/util/response.type";
 import { useFocusEffect } from "@react-navigation/native"
 import type { HomeScreenProps } from "../../screens/Home/HomeScreen";
 import { NoticeCategory } from "../../constants/NoticeCategory";
-import { getMe } from "../../api/user";
 import { parseReceptionPeriod } from "../../util/DateFormat";
+import { useProfileStore } from "../../store/profileStore";
+import { useNoticeStore } from "../../store/noticeStore";
 
 const noticeCategoryList = [
     { label: '사업화', value: '사업화', noticeType: NoticeCategory.BUSINESS },
@@ -30,19 +31,21 @@ const navItemList: { label: string; nav: 'Competitor' | 'MyLikes' | 'ChatBot' | 
 
 const useHomeScreen = ({navigation} : HomeScreenProps) => {
     const [noticeItems, setNoticeItems] = useState<NoticeType[]>([]);
-    const [userName, setUserName] = useState('');
     const [recomLoading, setRecomLoading] = useState(true);
+    const profileData = useProfileStore((state) => state.profileData);
+    const fetchProfile = useProfileStore((state) => state.fetchProfile);
+    const setNotices = useNoticeStore((state) => state.setNotices);
 
     const fetchItems = async () => {
         setRecomLoading(true);
         try {
-            const meResponse = (await getMe()).data;
-            setUserName(meResponse.username);
+            await fetchProfile();
             const notices = (await getRecommendedNotices()).data;
             const mapped = notices.map((notice: BeforeNoticeType) => {
                 const { startDate, endDate } = parseReceptionPeriod(notice.receptionPeriod);
                 return { ...notice, startDate, endDate };
             });
+            setNotices(mapped);
             setNoticeItems(mapped);
         } catch (error: unknown) {
             if (isAxiosError(error)) {
@@ -69,17 +72,16 @@ const useHomeScreen = ({navigation} : HomeScreenProps) => {
             fetchItems();
             return () => {
                 setNoticeItems([]);
-                setUserName('');
                 setRecomLoading(true);
             };
-        }, [])
+        }, [fetchProfile, setNotices])
     );
 
     return {
         form : {
             noticeItems,
             noticeCategoryList,
-            userName
+            userName: profileData?.username ?? ''
         },
         ui : {
             navItemList,

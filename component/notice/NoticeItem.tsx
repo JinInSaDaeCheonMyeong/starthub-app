@@ -1,14 +1,15 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { Colors } from "../../constants/Color"
 import { Fonts } from "../../constants/Fonts"
-import { useState, useEffect, useCallback, memo } from "react"
+import { useCallback, memo } from "react"
 import BookMarkFill from "../../assets/icons/bookMark/bookmark.fill.svg"
 import BookMark from "../../assets/icons/bookMark/bookmark.svg"
 import {NoticeType} from "../../type/notice/notice.type";
-import {deleteLikes, postLikes} from "../../api/likes";
 import GlassView from "../GlassView"
 import { NoticeImages } from "../../constants/AppImages"
 import { Image } from 'expo-image';
+import { useNoticeStore } from "../../store/noticeStore"
+import { ShowToast, ToastType } from "../../util/ShowToast"
 
 
 interface NoticeItemProps {
@@ -34,13 +35,9 @@ function NoticeItem({
                                        item,
                                        onPress,
                                    } : NoticeItemProps ){
-    const [isSelected, setIsSelected] = useState(item.isLiked)
-    const [isBookmarkLoading, setIsBookmarkLoading] = useState(false)
-
-    // item.isLiked가 변경될 때마다 내부 상태도 동기화
-    useEffect(() => {
-        setIsSelected(item.isLiked);
-    }, [item.isLiked]);
+    const isSelected = useNoticeStore((state) => state.likedById[item.id] ?? item.isLiked)
+    const isBookmarkLoading = useNoticeStore((state) => state.bookmarkLoadingById[item.id] ?? false)
+    const toggleNoticeLike = useNoticeStore((state) => state.toggleNoticeLike)
 
     const transformDate = useCallback((date : Date) => {
         return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`
@@ -52,20 +49,12 @@ function NoticeItem({
 
     const handleBookmarkToggle = useCallback(async () => {
         if (isBookmarkLoading) return
-        setIsBookmarkLoading(true)
         try {
-            if (isSelected) {
-                await deleteLikes(item.id)
-            } else {
-                await postLikes(item.id)
-            }
-            setIsSelected(prev => !prev)
+            await toggleNoticeLike(item.id, item.isLiked)
         } catch (error) {
-            // 필요 시 에러 처리
-        } finally {
-            setIsBookmarkLoading(false)
+            ShowToast('오류 발생', '북마크 처리 중 오류가 발생했습니다', ToastType.ERROR)
         }
-    }, [isSelected, isBookmarkLoading, item])
+    }, [isBookmarkLoading, item.id, item.isLiked, toggleNoticeLike])
 
     const category = categoryMap[item.supportField as keyof typeof categoryMap];
     const hasValidDateRange = isValidDate(item.startDate) && isValidDate(item.endDate)
