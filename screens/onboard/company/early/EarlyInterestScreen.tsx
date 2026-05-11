@@ -5,6 +5,7 @@ import { InterestTypeList } from "../../../../constants/InterestTypeList";
 import { Fonts } from "../../../../constants/Fonts";
 import { StartupField } from "../../../../type/user/companyInput.type";
 import {FlashList} from "@shopify/flash-list";
+import ListEmptyState from "../../../../component/ListEmptyState";
 
 type EarlyInterestScreenProps = {
     startupFields: StartupField[];
@@ -25,6 +26,12 @@ export default function EarlyInterestScreen(props : EarlyInterestScreenProps){
                 removeClippedSubviews={true}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle = {styles.listContentContainer}
+                ListEmptyComponent={
+                    <ListEmptyState
+                        message="선택 가능한 창업 분야 항목이 없습니다."
+                        style={styles.emptyState}
+                    />
+                }
                 renderItem={({item : {id, color, text, icon}}) => {
                     const selectItem : StartupField = {
                         businessType : id,
@@ -79,5 +86,8 @@ const styles = StyleSheet.create({
     },
     listContentContainer : {
         gap : 16
-    }
+    },
+    emptyState: {
+        minHeight: 120,
+    },
 })

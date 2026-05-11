@@ -1,6 +1,7 @@
 import { SigninRequest, SigninResponse } from "../type/user/signin.type";
 import { SignupRequest } from "../type/user/signup.type";
 import StartHubAxios from "../lib/StartHubAxios";
+import { StartHubAxiosConfig } from "../lib/StartHubAxios";
 import { Response } from "../type/util/response.type";
 import { GetMeResponse, GetUserResponse } from "../type/user/user.type";
 import { SetProfileRequest } from "../type/user/profile.type";
@@ -22,8 +23,8 @@ export const signin = async (signinData : SigninRequest) : Promise<SigninRespons
 export const setProfile = async (setProfileData: SetProfileRequest): Promise<Response> =>
     (await StartHubAxios.patch('/user/profile', setProfileData)).data;
 
-export const getMe = async () : Promise<GetMeResponse> => 
-    (await StartHubAxios.get('/user/me')).data
+export const getMe = async (config?: StartHubAxiosConfig) : Promise<GetMeResponse> =>
+    (await StartHubAxios.get('/user/me', config)).data
 
 export const getUser = async (userId : number) : Promise<GetUserResponse> => 
     (await StartHubAxios.get(`/user/${userId}/profile`)).data

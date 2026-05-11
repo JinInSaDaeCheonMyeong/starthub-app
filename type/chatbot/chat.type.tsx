@@ -8,6 +8,7 @@ export type Message = {
     text: string;
     isBot: boolean;
     questionType?: QuestionType | null;
+    attachments?: SelectedFile[];
 };
 
 export enum QuestionType {

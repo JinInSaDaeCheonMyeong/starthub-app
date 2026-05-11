@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Alert } from "react-native";
+import { Alert, AppState, AppStateStatus } from "react-native";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { pick, types, isErrorWithCode, errorCodes } from "@react-native-documents/picker";
 import { ChatSession, ChatMessage } from "../../type/chatbot/chatbot.type";
@@ -14,11 +14,49 @@ const ALLOWED_MIME_TYPES = [
 ];
 
 const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'pdf', 'docx'];
+const questionTypePrefix: Record<QuestionType, string> = {
+    [QuestionType.NOTICE]: '[[[[공고위주질문입니다]]]]',
+    [QuestionType.LAW]: '[[[[법률위주질문입니다]]]]',
+    [QuestionType.IDEA]: '[[[[아이디어위주질문입니다]]]]',
+};
 
 function isFileAllowed(fileName: string, mimeType?: string): boolean {
     if (mimeType && ALLOWED_MIME_TYPES.includes(mimeType)) return true;
     const ext = fileName.split('.').pop()?.toLowerCase();
     return ext ? ALLOWED_EXTENSIONS.includes(ext) : false;
+}
+
+function parseStoredMessage(content: string, isBot: boolean): Pick<Message, "text" | "questionType"> {
+    if (isBot) {
+        return { text: content };
+    }
+
+    const matchedType = Object.values(QuestionType).find((type) => (
+        content.startsWith(questionTypePrefix[type])
+    ));
+
+    if (!matchedType) {
+        return { text: content };
+    }
+
+    return {
+        text: content.replace(questionTypePrefix[matchedType], "").trimStart(),
+        questionType: matchedType,
+    };
+}
+
+function mapStoredMessages(messages: ChatMessage[]): Message[] {
+    return messages.map((msg) => {
+        const isBot = msg.role === "ASSISTANT";
+        const parsedMessage = parseStoredMessage(msg.content, isBot);
+
+        return {
+            id: msg.id.toString(),
+            text: parsedMessage.text,
+            isBot,
+            questionType: parsedMessage.questionType,
+        };
+    });
 }
 
 export default function useChatBot() {
@@ -31,8 +69,21 @@ export default function useChatBot() {
     const [isLoading, setIsLoading] = useState(false);
     const [isStreaming, setIsStreaming] = useState(false);
     const streamCancelRef = useRef<(() => void) | null>(null);
+    const currentSessionIdRef = useRef<number | null>(null);
+    const isStreamingRef = useRef(false);
+    const shouldSyncOnActiveRef = useRef(false);
+    const suppressStreamErrorRef = useRef(false);
+    const appStateRef = useRef<AppStateStatus>(AppState.currentState);
     const messageIdRef = useRef(0);
     const nextId = () => String(++messageIdRef.current);
+
+    useEffect(() => {
+        currentSessionIdRef.current = currentSessionId;
+    }, [currentSessionId]);
+
+    useEffect(() => {
+        isStreamingRef.current = isStreaming;
+    }, [isStreaming]);
 
     useEffect(() => {
         return () => {
@@ -49,6 +100,50 @@ export default function useChatBot() {
         }
     }, []);
 
+    const syncCurrentSession = useCallback(async () => {
+        const sessionId = currentSessionIdRef.current;
+        if (!sessionId) return;
+
+        try {
+            const res = await getSessionDetail(sessionId);
+            const detail = res.data;
+            setCurrentSessionId(detail.id);
+            setMessages(mapStoredMessages(detail.messages));
+            await fetchSessions();
+        } catch {
+            ShowToast('', '세션을 다시 불러올 수 없습니다', ToastType.ERROR);
+        }
+    }, [fetchSessions]);
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', (nextAppState) => {
+            const previousAppState = appStateRef.current;
+            appStateRef.current = nextAppState;
+
+            if (nextAppState !== 'active' && isStreamingRef.current) {
+                shouldSyncOnActiveRef.current = true;
+                suppressStreamErrorRef.current = true;
+                return;
+            }
+
+            if (
+                nextAppState === 'active' &&
+                previousAppState !== 'active' &&
+                shouldSyncOnActiveRef.current
+            ) {
+                shouldSyncOnActiveRef.current = false;
+                streamCancelRef.current = null;
+                setIsStreaming(false);
+                setTimeout(() => {
+                    syncCurrentSession();
+                    suppressStreamErrorRef.current = false;
+                }, 500);
+            }
+        });
+
+        return () => subscription.remove();
+    }, [syncCurrentSession]);
+
     const loadSession = useCallback(async (sessionId: number) => {
         streamCancelRef.current?.();
         streamCancelRef.current = null;
@@ -58,13 +153,7 @@ export default function useChatBot() {
             const res = await getSessionDetail(sessionId);
             const detail = res.data;
             setCurrentSessionId(detail.id);
-            setMessages(
-                detail.messages.map((msg: ChatMessage) => ({
-                    id: msg.id.toString(),
-                    text: msg.content,
-                    isBot: msg.role === "ASSISTANT",
-                }))
-            );
+            setMessages(mapStoredMessages(detail.messages));
         } catch {
             ShowToast('', '세션을 불러올 수 없습니다', ToastType.ERROR);
         } finally {
@@ -152,12 +241,6 @@ export default function useChatBot() {
         const trimmed = input.trim();
         if (!trimmed || isStreaming) return;
 
-        const questionTypePrefix: Record<QuestionType, string> = {
-            [QuestionType.NOTICE]: '[[[[공고위주질문입니다]]]]',
-            [QuestionType.LAW]: '[[[[법률위주질문입니다]]]]',
-            [QuestionType.IDEA]: '[[[[아이디어위주질문입니다]]]]',
-        };
-
         const prefix = selectedQuestionType ? questionTypePrefix[selectedQuestionType] + ' ' : '';
         const messageToSend = prefix + trimmed;
 
@@ -184,6 +267,7 @@ export default function useChatBot() {
             text: trimmed,
             isBot: false,
             questionType: selectedQuestionType,
+            attachments: selectedFiles,
         };
         setMessages(prev => [...prev, userMessage]);
         setInput("");
@@ -211,12 +295,20 @@ export default function useChatBot() {
                 () => {
                     streamCancelRef.current = null;
                     setIsStreaming(false);
+                    suppressStreamErrorRef.current = false;
                     setSelectedFiles([]);
                     fetchSessions();
                 },
                 () => {
                     streamCancelRef.current = null;
                     setIsStreaming(false);
+                    if (
+                        suppressStreamErrorRef.current ||
+                        shouldSyncOnActiveRef.current ||
+                        appStateRef.current !== 'active'
+                    ) {
+                        return;
+                    }
                     ShowToast('', '메시지 전송에 실패했습니다', ToastType.ERROR);
                 },
                 files,

@@ -10,7 +10,6 @@ import NoticeIcon from "../../assets/icons/chat/newspaper.svg"
 import CompetitorIcon from "../../assets/icons/chat/chart.svg"
 import BMCIcon from "../../assets/icons/chat/briefcase.svg"
 import LogoutIcon from "../../assets/icons/section/logout.svg"
-import DeleteIcon from "../../assets/icons/section/delete.svg"
 import { Colors } from "../../constants/Color"
 import { Fonts } from "../../constants/Fonts"
 import { ChatSession } from "../../type/chatbot/chatbot.type"
@@ -22,7 +21,6 @@ type ChatBotSideBarProps = {
     sessions: ChatSession[]
     onXmarkPress: () => void
     handleSignOut: () => void
-    handleDeleteUser: () => void
     onNewChat: () => void
     onSelectSession: (sessionId: number) => void
 }
@@ -34,17 +32,26 @@ export default function ChatBotSideBar(props: ChatBotSideBarProps) {
         {
             icon: <ProfileIcon width={29} height={29} />,
             label: '프로필',
-            action: () => props.navigation.reset({ index: 0, routes: [{ name: 'SystemStack' }] }),
+            action: () => {
+                props.onXmarkPress()
+                props.navigation.navigate('SystemStack')
+            },
         },
         {
             icon: <BellIcon width={29} height={29} />,
             label: '알림',
-            action: () => props.navigation.reset({ index: 0, routes: [{ name: 'HomeStack' }, { name: 'Alarm' }] }),
+            action: () => {
+                props.onXmarkPress()
+                props.navigation.navigate('Alarm')
+            },
         },
         {
             icon: <HeartIcon width={29} height={29} />,
             label: '북마크',
-            action: () => props.navigation.reset({ index: 0, routes: [{ name: 'HomeStack' }, { name: 'MyLikes' }] }),
+            action: () => {
+                props.onXmarkPress()
+                props.navigation.navigate('MyLikes')
+            },
         },
     ]
 
@@ -102,12 +109,6 @@ export default function ChatBotSideBar(props: ChatBotSideBarProps) {
             label: '로그아웃',
             color: Colors.gray1,
             action: props.handleSignOut,
-        },
-        {
-            icon: <DeleteIcon width={23} height={20} />,
-            label: '회원 탈퇴',
-            color: Colors.error,
-            action: props.handleDeleteUser,
         },
     ]
 

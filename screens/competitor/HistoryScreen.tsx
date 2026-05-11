@@ -17,6 +17,7 @@ import { formatToDate } from "../../util/DateFormat";
 import { ErrorResponse } from "../../type/util/response.type";
 import { DefaultImage } from "../../constants/AppImages";
 import {FlashList} from "@shopify/flash-list";
+import ListEmptyState from "../../component/ListEmptyState";
 
 type HistoryScreenProps = NativeStackScreenProps<CompoetitorStackParamList, 'History'>
 const backgroundImage = DefaultImage.background
@@ -99,11 +100,8 @@ export function HistoryScreen({navigation} : HistoryScreenProps) {
         >
             <SubHeaderBar
                 handleBackPress={navigation.goBack}
-                handleSubPress={async () => {
-                    navigation.navigate('Select')
-                }}
                 title="내 경쟁사 분석"
-                subIcon='Profile'
+                subIcon='None'
             />
             <FlashList
                 removeClippedSubviews={true}
@@ -115,9 +113,10 @@ export function HistoryScreen({navigation} : HistoryScreenProps) {
                 ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
                 ListEmptyComponent={() => (
                     !loading ? (
-                        <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyContainerText}>{'존재하는\n 경쟁사 분석이 없습니다'}</Text>
-                        </View>
+                        <ListEmptyState
+                            message="경쟁사 분석 항목이 없습니다."
+                            style={styles.emptyContainer}
+                        />
                     ) : (
                         <View style={{
                             flex : 1,
@@ -180,12 +179,6 @@ const styles = StyleSheet.create({
         width: '100%',
         resizeMode: 'cover',
         height: 200,
-    },
-    emptyContainerText: {
-        fontSize: 18,
-        color: Colors.gray2,
-        fontFamily: Fonts.medium,
-        textAlign : 'center'
     },
     emptyContainer: {
         flex: 1,

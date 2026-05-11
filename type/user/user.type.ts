@@ -1,7 +1,7 @@
 import { Response } from "../util/response.type";
 import { StartupField } from "./companyInput.type";
 
-export type ProfileProvider = "LOCAL" | "GOOGLE" | "NAVER" | "APPLE"
+export type ProfileProvider = "LOCAL" | "GOOGLE" | "APPLE"
 
 export interface GetMeResponse extends Response {
     data: {

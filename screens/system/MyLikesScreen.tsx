@@ -4,12 +4,10 @@ import {
     ImageBackground,
     RefreshControl,
     StyleSheet,
-    Text,
     View
 } from "react-native";
 import  *  as  Progress  from  'react-native-progress' ;
 import { Colors } from "../../constants/Color";
-import { Fonts } from "../../constants/Fonts";
 import {useCallback, useEffect, useRef, useState} from "react";
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import { parseReceptionPeriod } from "../../util/DateFormat";
@@ -21,6 +19,7 @@ import SubHeaderBar from "../../component/home/SubHeaderBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DefaultImage } from "../../constants/AppImages";
 import {FlashList} from "@shopify/flash-list";
+import ListEmptyState from "../../component/ListEmptyState";
 
 export type MyLikesScreenProps = NativeStackScreenProps<RootStackParamList>
 
@@ -170,6 +169,7 @@ export default function MyLikesScreen({navigation}: MyLikesScreenProps){
                 handleBackPress={navigation.goBack}
             />
             <FlashList
+                style={styles.list}
                 removeClippedSubviews={true}
                 data={refreshing ? [] : allLikes}
                 refreshControl={
@@ -201,7 +201,7 @@ export default function MyLikesScreen({navigation}: MyLikesScreenProps){
                         </View> : <View style={{height: 16}}/>
                 }
                 ListEmptyComponent={
-                    refreshing ? (
+                    () => refreshing ? (
                         <View style={styles.emptyContainer}>
                             <Progress.Circle
                                 color={Colors.primary}
@@ -211,11 +211,10 @@ export default function MyLikesScreen({navigation}: MyLikesScreenProps){
                             />
                         </View>
                     ) : !loading && !isFetchingNextPage ? (
-                        <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyContainerText}>
-                                좋아요한 공고가 없습니다.
-                            </Text>
-                        </View>
+                        <ListEmptyState
+                            message="북마크한 공고 항목이 없습니다."
+                            style={styles.emptyContainer}
+                        />
                     ) : null
                 }
             />
@@ -228,6 +227,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
+    },
+    list: {
+        flex: 1,
     },
     noticeItemContainer: {
         marginTop: 16,
@@ -243,9 +245,4 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    emptyContainerText: {
-        fontSize: 18,
-        color: Colors.gray2,
-        fontFamily: Fonts.medium
-    }
 });

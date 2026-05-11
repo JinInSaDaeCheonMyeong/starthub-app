@@ -2,14 +2,10 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { Colors } from "../../constants/Color"
 import { Fonts } from "../../constants/Fonts"
 import { useCallback, memo } from "react"
-import BookMarkFill from "../../assets/icons/bookMark/bookmark.fill.svg"
-import BookMark from "../../assets/icons/bookMark/bookmark.svg"
 import {NoticeType} from "../../type/notice/notice.type";
 import GlassView from "../GlassView"
 import { NoticeImages } from "../../constants/AppImages"
 import { Image } from 'expo-image';
-import { useNoticeStore } from "../../store/noticeStore"
-import { ShowToast, ToastType } from "../../util/ShowToast"
 
 
 interface NoticeItemProps {
@@ -35,10 +31,6 @@ function NoticeItem({
                                        item,
                                        onPress,
                                    } : NoticeItemProps ){
-    const isSelected = useNoticeStore((state) => state.likedById[item.id] ?? item.isLiked)
-    const isBookmarkLoading = useNoticeStore((state) => state.bookmarkLoadingById[item.id] ?? false)
-    const toggleNoticeLike = useNoticeStore((state) => state.toggleNoticeLike)
-
     const transformDate = useCallback((date : Date) => {
         return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}`
     }, [])
@@ -47,15 +39,6 @@ function NoticeItem({
         return !Number.isNaN(date.getTime())
     }, [])
 
-    const handleBookmarkToggle = useCallback(async () => {
-        if (isBookmarkLoading) return
-        try {
-            await toggleNoticeLike(item.id, item.isLiked)
-        } catch (error) {
-            ShowToast('오류 발생', '북마크 처리 중 오류가 발생했습니다', ToastType.ERROR)
-        }
-    }, [isBookmarkLoading, item.id, item.isLiked, toggleNoticeLike])
-
     const category = categoryMap[item.supportField as keyof typeof categoryMap];
     const hasValidDateRange = isValidDate(item.startDate) && isValidDate(item.endDate)
 
@@ -63,6 +46,8 @@ function NoticeItem({
         <TouchableOpacity
             onPress={() => {onPress()}}
             key={item.id}
+            activeOpacity={0.75}
+            style={styles.pressableContainer}
         >
             <GlassView
                 containerStyle={styles.shadowContainer}
@@ -80,31 +65,10 @@ function NoticeItem({
                             ? `모집 : ${transformDate(item.startDate)}~${transformDate(item.endDate)}`
                             : `모집 : ${item.receptionPeriod || '모집기간 정보 없음'}`}
                     </Text>
-                    <View style={styles.bookMarkCotainer}>
-                        <View style={[styles.hashTagContainer, {height : 'auto'}]}>
-                            {[item.region].map((value, index) => (
-                                <Text key={index} style={styles.hashTagText}>{`#${value}`}</Text>
-                            ))}
-                        </View>
-                        <TouchableOpacity
-                            onPress={handleBookmarkToggle}
-                            disabled={isBookmarkLoading}
-                            activeOpacity={0.7}
-                        >
-                            {isSelected ? (
-                                <BookMarkFill
-                                    width={24}
-                                    height={24}
-                                    color={'rgba(36, 102, 244, 0.7)'}
-                                />
-                            ) : (
-                                <BookMark
-                                    width={24}
-                                    height={24}
-                                    color={'rgba(36, 102, 244, 0.7)'}
-                                />
-                            )}
-                        </TouchableOpacity>
+                    <View style={[styles.hashTagContainer, {height : 'auto'}]}>
+                        {[item.region].map((value, index) => (
+                            <Text key={index} style={styles.hashTagText}>{`#${value}`}</Text>
+                        ))}
                     </View>
                 </View>
             </GlassView>
@@ -115,7 +79,12 @@ function NoticeItem({
 export default memo(NoticeItem);
 
 const styles = StyleSheet.create({
+    pressableContainer: {
+        width: "100%",
+    },
     shadowContainer: {
+        width : "100%",
+        minHeight : 96,
         paddingHorizontal : 10,
         paddingVertical : 20,
         alignItems : 'center',
@@ -149,11 +118,4 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.medium,
         color: Colors.primary
     },
-    bookMarkCotainer : {
-        flexDirection : "row",
-        gap : 32,
-        justifyContent : "space-between",
-        alignItems : "center",
-        width : "100%"
-    }
 })

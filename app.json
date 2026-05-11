@@ -1,28 +1,40 @@
 {
   "expo": {
-    "scheme": "starthub-app",
+    "scheme": [
+      "starthub-app",
+      "com.googleusercontent.apps.726815826678-ebvuf725o1b0q0tki4t737en2i120ggh",
+      "com.jininsa.startHubapp"
+    ],
     "name": "startHub-app",
     "slug": "startHub-app",
-    "version": "1.0.0",
+    "version": "1.4.2",
     "orientation": "portrait",
     "icon": "./assets/icons/icon.png",
     "userInterfaceStyle": "light",
-    "runtimeVersion": "1.0.0",
+    "runtimeVersion": "1.4.2",
     "devClient": {
       "silenceNativeLoggingAndroid": false
     },
     "ios": {
       "supportsTablet": true,
+      "usesAppleSignIn": true,
       "bundleIdentifier": "com.jininsa.startHubapp",
       "infoPlist": {
-        "CADisableMinimumFrameDurationOnPhone": true
+        "CADisableMinimumFrameDurationOnPhone": true,
+        "CFBundleAllowMixedLocalizations": true,
+        "NSPhotoLibraryUsageDescription": "이미지 업로드를 위해 사진 보관함 접근 권한이 필요합니다.",
+        "NSCameraUsageDescription": "사진 촬영을 위해 카메라 권한이 필요합니다."
       },
       "entitlements": {
-        "aps-environment": "production"
+        "aps-environment": "production",
+        "com.apple.developer.applesignin": [
+          "Default"
+        ]
       },
       "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
+      "versionCode": 5,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/icon.png",
@@ -57,6 +69,7 @@
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
       "@react-native-firebase/crashlytics",
+      "expo-apple-authentication",
       "expo-image",
       "expo-notifications",
       "./plugins/withWorkletsHermesDebuggerFix",

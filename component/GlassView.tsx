@@ -18,7 +18,7 @@ export default function GlassView({
     blurStyle,
     blurPercent = 0.6,
     blurType = 'light',
-    overlayColor = "rgba(255, 255, 255, 1)"
+    overlayColor = "rgba(255, 255, 255, 0.6)"
 } : GlassViewProps){
     // Android에서 BlurView는 CPU 블러 연산으로 매우 느림 — 단순 배경색으로 대체
     if (Platform.OS === 'android') {
@@ -34,6 +34,7 @@ export default function GlassView({
     return (
         <View style={[styles.container, containerStyle]}>
             <BlurView
+                pointerEvents="none"
                 style={[StyleSheet.absoluteFill, blurStyle]}
                 blurType={blurType}
                 blurAmount={blurAmount}

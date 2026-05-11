@@ -19,6 +19,7 @@ import CalendarIcon from "../../assets/icons/alarm/Iconly/Regular/Bulk/Calendar.
 import { getNotice } from "../../api/notice";
 import { DefaultImage } from "../../constants/AppImages";
 import {FlashList} from "@shopify/flash-list";
+import ListEmptyState from "../../component/ListEmptyState";
 
 export type AlarmScreenProps = NativeStackScreenProps<
     RootStackParamList,
@@ -130,9 +131,7 @@ export default function AlarmScreen({navigation} : AlarmScreenProps) {
                 }
                 ListEmptyComponent={
                     !loading ? (
-                        <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyContainerText}>내 알람 목록이 없습니다</Text>
-                        </View>
+                        <ListEmptyState message="알림 항목이 없습니다." style={styles.emptyContainer} />
                     ) : null
                 }
             />
@@ -151,10 +150,5 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         paddingVertical: 40,
-    },
-    emptyContainerText: {
-        fontSize: 18,
-        color: Colors.gray2,
-        fontFamily: Fonts.medium,
     },
 })

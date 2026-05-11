@@ -1,13 +1,18 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Alert, Linking } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { isAxiosError } from "axios";
+import { deleteUser } from "../../api/user";
 import { ErrorResponse } from "../../type/util/response.type";
 import { GetMeResponse } from "../../type/user/user.type";
 import StartupStatus from "../../constants/StartupStatus";
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import { ProfileScreenProps } from "../../screens/system/ProfileScreen";
 import { useProfileStore } from "../../store/profileStore";
+import { useNoticeStore } from "../../store/noticeStore";
+import { getFCMToken, removeTokens } from "../../util/token";
+import { resetScheduleList } from "../../util/Schedule";
+import { removeFCMToken } from "../../api/notification";
 
 // SVG Icons
 import NameIcon from "../../assets/icons/profile/name.svg";
@@ -54,6 +59,12 @@ const useProfileScreen = ({ navigation }: ProfileScreenProps) => {
     const profileData = storeProfileData ?? defaultProfileData;
     const loading = useProfileStore((state) => state.loading);
     const fetchProfile = useProfileStore((state) => state.fetchProfile);
+    const clearProfile = useProfileStore((state) => state.clearProfile);
+    const clearNoticeState = useNoticeStore((state) => state.clearNoticeState);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+    const [password, setPassword] = useState("");
+    const isLocal = profileData.provider === "LOCAL";
 
     const profileList = [
         {
@@ -185,6 +196,46 @@ const useProfileScreen = ({ navigation }: ProfileScreenProps) => {
         navigation.navigate("EditProfile", { ...profileData });
     };
 
+    const handleOpenDeleteModal = () => {
+        setIsModalVisible(true);
+    };
+
+    const handleCloseModal = useCallback(() => {
+        setIsModalVisible(false);
+        setPassword("");
+    }, []);
+
+    const cleanupAndNavigateToAuth = useCallback(async () => {
+        await removeTokens();
+        await resetScheduleList();
+        const fcmToken = await getFCMToken();
+        if (fcmToken) await removeFCMToken(fcmToken);
+        clearProfile();
+        clearNoticeState();
+        navigation.getParent()?.reset({
+            index: 0,
+            routes: [{ name: "AuthStack" }],
+        });
+    }, [clearNoticeState, clearProfile, navigation]);
+
+    const handleDeleteUser = useCallback(async () => {
+        const deleteUserData = isLocal ? { password } : { password: undefined };
+        if (!deleteUserData.password && isLocal) {
+            ShowToast("회원 탈퇴", "비밀번호를 확인해주세요!", ToastType.ERROR);
+            return;
+        }
+
+        try {
+            await deleteUser(deleteUserData);
+            await cleanupAndNavigateToAuth();
+            ShowToast("회원 탈퇴", "회원 탈퇴에 성공했습니다", ToastType.SUCCESS);
+        } catch {
+            ShowToast("회원 탈퇴", "회원 탈퇴에 실패했습니다", ToastType.ERROR);
+        } finally {
+            handleCloseModal();
+        }
+    }, [cleanupAndNavigateToAuth, handleCloseModal, isLocal, password]);
+
     useFocusEffect(
         useCallback(() => {
             let isActive = true;
@@ -206,6 +257,10 @@ const useProfileScreen = ({ navigation }: ProfileScreenProps) => {
         form: {
             loading,
             profileData,
+            isLocal,
+            isModalVisible,
+            isKeyboardVisible,
+            password,
         },
         ui: {
             profileList,
@@ -217,6 +272,12 @@ const useProfileScreen = ({ navigation }: ProfileScreenProps) => {
             goBack,
             goEditProfile,
             goWeb,
+            setIsModalVisible,
+            setIsKeyboardVisible,
+            setPassword,
+            handleOpenDeleteModal,
+            handleCloseModal,
+            handleDeleteUser,
         },
     };
 };

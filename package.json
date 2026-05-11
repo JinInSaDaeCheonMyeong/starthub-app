@@ -25,6 +25,7 @@
     "babel-preset-expo": "~55.0.8",
     "date-fns": "^4.1.0",
     "expo": "^55.0.16",
+    "expo-apple-authentication": "~55.0.13",
     "expo-asset": "~55.0.16",
     "expo-auth-session": "~55.0.15",
     "expo-build-properties": "~55.0.13",

@@ -1,13 +1,18 @@
-import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { getAccToken, getRefToken, removeTokens, saveAccToken, saveRefToken } from "../util/token";
 import { RefreshResponse } from "../type/user/refresh.type";
-import popToSigninScreen from "../util/NavigationService";
+import popToWelcomeScreen from "../util/NavigationService";
 import { API_URL } from "../util/apiUrl";
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
     _retry?: boolean;
     _dedup?: boolean;
+    skipAuthRedirect?: boolean;
 }
+
+export type StartHubAxiosConfig = AxiosRequestConfig & {
+    skipAuthRedirect?: boolean;
+};
 
 const pendingRequests = new Map<string, Promise<AxiosResponse>>();
 
@@ -94,7 +99,9 @@ StartHubAxios.interceptors.response.use(
                 return StartHubAxios(originalRequest);
             } catch (err) {
                 await removeTokens();
-                popToSigninScreen();
+                if (!originalRequest.skipAuthRedirect) {
+                    popToWelcomeScreen();
+                }
                 return Promise.reject(err);
             }
         }

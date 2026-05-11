@@ -85,7 +85,7 @@ export default function WelcomeScreen({navigation}: WelcomeScreenProps) {
               </View>
           </View>
           <View style={styles.bottomButton}>
-              <CommonButton disabled={disabled} title={'StartHub 시작하기'} onPress={() => navigation.navigate('Signin')}/>
+              <CommonButton disabled={disabled} title={'StartHub 시작하기'} onPress={() => navigation.navigate('LoginSelect')}/>
           </View>
           <StatusBar barStyle="dark-content" backgroundColor={Colors.white1}/>
       </View>

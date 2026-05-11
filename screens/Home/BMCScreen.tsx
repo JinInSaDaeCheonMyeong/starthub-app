@@ -20,6 +20,7 @@ import { formatToDate } from "../../util/DateFormat";
 import { ShowToast, ToastType } from "../../util/ShowToast";
 import BMCItem from "../../component/home/BMCItem";
 import {FlashList} from "@shopify/flash-list";
+import ListEmptyState from "../../component/ListEmptyState";
 
 const { height} = Dimensions.get('window');
 
@@ -115,6 +116,13 @@ export default function BMCScreen({navigation}: BMCScreenProps) {
                                     ListHeaderComponent={
                                         <View style={styles.flatMargin}/>
                                     }
+                                    ListEmptyComponent={
+                                        <ListEmptyState
+                                            message="최근 BMC 항목이 없습니다."
+                                            style={styles.horizontalEmptyContainer}
+                                            textStyle={styles.horizontalEmptyText}
+                                        />
+                                    }
                                     renderItem={({item}) => (
                                     <BMCItem
                                         width={189}
@@ -148,11 +156,7 @@ export default function BMCScreen({navigation}: BMCScreenProps) {
                                 />
                             </View>
                         ) : (
-                            <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>
-                                    BMC 가 없습니다.
-                                </Text>
-                            </View>
+                            <ListEmptyState message="BMC 항목이 없습니다." style={styles.emptyContainer} />
                         )
                     }
                 />
@@ -249,9 +253,11 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    emptyText: {
-        fontSize: 18,
-        fontFamily: Fonts.medium,
-        color: Colors.gray2,
+    horizontalEmptyContainer: {
+        minHeight: 120,
+        minWidth: 220,
+    },
+    horizontalEmptyText: {
+        fontSize: 14,
     },
 })

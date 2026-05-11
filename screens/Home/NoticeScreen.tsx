@@ -26,6 +26,7 @@ import { NoticeImages } from "../../constants/AppImages";
 import {FlashList} from "@shopify/flash-list";
 import { Image } from 'expo-image';
 import { useNoticeStore } from "../../store/noticeStore";
+import ListEmptyState from "../../component/ListEmptyState";
 
 
 export type NoticeScreenProps = CompositeScreenProps<
@@ -129,6 +130,13 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
                         horizontal
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={styles.categoryList}
+                        ListEmptyComponent={
+                            <ListEmptyState
+                                message="카테고리 항목이 없습니다."
+                                style={styles.horizontalEmptyContainer}
+                                textStyle={styles.horizontalEmptyText}
+                            />
+                        }
                     />
 
                     <View style={styles.recommendHeader}>
@@ -153,9 +161,7 @@ export default function NoticeScreen({ navigation }: NoticeScreenProps) {
             }
             ListEmptyComponent={
                 !loading ? (
-                    <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyContainerText}>추천 공고가 없습니다.</Text>
-                    </View>
+                    <ListEmptyState message="추천 공고 항목이 없습니다." style={styles.emptyContainer} />
                 ) : null
             }
             contentContainerStyle={{ paddingBottom: 16 }}
@@ -188,5 +194,6 @@ const styles = StyleSheet.create({
     recommendTitle: { fontSize: 16, fontFamily: Fonts.semiBold },
     loadingContainer: { alignItems: "center", justifyContent: "center", paddingVertical: 40 },
     emptyContainer: { alignItems: "center", justifyContent: "center", paddingVertical: 40 },
-    emptyContainerText: { fontSize: 18, color: Colors.gray2, fontFamily: Fonts.medium },
+    horizontalEmptyContainer: { minHeight: 80, minWidth: 220 },
+    horizontalEmptyText: { fontSize: 14 },
 });

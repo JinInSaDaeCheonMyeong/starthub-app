@@ -9,11 +9,13 @@ import {useSafeAreaInsets} from "react-native-safe-area-context";
 import CompanyInputScreen from "../screens/CompanyInputScreen";
 import StartupStatus from "../constants/StartupStatus";
 import SplashScreen from "../screens/SplashScreen";
+import LoginSelectScreen from "../screens/LoginSelectScreen";
 
 const Stack = createNativeStackNavigator<AuthStackParamList>()
 
 export type AuthStackParamList = {
     Welcome: undefined;
+    LoginSelect: undefined;
     Signin : undefined;
     Signup : undefined;
     Splash : undefined;
@@ -42,6 +44,7 @@ export default function AuthStack() {
             >
                 <Stack.Screen name="Splash" component={SplashScreen} />
                 <Stack.Screen name="Welcome" component={WelcomeScreen} />
+                <Stack.Screen name="LoginSelect" component={LoginSelectScreen} />
                 <Stack.Screen name="Signin" component={SigninScreen} />
                 <Stack.Screen name="Signup" component={SignupScreen} />
                 <Stack.Screen name="SignupInput" component={SignupInputScreen} />

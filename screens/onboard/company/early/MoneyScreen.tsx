@@ -30,7 +30,7 @@ export default function MoneyScreen(props : MoneyScreenProps) {
             <View style={styles.inputBox}>
                 <View style={styles.textBox}>
                     <Text style={styles.subText}>창업 위치를 입력해주세요!</Text>
-                    <Text style={styles.mainText}>(선택) 위치에 알맞는 공고를 추천들릴게요!</Text>
+                    <Text style={styles.mainText}>(선택) 위치에 알맞는 공고를 추천드릴게요!</Text>
                 </View>
                 <TextInput
                     style={styles.inputText}

@@ -6,7 +6,6 @@ import BellIcon from "../../assets/icons/header/bell.svg"
 import HeartIcon from "../../assets/icons/header/heart.svg"
 import InfoIcon from "../../assets/icons/section/information.svg";
 import LogoutIcon from "../../assets/icons/section/logout.svg";
-import DeleteIcon from "../../assets/icons/section/delete.svg"
 import { Colors } from "../../constants/Color"
 import { Fonts } from "../../constants/Fonts"
 
@@ -16,7 +15,6 @@ type SideBarProps = {
     navigation : any,
     onXmarkPress : () => void,
     handleSignOut : () => void,
-    handleDeleteUser : () => void
 }
 
 export default function SideBar(props : SideBarProps){
@@ -68,12 +66,6 @@ export default function SideBar(props : SideBarProps){
             label : '로그아웃',
             color : Colors.gray1,
             action : () => {props.handleSignOut()}
-        },
-        {
-            icon : <DeleteIcon width={23} height={20}/>,
-            label : '회원 탈퇴',
-            color : Colors.error,
-            action : () => {props.handleDeleteUser()}
         },
     ]
     return (

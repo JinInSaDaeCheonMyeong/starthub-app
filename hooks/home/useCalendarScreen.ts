@@ -14,7 +14,7 @@ const useCalendarScreen = () => {
     const todayString = formatToDate(today, 'solid');
     const [currentDate, setCurrentDate] = useState(todayString)
     const [viewingMonth, setViewingMonth] = useState(todayString.substring(0, 7))
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [markedDates, setMarkedDates] = useState<MarkedDates>({})
     const [noticeItemList, setNoticeItemList] = useState<NoticeType[]>([]);
     const setNotices = useNoticeStore((state) => state.setNotices);
@@ -82,9 +82,6 @@ const useCalendarScreen = () => {
         useCallback(() => {
             initMarkedDates(); 
             getNoticeItem(currentDate);
-            return () => {
-                setNoticeItemList([])
-            }
         }, [currentDate])
     );
 

@@ -53,3 +53,7 @@ Thumbs.db
 *.tsbuildinfo
 /android/
 /ios/
+
+.env.local
+
+.env.local

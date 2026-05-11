@@ -1,12 +1,14 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SystemStackParamList } from "../../navigation/SystemStack";
-import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../constants/Color";
 import { Fonts } from "../../constants/Fonts";
 import StartupStatus from "../../constants/StartupStatus";
 import useProfileScreen from "../../hooks/system/useProfileScreen";
 import SubHeaderBar from "../../component/home/SubHeaderBar";
 import * as Progress from 'react-native-progress';
+import InputModal from "../../component/home/InputModal";
+import DeleteIcon from "../../assets/icons/section/delete.svg";
 
 
 export type ProfileScreenProps = NativeStackScreenProps<SystemStackParamList, 'Profile'>
@@ -15,7 +17,11 @@ export default function ProfileScreen(props : ProfileScreenProps){
     const {
         form : {
             profileData,
-            loading
+            loading,
+            isLocal,
+            isModalVisible,
+            isKeyboardVisible,
+            password,
         },
         ui : {
             profileList,
@@ -26,7 +32,13 @@ export default function ProfileScreen(props : ProfileScreenProps){
         action : {
             goBack,
             goEditProfile,
-            goWeb
+            goWeb,
+            setIsModalVisible,
+            setIsKeyboardVisible,
+            setPassword,
+            handleOpenDeleteModal,
+            handleCloseModal,
+            handleDeleteUser,
         }
     } = useProfileScreen(props)
 
@@ -105,7 +117,33 @@ export default function ProfileScreen(props : ProfileScreenProps){
                         </View>
                     ))
                 }
+                <View style={styles.line}/>
+                <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={handleOpenDeleteModal}
+                    activeOpacity={0.7}
+                >
+                    <View style={styles.dataContainer}>
+                        <DeleteIcon width={15} height={15} />
+                        <Text style={[styles.labelText, styles.deleteText]}>회원 탈퇴</Text>
+                    </View>
+                    <Text style={[styles.dataText, styles.deleteText]}>탈퇴하기</Text>
+                </TouchableOpacity>
             </ScrollView>
+            <InputModal
+                isLocal={isLocal}
+                isModalVisible={isModalVisible}
+                isKeyboardVisible={isKeyboardVisible}
+                setIsKeyboardVisible={setIsKeyboardVisible}
+                setIsModalVisible={setIsModalVisible}
+                password={password}
+                setPassword={setPassword}
+                modalTitle="회원 탈퇴를 하시겠습니까?"
+                purpose="Delete"
+                handleCloseModal={handleCloseModal}
+                handleDeleteUser={handleDeleteUser}
+                handleSignOut={async () => {}}
+            />
         </View>
     )
 }
@@ -162,5 +200,15 @@ const styles = StyleSheet.create({
         fontSize : 14,
         fontFamily : Fonts.reqular,
         color : Colors.black1
+    },
+    deleteButton: {
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 12,
+    },
+    deleteText: {
+        color: Colors.error,
     }
 })

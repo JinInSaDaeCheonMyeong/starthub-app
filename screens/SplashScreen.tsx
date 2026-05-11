@@ -29,7 +29,7 @@ export default function SplashScreen({ navigation }: SplashScreenProps) {
             }
 
             try {
-                const { data } = await getMe();
+                const { data } = await getMe({ skipAuthRedirect: true });
                 setProfileData(data);
                 const startupFields = data.startupFields ?? [];
 

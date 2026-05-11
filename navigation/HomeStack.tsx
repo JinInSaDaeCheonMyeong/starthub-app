@@ -159,9 +159,6 @@ export function HomeStack({ navigation } : HomeStackProps) {
                     startupStatus={startupStatus}
                     navigation={navigation}
                     onXmarkPress={() => setDrawerOpen(false)}
-                    handleDeleteUser={() => {
-                        handleOpenModal('Delete')
-                    }}
                     handleSignOut={() => {
                         handleOpenModal("SignOut");
                     }}
